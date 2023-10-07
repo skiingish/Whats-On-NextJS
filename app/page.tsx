@@ -4,6 +4,8 @@ import Link from 'next/link'
 import LogoutButton from '../components/LogoutButton'
 import SupabaseLogo from '../components/SupabaseLogo'
 import NextJsLogo from '../components/NextJsLogo'
+import SpecialsTable from '@/components/SpecialsTable'
+import AddSpecialModal from '@/components/AddSpecialModal'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,29 +69,24 @@ export default async function Index() {
           </div>
         </div>
       </nav>
-
-      <div className="animate-in flex flex-col gap-14 opacity-0 max-w-4xl px-3 py-16 lg:py-24 text-foreground">
+      
+      // Main Body
+      <div className="animate-in flex flex-col gap-8 opacity-0 max-w-4xl px-3 py-8 lg:py-12 text-foreground">
         <div className="flex flex-col items-center mb-4 lg:mb-12">
-          <div className="flex gap-8 justify-center items-center">
-            <Link href="https://supabase.com/" target="_blank">
-              <SupabaseLogo />
-            </Link>
-            <span className="border-l rotate-45 h-6" />
+          <div className="flex gap-4 justify-center items-center">
             <NextJsLogo />
           </div>
-          <h1 className="sr-only">Supabase and Next.js Starter Template</h1>
-          <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center my-12">
-            The fastest way to start building apps with{' '}
-            <strong>Supabase</strong> and <strong>Next.js</strong>
+          <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center my-4">
+            Whats On Today!
           </p>
-          <div className="bg-foreground py-3 px-6 rounded-lg font-mono text-sm text-background">
+          {/* <div className="bg-foreground py-3 px-6 rounded-lg font-mono text-sm text-background">
             Get started by editing <strong>app/page.tsx</strong>
-          </div>
+          </div> */}
         </div>
 
-        <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
+        {/* <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent" /> */}
 
-        <div className="flex flex-col gap-8 text-foreground">
+        {/* <div className="flex flex-col gap-8 text-foreground">
           <h2 className="text-lg font-bold text-center">
             Everything you need to get started
           </h2>
@@ -144,9 +141,9 @@ export default async function Index() {
               </a>
             ))}
           </div>
-        </div>
+        </div> */}
 
-        <div className="flex flex-col gap-8 text-foreground">
+        {/* <div className="flex flex-col gap-8 text-foreground">
           <div className="grid gap-2 justify-center mx-auto text-center">
             <h2 className="text-lg font-bold text-center">Examples</h2>
             <p className="text-sm">
@@ -169,20 +166,36 @@ export default async function Index() {
               </div>
             ))}
           </div>
+        </div> */}
+
+        {/* <AddSpecialModal/> */}
+        
+        <SpecialsTable/>
+
+        <div>
+          <p className='py-4' >Add New</p>
+          <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
+        action="/events/add"
+        method="post">
+          <label className='text-md'>What</label>
+          <input className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          name="desc"
+          required
+          />
+          <label className='text-md'>Where</label>
+          <input className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          name="venue"
+          required
+          />
+          <label className='text-md'>When</label>
+          <input className="rounded-md px-4 py-2 bg-inherit border mb-6" 
+          name="days"
+          required
+          />
+          <button className="bg-green-700 rounded px-4 py-2 text-white mb-2">Submit</button>
+          </form>
         </div>
 
-        <div className="flex justify-center text-center text-xs">
-          <p>
-            Powered by{' '}
-            <Link
-              href="https://supabase.com/"
-              target="_blank"
-              className="font-bold"
-            >
-              Supabase
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   )
