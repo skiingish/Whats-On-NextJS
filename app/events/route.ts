@@ -6,21 +6,45 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const requestUrl = new URL(request.url);
-  const formData = await request.formData();
-  const desc = String(formData.get('desc'));
-  const venue = String(formData.get('venue'));
-  const when = String(formData.get('days'));
-  const supabase = createRouteHandlerClient({ cookies });
+  try {
+    const formData = await request.formData();
+    const supabase = createRouteHandlerClient({ cookies });
 
-  const { data, error } = await supabase
-    .from('events')
-    .insert([{ desc, venue, when }]);
+    const desc = formData.get('desc');
+    const venue = formData.get('venue');
 
-  if (error) {
+    // Use getAll to retrieve all selected days
+    const selectedDays = formData.getAll('days');
+    const when = selectedDays.join(' ');
+
+    const { data, error } = await supabase
+      .from('events')
+      .insert([{ desc, venue, when }]);
+
+    if (error) {
+      console.error(error);
+
+      //return NextResponse.json({ error }, { status: 500 });
+
+      return NextResponse.redirect(
+        `${requestUrl.origin}?message=Could not save item`,
+        {
+          // a 301 status is required to redirect from a POST to a GET route
+          status: 301,
+        }
+      );
+    }
+
+    //return NextResponse.json({ message: 'Event Added!' }, { status: 200 });
+
+    // Redirect to the home page after a successful POST.
+    return NextResponse.redirect(`${requestUrl.origin}/`, {
+      // a 301 status is required to redirect from a POST to a GET route
+      // TODO this should just call the refresh function, and do something fun like flying burgers on the screen.
+      status: 301,
+    });
+  } catch (error) {
     console.error(error);
-
-    //return NextResponse.json({ error }, { status: 500 });
-
     return NextResponse.redirect(
       `${requestUrl.origin}?message=Could not save item`,
       {
@@ -29,16 +53,6 @@ export async function POST(request: Request) {
       }
     );
   }
-
-  //return NextResponse.json({ message: 'Event Added!' }, { status: 200 });
-
-  return NextResponse.redirect(
-    `${requestUrl.origin}?message=Item saved successfully`,
-    {
-      // a 301 status is required to redirect from a POST to a GET route
-      status: 301,
-    }
-  );
 }
 
 export async function GET() {
