@@ -2,10 +2,8 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import LogoutButton from '../components/LogoutButton'
-import SupabaseLogo from '../components/SupabaseLogo'
 import NextJsLogo from '../components/NextJsLogo'
-import SpecialsTable from '@/components/SpecialsTable'
-import AddSpecialModal from '@/components/AddSpecialModal'
+import EventsDisplay from '@/components/EventsDisplay'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +13,9 @@ export default async function Index() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
+  
+    let { data: events} = await supabase.from('events').select()
+  
   return (
     <div className="w-full flex flex-col items-center">
       <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
@@ -138,8 +138,8 @@ export default async function Index() {
         </div> */}
 
         {/* <AddSpecialModal/> */}
-        
-        <SpecialsTable/>
+
+        <EventsDisplay events={events || []}/>
 
         <div>
           <p className='py-4' >Add New</p>
