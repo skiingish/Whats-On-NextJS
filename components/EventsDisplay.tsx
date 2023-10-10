@@ -1,15 +1,17 @@
 'use client'
-import {FC, useState} from 'react'
+import {FC, useState, useEffect} from 'react'
 import EventsList from './EventsList'
 export const dynamic = 'force-dynamic'
 
 interface EventsDisplayProps {
   events: Events[] | null
+  user: object | null
 }
 
-const EventsDisplay: FC<EventsDisplayProps>  = ({events}) => {
+const EventsDisplay: FC<EventsDisplayProps>  = ({events, user}) => {
 
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [userSession, setUserSession] = useState<any>(null)
 
   // If the search has changed.
   const changeSpecialsSearch = (e: any) => {
@@ -44,7 +46,7 @@ const EventsDisplay: FC<EventsDisplayProps>  = ({events}) => {
                 value={searchTerm}
             />
         </div>
-          <EventsList events={filteredSearchedEvents || []}/>
+          <EventsList events={filteredSearchedEvents || []} user={user}/>
         </div>
   )
 }

@@ -5,9 +5,10 @@ export const dynamic = 'force-dynamic'
 
 interface EventsDisplayProps {
   events: Events[] | null
+  user: object | null
 }
 
-const EventsList: FC<EventsDisplayProps>  = ({events}) => {
+const EventsList: FC<EventsDisplayProps>  = ({events, user}) => {
   return (
     // Specials Table
         <div>
@@ -29,12 +30,12 @@ const EventsList: FC<EventsDisplayProps>  = ({events}) => {
                 <th className="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Time
                 </th>
-                <th className="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                {user ? (<><th className="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   
                 </th>
                 <th className="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   
-                </th>
+                </th></>) : null}
               </tr>
             </thead>
             <tbody>
@@ -58,12 +59,12 @@ const EventsList: FC<EventsDisplayProps>  = ({events}) => {
                       <td className="px-6 py-4 whitespace-no-wrap">
                         {event.event_time}
                       </td>
-                      <td className="px-6 py-4 whitespace-no-wrap">
+                      {user ? (<><td className="px-6 py-4 whitespace-no-wrap">
                         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</button>
                       </td>
                       <td className="px-6 py-4 whitespace-no-wrap">
                         <DeleteItemButton id={event.id}/>
-                      </td>
+                      </td></>) : null}
                     </tr>
                   )
                 }) : <></>
