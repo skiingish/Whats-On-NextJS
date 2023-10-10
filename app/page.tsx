@@ -39,7 +39,6 @@ export default async function Index() {
         </div>
       </nav>
       
-      // Main Body
       <div className="animate-in flex flex-col gap-8 opacity-0 max-w-4xl px-3 py-8 lg:py-12 text-foreground">
         <div className="flex flex-col items-center mb-4 lg:mb-12">
           <div className="flex gap-4 justify-center items-center">
@@ -146,16 +145,27 @@ export default async function Index() {
           <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
         action="/events"
         method="post">
-          <label className='text-md'>What</label>
-          <input className="rounded-md px-4 py-2 bg-inherit border mb-6"
-          name="desc"
-          required
-          />
           <label className='text-md'>Where</label>
           <input className="rounded-md px-4 py-2 bg-inherit border mb-6"
           name="venue"
           required
           />
+          <label className='text-md'>What</label>
+          <input className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          name="desc"
+          required
+          />
+          <label className='text-md'>$ Special $</label>
+          <input className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          name="special_price"
+          required
+          />
+          <label className='text-md'>Time</label>
+          <input className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          name="event_time"
+          required
+          />
+          
           <label className='text-md'>When</label>
           {/*           
           <input className="rounded-md px-4 py-2 bg-inherit border mb-6" 

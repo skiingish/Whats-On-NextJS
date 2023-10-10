@@ -15,13 +15,19 @@ const EventsList: FC<EventsDisplayProps>  = ({events}) => {
             <thead>
               <tr>
                 <th className="px-6 py-4 whitespace-no-wrap font-medium text-gray-500 uppercase tracking-wider">
-                  What
-                </th>
-                <th className="px-6 py-4 whitespace-no-wrap leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   Where
                 </th>
                 <th className="px-6 py-4 whitespace-no-wrap leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                  What
+                </th>
+                <th className="px-6 py-4 whitespace-no-wrap leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                  Special
+                </th>
+                <th className="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   When
+                </th>
+                <th className="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                  Time
                 </th>
                 <th className="px-6 py-3 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                   
@@ -38,13 +44,19 @@ const EventsList: FC<EventsDisplayProps>  = ({events}) => {
                   return (
                     <tr className="" key={event.id}>
                       <td className="px-6 py-4 whitespace-no-wrap">
-                        {event.desc}
+                       {event.venue}
                       </td>
                       <td className="px-6 py-4 whitespace-no-wrap">
-                        {event.venue}
+                         {event.desc}
+                      </td>
+                      <td className="px-6 py-4 whitespace-no-wrap">
+                        {event.special_price}
                       </td>
                       <td className="px-6 py-4 whitespace-no-wrap">
                         {event.when}
+                      </td>
+                      <td className="px-6 py-4 whitespace-no-wrap">
+                        {event.event_time}
                       </td>
                       <td className="px-6 py-4 whitespace-no-wrap">
                         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</button>

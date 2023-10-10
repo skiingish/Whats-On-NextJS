@@ -12,6 +12,8 @@ export async function POST(request: Request) {
 
     const desc = formData.get('desc');
     const venue = formData.get('venue');
+    const special_price = formData.get('special_price');
+    const event_time = formData.get('event_time');
 
     // Use getAll to retrieve all selected days
     const selectedDays = formData.getAll('days');
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('events')
-      .insert([{ desc, venue, when }]);
+      .insert([{ desc, venue, when, special_price, event_time }]);
 
     if (error) {
       console.error(error);
