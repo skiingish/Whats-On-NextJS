@@ -1,6 +1,7 @@
 'use client'
 import {FC, useState} from 'react'
 import EventsList from './EventsList'
+import EventsCards from './EventsCards'
 export const dynamic = 'force-dynamic'
 
 interface EventsDisplayProps {
@@ -44,7 +45,8 @@ const EventsDisplay: FC<EventsDisplayProps>  = ({events}) => {
                 value={searchTerm}
             />
         </div>
-          <EventsList events={filteredSearchedEvents || []}/>
+          <EventsCards events={filteredSearchedEvents || []}/>
+          {/* <EventsList events={filteredSearchedEvents || []}/> */}
         </div>
   )
 }

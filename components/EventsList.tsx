@@ -10,8 +10,8 @@ interface EventsDisplayProps {
 const EventsList: FC<EventsDisplayProps>  = ({events}) => {
   return (
     // Specials Table
-        <div>
-          <table className="min-w-full">
+        <div className='overflow-x-auto bg-fuchsia-400'>
+          <table className="min-w-full bg-red-500">
             <thead>
               <tr>
                 <th className="px-6 py-4 whitespace-no-wrap font-medium text-gray-500 uppercase tracking-wider">

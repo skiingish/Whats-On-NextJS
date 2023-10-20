@@ -39,6 +39,8 @@ export default async function Index() {
         </div>
       </nav>
       
+      
+      
       <div className="animate-in flex flex-col gap-8 opacity-0 max-w-4xl px-3 py-8 lg:py-12 text-foreground">
         <div className="flex flex-col items-center mb-4 lg:mb-12">
           <div className="flex gap-4 justify-center items-center">
@@ -138,7 +140,7 @@ export default async function Index() {
 
         {/* <AddSpecialModal/> */}
 
-        <EventsDisplay events={events || []}/>
+        
 
         <div>
           <p className='py-4' >Add New</p>
@@ -214,6 +216,11 @@ export default async function Index() {
         </div>
 
       </div>
+      
+      <div className="animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-12 px-8 text-foreground">
+        <EventsDisplay events={events || []}/>
+      </div>
+
     </div>
   )
 }
