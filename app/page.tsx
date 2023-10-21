@@ -4,7 +4,7 @@ import Link from 'next/link'
 import LogoutButton from '../components/LogoutButton'
 import Logo from '../components/Logo'
 import EventsDisplay from '@/components/EventsDisplay'
-import AddEventForm from '@/components/AddEventForm'
+import AddEventDisplay from '@/components/AddEventDisplay'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +19,7 @@ export default async function Index() {
   
   return (
     <div className="w-full flex flex-col items-center">
+      
       <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
         <div className="w-full max-w-4xl flex justify-between items-center p-3 text-sm text-foreground">
           <div />
@@ -52,6 +53,7 @@ export default async function Index() {
             Get started by editing <strong>app/page.tsx</strong>
           </div> */}
         </div>
+
 
         {/* <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent" /> */}
 
@@ -139,11 +141,14 @@ export default async function Index() {
 
         {/* <AddSpecialModal/> */}
 
-        <EventsDisplay events={events || []} user={user}/>
-
-        {user ? <AddEventForm /> : <></>}
+        <AddEventDisplay />
 
       </div>
+      
+      <div className="animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-12 px-8 text-foreground">
+        <EventsDisplay events={events || []}/>
+      </div>
+
     </div>
   )
 }

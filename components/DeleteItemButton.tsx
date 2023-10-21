@@ -19,7 +19,7 @@ export default function DeleteItemButton(id: any) {
   return (
     <form action={handleDelete}>
         <input type="hidden" name="id" value={id} />
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Delete</button>
+        <button className="bg-btn-background hover:bg-btn-background-hover rounded px-4 py-2 text-white mb-2">Delete</button>
     </form>
   )
 }
