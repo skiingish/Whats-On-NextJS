@@ -7,6 +7,23 @@ interface EventsDisplayProps {
   events: Events[] | null
 }
 
+const dayformatter = (dayString: string) => { 
+  // If this string contains more chars than just a single day of the week, then we need to format it.
+  if (dayString.length > 10) {
+    if (dayString.includes('Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday')) {
+      return 'Everyday'
+    } else if (dayString.includes('Monday, Tuesday, Wednesday, Thursday, Friday')) {
+      return 'Weekdays'
+    } else if (dayString.includes('Saturday, Sunday')) {
+      return 'Weekends'
+    } else {
+      return dayString
+    }
+  } else {
+    return dayString
+  }
+}
+
 const EventsCards: FC<EventsDisplayProps>  = ({events}) => {
   return (
     // Specials Table
@@ -19,14 +36,14 @@ const EventsCards: FC<EventsDisplayProps>  = ({events}) => {
                   <p className="flex-none px-6 py-4 whitespace-no-wrap" style={{minWidth: '100%'}}>
                     {event.venue}
                   </p>
-                  <p className="flex-none min-w-fit px-6 py-4 whitespace-no-wrap">
+                  <p className="flex-none px-6 py-4 whitespace-no-wrap" style={{minWidth: '100%'}}>
                       {event.desc}
                   </p>
                   <p className="px-6 py-4 whitespace-no-wrap">
                     {event.special_price}
                   </p>
                   <p className="px-6 py-4 whitespace-no-wrap">
-                    {event.when}
+                    {dayformatter(event.when)}
                   </p>
                   <p className="px-6 py-4 whitespace-no-wrap">
                     {event.event_time}
