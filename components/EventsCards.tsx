@@ -27,16 +27,16 @@ const dayformatter = (dayString: string) => {
 const EventsCards: FC<EventsDisplayProps>  = ({events}) => {
   return (
     // Specials Table
-        <div className='overflow-x-auto'>
+        <div className=''>
           {
             events && events?.length > 0 ?
             events?.map((event) => {
               return (
-                <div className="flex flex-wrap py-2 border border-foreground rounded-lg" style={{marginBottom: '1.5rem'}} key={event.id}>
-                  <p className="flex-none px-6 py-4 whitespace-no-wrap">
+                <div className="flex flex-wrap py-2 border border-foreground/50 rounded-lg" style={{marginBottom: '1.5rem'}} key={event.id}>
+                  <p className=" text-xl tracking-wider px-6 py-4 whitespace-no-wrap">
                     {event.venue}
                   </p>
-                  <p className="flex-none px-6 py-4 whitespace-no-wrap min-w-full">
+                  <p className="px-6 py-4 whitespace-no-wrap min-w-full">
                       {event.desc}
                   </p>
                   <p className="px-6 py-4 whitespace-no-wrap">
@@ -50,7 +50,7 @@ const EventsCards: FC<EventsDisplayProps>  = ({events}) => {
                   </p>
                   <div className='flex' style={{minWidth: '100%'}}>
                     <div className="px-6 py-4 whitespace-no-wrap">
-                      <button className="bg-green-700 hover:bg-green-300 rounded px-4 py-2 text-white mb-2">Edit</button>
+                      <button className=" bg-yellow-600 hover:bg-yellow-400 rounded px-4 py-2 text-white mb-2">Edit</button>
                     </div>
                     <div className="px-6 py-4 whitespace-no-wrap">
                       <DeleteItemButton id={event.id}/>

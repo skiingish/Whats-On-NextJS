@@ -30,18 +30,7 @@
   animation: animateIn 0.3s ease 0.15s both;
 }
 
-.flex-wrap {
-  flex-wrap: wrap;
-}
 
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.min-w-full {
-  min-width: 100%;
-}
 
 @keyframes animateIn {
   from {
