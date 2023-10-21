@@ -1,4 +1,3 @@
-'use client'
 import DeleteItemButton from './DeleteItemButton'
 import { FC } from 'react'
 export const dynamic = 'force-dynamic'
