@@ -32,11 +32,11 @@ const EventsCards: FC<EventsDisplayProps>  = ({events}) => {
             events && events?.length > 0 ?
             events?.map((event) => {
               return (
-                <div className="flex flex-wrap py-2 border border-foreground rounded-lg" style={{flexWrap: 'wrap', marginBottom: '1.5rem'}} key={event.id}>
-                  <p className="flex-none px-6 py-4 whitespace-no-wrap" style={{minWidth: '100%'}}>
+                <div className="flex flex-wrap py-2 border border-foreground rounded-lg" style={{marginBottom: '1.5rem'}} key={event.id}>
+                  <p className="flex-none px-6 py-4 whitespace-no-wrap">
                     {event.venue}
                   </p>
-                  <p className="flex-none px-6 py-4 whitespace-no-wrap" style={{minWidth: '100%'}}>
+                  <p className="flex-none px-6 py-4 whitespace-no-wrap min-w-full">
                       {event.desc}
                   </p>
                   <p className="px-6 py-4 whitespace-no-wrap">

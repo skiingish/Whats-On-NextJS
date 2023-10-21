@@ -6,13 +6,16 @@ export const dynamic = 'force-dynamic'
 export default function DeleteItemButton(id: any) {
   
     function handleDelete(formData: FormData) {
-      // Delete the item
-      
+    //   // Delete the item
+    // console.log('Delete the item')
     // const id = formData.get('id')
+    // console.log('id', id);
+    
     // if (id) {
     //   const supabase = createClientComponentClient()
-    //   const res = supabase.from('events').delete().match({ id })
+    //   const {data, error} = await supabase.from('events').delete().match({ id })
     //   //revalidatePath('/')
+    //   console.log(data, error)
     // }
   }
   

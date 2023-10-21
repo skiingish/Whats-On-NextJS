@@ -72,19 +72,18 @@ export async function GET() {
 
 export async function DELETE(request: Request) {
   const supabase = createRouteHandlerClient({ cookies });
+  const formData = await request.formData();
+  const requestUrl = new URL(request.url);
+  const id = formData.get('id');
+  const { data, error } = await supabase.from('events').delete().match({ id });
 
-  console.log(request);
-  //   const supabase = createRouteHandlerClient({ cookies });
-  //   const { data, error } = await supabase
-  //     .from('events')
-  //     .delete()
-  //     .match({ id: requestUrl.searchParams.get('id') });
+  if (error) {
+    console.error(error);
+    return new Response('Error', { status: 500 });
+  }
 
-  //   if (error) {
-  //     console.error(error);
-
-  //     return new Response('Error', { status: 500 });
-  //   }
-
-  return new Response('OK');
+  return NextResponse.redirect(`${requestUrl.origin}`, {
+    // a 301 status is required to redirect from a POST to a GET route
+    status: 301,
+  });
 }
