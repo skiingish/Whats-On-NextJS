@@ -47,7 +47,7 @@ const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
               className='flex flex-wrap py-2 my-6 border border-foreground/50 rounded-lg bg-slate-900  shadow-slate-600/10 shadow-inner'
               key={event.id}
             >
-              <p className=' text-xl tracking-wider px-6 py-4 whitespace-no-wrap'>
+              <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
                 {event.venue}
               </p>
               <p className='px-6 py-2 whitespace-no-wrap min-w-full'>

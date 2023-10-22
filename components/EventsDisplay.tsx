@@ -74,9 +74,12 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
           value={searchTerm}
         />
       </div>
-      <hr className='py-6'></hr>
-      <EventsCards events={filteredSearchedEvents || []} user={user} />
-      {/* <EventsList events={filteredSearchedEvents || []}/> */}
+      <hr className='py-2'></hr>
+      {filteredSearchedEvents?.length === 0 ? (
+        <p className='text-foreground text-center text-2xl'>No Events Found</p>
+      ) : (
+        <EventsCards events={filteredSearchedEvents || []} user={user} />
+      )}
     </div>
   );
 };
