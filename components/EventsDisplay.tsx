@@ -10,6 +10,7 @@ interface EventsDisplayProps {
 
 const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchDay, setSearchDay] = useState<string>('');
 
   // If the search has changed.
   const changeSpecialsSearch = (e: any) => {
@@ -19,19 +20,26 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
   const handleOptionChange = (e: any) => {
     // If the value is blank, then we want to show all events.
     if (e.target.value === 'blank') {
-      setSearchTerm('');
+      setSearchDay('');
     } else if (e.target.value === 'today') {
       // If the value is today, then we want to show all events that are on today.
       let today = new Date().toLocaleString('en-us', { weekday: 'long' });
-      setSearchTerm(today);
+      setSearchDay(today);
     } else {
       // Otherwise, we want to show all events that are on that day.
-      setSearchTerm(e.target.value);
+      setSearchDay(e.target.value);
     }
   };
 
+  let filteredEventsByDay = events?.filter((event) => {
+    let result = event.when
+      .toLowerCase()
+      .includes(searchDay.toLocaleLowerCase());
+    return result;
+  });
+
   // Search for different items, including day of the week, title, and the place.
-  let filteredSearchedEvents = events?.filter((event) => {
+  let filteredSearchedEvents = filteredEventsByDay?.filter((event) => {
     let result =
       event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
       event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
