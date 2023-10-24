@@ -5,6 +5,7 @@ import LogoutButton from '../components/LogoutButton';
 import Logo from '../components/Logo';
 import EventsDisplay from '@/components/EventsDisplay';
 import AddEventDisplay from '@/components/AddEventDisplay';
+import { PawPrint } from 'lucide-react';
 import Image from 'next/image';
 
 import hamburger from '../public/assets/hamburger_1280.jpg';
@@ -55,15 +56,15 @@ export default async function Index() {
 
       <div className='animate-in flex flex-col gap-4 opacity-0 max-w-4xl px-3 py-4 lg:py-8 text-foreground'>
         <div className='flex flex-col items-center mb-2 lg:mb-8'>
-          <p className='text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center my-2'>
-            Whats On Today!
+          <p className='flex text-4xl lg:text-4xl tracking-wider italic !leading-tight font-medium mx-auto max-w-xl text-center my-2'>
+            <PawPrint size={48} className=' pr-1.5' /> Jasper Specials
           </p>
-          <div className='flex gap-4 my-6 justify-center items-center'>
+          <div className='flex my-4 justify-center items-center'>
             <Image
               className='rounded-lg opacity-80'
               src={randomPicture}
               alt='Picture logo'
-              width={250}
+              width={270}
             />
           </div>
         </div>

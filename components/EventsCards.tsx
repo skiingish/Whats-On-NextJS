@@ -1,6 +1,7 @@
 import DeleteItemButton from './DeleteItemButton';
 import { FC } from 'react';
 export const dynamic = 'force-dynamic';
+import { CalendarDays, Clock } from 'lucide-react';
 
 interface EventsDisplayProps {
   events: Events[] | null;
@@ -44,7 +45,7 @@ const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
         events?.map((event) => {
           return (
             <div
-              className='flex flex-wrap py-2 my-6 border border-foreground/50 rounded-lg bg-slate-900  shadow-slate-600/10 shadow-inner'
+              className='flex flex-wrap py-2 my-8 rounded-lg bg-gray-800'
               key={event.id}
             >
               <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
@@ -53,13 +54,20 @@ const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
               <p className='px-6 py-2 whitespace-no-wrap min-w-full'>
                 {event.desc}
               </p>
-              <p className='px-6 py-2 whitespace-no-wrap'>
-                {event.special_price}
-              </p>
-              <p className='px-6 py-2 whitespace-no-wrap'>
+              <div>
+                {event.special_price !== null ? (
+                  <p className='px-6 py-2 text-md font-bold whitespace-no-wrap'>
+                    {event.special_price}
+                  </p>
+                ) : null}
+              </div>
+              <p className='flex px-6 py-2 whitespace-no-wrap'>
+                <CalendarDays className=' pr-1.5' />
                 {dayformatter(event.when)}
               </p>
-              <p className='px-6 py-2 whitespace-no-wrap'>{event.event_time}</p>
+              <p className='flex px-6 py-2 whitespace-no-wrap'>
+                <Clock className='pr-1.5' /> {event.event_time}
+              </p>
               {user ? (
                 <div className='flex' style={{ minWidth: '100%' }}>
                   <div className='px-6 py-2 whitespace-no-wrap'>

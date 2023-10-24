@@ -47,7 +47,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
         <select
           name='daysoftheweek'
           id='dayselector'
-          className='rounded-md px-4 py-2 bg-inherit border mb-6'
+          className='rounded-md px-4 py-3.5 bg-inherit border mb-6 '
           onChange={(e) => {
             handleOptionChange(e);
           }}
@@ -66,7 +66,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
       <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
         <label className='text-md'>Search</label>
         <input
-          className='rounded-md px-4 py-2 bg-inherit border mb-6'
+          className='rounded-md px-4 py-3 bg-inherit border mb-6'
           type='text'
           onChange={changeSpecialsSearch}
           id='search'
