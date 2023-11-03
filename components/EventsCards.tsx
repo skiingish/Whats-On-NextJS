@@ -1,7 +1,7 @@
 import DeleteItemButton from './DeleteItemButton';
 import { FC } from 'react';
 export const dynamic = 'force-dynamic';
-import { CalendarDays, Clock } from 'lucide-react';
+import { CalendarDays, Clock, Flag } from 'lucide-react';
 
 interface EventsDisplayProps {
   events: Events[] | null;
@@ -48,6 +48,12 @@ const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
               className='flex flex-wrap py-2 my-8 rounded-lg bg-gray-800'
               key={event.id}
             >
+              <button className='group absolute right-10 bg-slate-900 content-center rounded-lg hover:bg-slate-500'>
+                <Flag className='p-1' />
+                <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
+                  Report
+                </span>
+              </button>
               <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
                 {event.venue}
               </p>

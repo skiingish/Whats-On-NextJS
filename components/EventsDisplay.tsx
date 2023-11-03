@@ -79,6 +79,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
           onChange={changeSpecialsSearch}
           id='search'
           name='search'
+          placeholder='Pizza...'
           value={searchTerm}
         />
       </div>

@@ -65,6 +65,7 @@ export default async function Index() {
               src={randomPicture}
               alt='Picture logo'
               width={270}
+              placeholder='blur'
             />
           </div>
         </div>
