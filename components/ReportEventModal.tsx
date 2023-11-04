@@ -1,7 +1,8 @@
-import { FC, Fragment, useRef, useState } from 'react';
+import { FC, Fragment, useRef, useState, FormEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { dayformatter } from '@/utils/dataformatter';
 import { CalendarDays, Clock, Flag, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ReportEventModalProps {
   event: Events | null;
@@ -17,9 +18,27 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
   const cancelButtonRef = useRef(null);
   const [issue, setIssue] = useState<string>('notvaild');
 
-  const handleFormSubmit = (e: any) => {
-    setOpen(false);
-    //e.preventDefault();
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    let eventId = event?.id;
+    // If no event id is found, then we don't want to submit the form.
+    if (!eventId) {
+      return;
+    }
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      formData.append('eventid', eventId.toString());
+      const response = await fetch('/issues', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      toast.success(data.message);
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -54,7 +73,7 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
-                <form action='/issues' method='post'>
+                <form onSubmit={handleFormSubmit}>
                   <div className='bg-gray-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
                     <div className='sm:flex sm:items-start'>
                       {/* <div className='mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10'></div> */}
@@ -130,7 +149,6 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                     <button
                       type='submit'
                       className='inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm bg-green-600 hover:bg-green-400 sm:ml-3 sm:w-auto'
-                      onClick={(e) => handleFormSubmit(e)}
                     >
                       Submit
                     </button>

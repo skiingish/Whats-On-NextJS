@@ -10,8 +10,13 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const supabase = createRouteHandlerClient({ cookies });
 
+    const eventid = formData.get('eventid');
     const issue = formData.get('issueselector');
     const info = formData.get('missinginfotext');
+
+    console.log('eventid: ' + eventid);
+    console.log('issue: ' + issue);
+    console.log('info: ' + info);
     // const special_price = formData.get('special_price');
     // const event_time = formData.get('event_time');
 
@@ -39,7 +44,10 @@ export async function POST(request: Request) {
 
     //return NextResponse.json({ message: 'Event Added!' }, { status: 200 });
 
-    //return NextResponse.json({ message: 'Issue Added!' }, { status: 200 });
+    return NextResponse.json(
+      { message: 'Thanks for your feedback!' },
+      { status: 200 }
+    );
 
     // // Redirect to the home page after a successful POST.
     return NextResponse.redirect(`${requestUrl.origin}/`, {
