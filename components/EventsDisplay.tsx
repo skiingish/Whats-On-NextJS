@@ -49,47 +49,51 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
   });
 
   return (
-    <div className='w-full'>
-      <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
-        <label className='text-md'>Whats On</label>
-        <select
-          name='daysoftheweek'
-          id='dayselector'
-          className='rounded-md px-4 py-3.5 bg-inherit border mb-6 '
-          onChange={(e) => {
-            handleOptionChange(e);
-          }}
-        >
-          <option value='blank'>Everyday</option>
-          <option value='today'>Today</option>
-          <option value='monday'>Monday</option>
-          <option value='tuesday'>Tuesday</option>
-          <option value='wednesday'>Wednesday</option>
-          <option value='thursday'>Thursday</option>
-          <option value='friday'>Friday</option>
-          <option value='saturday'>Saturday</option>
-          <option value='sunday'>Sunday</option>
-        </select>
+    <>
+      <div className='w-full'>
+        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
+          <label className='text-md'>Whats On</label>
+          <select
+            name='daysoftheweek'
+            id='dayselector'
+            className='rounded-md px-4 py-3.5 bg-inherit border mb-6 '
+            onChange={(e) => {
+              handleOptionChange(e);
+            }}
+          >
+            <option value='blank'>Everyday</option>
+            <option value='today'>Today</option>
+            <option value='monday'>Monday</option>
+            <option value='tuesday'>Tuesday</option>
+            <option value='wednesday'>Wednesday</option>
+            <option value='thursday'>Thursday</option>
+            <option value='friday'>Friday</option>
+            <option value='saturday'>Saturday</option>
+            <option value='sunday'>Sunday</option>
+          </select>
+        </div>
+        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
+          <label className='text-md'>Search</label>
+          <input
+            className='rounded-md px-4 py-3 bg-inherit border mb-6'
+            type='text'
+            onChange={changeSpecialsSearch}
+            id='search'
+            name='search'
+            placeholder='Pizza...'
+            value={searchTerm}
+          />
+        </div>
+        <hr className='py-2'></hr>
+        {filteredSearchedEvents?.length === 0 ? (
+          <p className='text-foreground text-center text-2xl'>
+            No Events Found
+          </p>
+        ) : (
+          <EventsCards events={filteredSearchedEvents || []} user={user} />
+        )}
       </div>
-      <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
-        <label className='text-md'>Search</label>
-        <input
-          className='rounded-md px-4 py-3 bg-inherit border mb-6'
-          type='text'
-          onChange={changeSpecialsSearch}
-          id='search'
-          name='search'
-          placeholder='Pizza...'
-          value={searchTerm}
-        />
-      </div>
-      <hr className='py-2'></hr>
-      {filteredSearchedEvents?.length === 0 ? (
-        <p className='text-foreground text-center text-2xl'>No Events Found</p>
-      ) : (
-        <EventsCards events={filteredSearchedEvents || []} user={user} />
-      )}
-    </div>
+    </>
   );
 };
 
