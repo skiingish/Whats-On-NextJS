@@ -1,8 +1,15 @@
+import { z } from 'zod';
 import { FC, Fragment, useRef, useState, FormEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { dayformatter } from '@/utils/dataformatter';
-import { CalendarDays, Clock, Flag, AlertCircle } from 'lucide-react';
+import { CalendarDays, Clock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+const issueSchema = z.object({
+  eventid: z.number(),
+  issueselector: z.string(),
+  missinginfotext: z.string().nullable().optional(),
+});
 
 interface ReportEventModalProps {
   event: Events | null;
@@ -17,27 +24,45 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
 }) => {
   const cancelButtonRef = useRef(null);
   const [issue, setIssue] = useState<string>('notvaild');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     e.preventDefault();
     let eventId = event?.id;
     // If no event id is found, then we don't want to submit the form.
     if (!eventId) {
-      return;
+      throw new Error('No event id found');
     }
 
     try {
       const formData = new FormData(e.currentTarget);
       formData.append('eventid', eventId.toString());
+
+      // Validate the form data.
+      const result = await issueSchema.safeParseAsync({
+        eventid: eventId,
+        issueselector: formData.get('issueselector'),
+        missinginfotext: formData.get('missinginfotext'),
+      });
+
+      if (!result.success) {
+        toast.error(result.error.message);
+        throw new Error(result.error.message);
+      }
+
       const response = await fetch('/issues', {
         method: 'POST',
         body: formData,
       });
       const data = await response.json();
       toast.success(data.message);
+      setLoading(false);
       setOpen(false);
     } catch (error) {
+      setLoading(false);
       console.error(error);
+      toast.error('Could not submit form');
     }
   };
 
@@ -146,20 +171,26 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                     </div>
                   </div>
                   <div className='bg-gray-800 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
-                    <button
-                      type='submit'
-                      className='inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm bg-green-600 hover:bg-green-400 sm:ml-3 sm:w-auto'
-                    >
-                      Submit
-                    </button>
-                    <button
-                      type='button'
-                      className='mt-3 inline-flex w-full justify-center rounded-md text-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
-                      onClick={() => setOpen(false)}
-                      ref={cancelButtonRef}
-                    >
-                      Cancel
-                    </button>
+                    {loading ? (
+                      <Loader2 className='animate-spin h-8 w-8 text-white' />
+                    ) : (
+                      <>
+                        <button
+                          type='submit'
+                          className='inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm bg-green-600 hover:bg-green-400 sm:ml-3 sm:w-auto'
+                        >
+                          Submit
+                        </button>
+                        <button
+                          type='button'
+                          className='mt-3 inline-flex w-full justify-center rounded-md text-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
+                          onClick={() => setOpen(false)}
+                          ref={cancelButtonRef}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    )}
                   </div>
                 </form>
               </Dialog.Panel>
