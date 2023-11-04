@@ -66,13 +66,13 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                           Report Event - {event?.venue}
                         </Dialog.Title>
                         <div
-                          className='flex flex-wrap py-2 my-3 border rounded-lg bg-gray-800'
+                          className='flex flex-wrap py-2 my-3 border rounded-lg bg-gray-800 text-white'
                           key={event?.id}
                         >
-                          <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
+                          <p className=' text-md tracking-wider font-bold px-6 py-2 whitespace-no-wrap'>
                             {event?.venue}
                           </p>
-                          <p className='px-6 py-2 whitespace-no-wrap min-w-full'>
+                          <p className='flex px-6 py-2 min-w-full'>
                             {event?.desc}
                           </p>
                           <div>
@@ -90,22 +90,26 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                             <Clock className='pr-1.5' /> {event?.event_time}
                           </p>
                         </div>
-                        <div className='mt-2'>
-                          <p className='text-sm text-gray-500'>
-                            What would you like to report?
-                          </p>
-                          <select
-                            name='issueselector'
-                            id='issueselector'
-                            className='rounded-md px-4 py-3.5 text-white bg-inherit border border-gray-500 m-3'
-                            value={issue}
-                            onChange={(e) => {
-                              setIssue(e.target.value);
-                            }}
-                          >
-                            <option value='notvaild'>Doesn't Exist</option>
-                            <option value='missinginfo'>Incorrect Info</option>
-                          </select>
+                        <div className='mt-6'>
+                          <div className='flex flex-col w-full justify-center'>
+                            <label className='text-sm text-white'>
+                              What would you like to report?
+                            </label>
+                            <select
+                              name='issueselector'
+                              id='issueselector'
+                              className='w-full rounded-md my-3 px-2 py-3.5 text-white bg-inherit border border-gray-500'
+                              value={issue}
+                              onChange={(e) => {
+                                setIssue(e.target.value);
+                              }}
+                            >
+                              <option value='notvaild'>Doesn't Exist</option>
+                              <option value='missinginfo'>
+                                Incorrect Info
+                              </option>
+                            </select>
+                          </div>
                           {issue === 'missinginfo' ? (
                             <>
                               <p className='text-sm text-white'>
@@ -125,14 +129,14 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                   <div className='bg-gray-800 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
                     <button
                       type='submit'
-                      className='inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm bg-yellow-600 hover:bg-yellow-400 sm:ml-3 sm:w-auto'
+                      className='inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm bg-green-600 hover:bg-green-400 sm:ml-3 sm:w-auto'
                       onClick={(e) => handleFormSubmit(e)}
                     >
                       Submit
                     </button>
                     <button
                       type='button'
-                      className='mt-3 inline-flex w-full justify-center rounded-md text-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                      className='mt-3 inline-flex w-full justify-center rounded-md text-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
                       onClick={() => setOpen(false)}
                       ref={cancelButtonRef}
                     >
