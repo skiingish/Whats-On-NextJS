@@ -14,6 +14,7 @@ import neon from '../public/assets/neon_1280.jpg';
 import pasta from '../public/assets/pasta_1280.jpg';
 import poutine from '../public/assets/poutine_1280.jpg';
 import steak from '../public/assets/steak_1280.jpg';
+import InviteUserButton from '@/components/InviteUserButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,13 +35,14 @@ export default async function Index() {
   return (
     <div className='font-sans w-full flex flex-col items-center'>
       <nav className='w-full flex justify-center border-b border-b-foreground/10 h-16'>
-        <div className='w-full max-w-4xl flex justify-between items-center p-3 text-sm text-foreground'>
+        <div className='w-full max-w-4xl flex justify-between items-center p-3 text-sm text-foreground sm:text-xs'>
           <div />
           <div>
             {user ? (
-              <div className='flex items-center gap-4'>
+              <div className='flex items-center gap-4  '>
                 Hey, {user.email}!
                 <LogoutButton />
+                <InviteUserButton />
               </div>
             ) : (
               <Link
