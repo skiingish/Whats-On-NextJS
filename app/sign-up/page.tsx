@@ -38,12 +38,14 @@ export default function Login() {
         method='post'
       >
         <h1 className='text-2xl mb-2 font-bold'>Specials Spotter</h1>
+        <h2 className='text-xl mb-2 font-bold'>Create Account</h2>
         <label className='text-md' htmlFor='email'>
           Email
         </label>
         <input
           className='rounded-md px-4 py-2 bg-inherit border mb-6'
           name='email'
+          type='email'
           placeholder='you@example.com'
           required
         />

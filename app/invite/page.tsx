@@ -30,6 +30,9 @@ export default function Invite() {
         action='/auth/generate-invite'
         method='POST'
       >
+        <h1 className='text-2xl mb-4 font-bold'>
+          Specials Spotter - Invite A User
+        </h1>
         <button className='bg-green-700 rounded px-4 py-2 text-white mb-2'>
           Create Invite Link
         </button>
