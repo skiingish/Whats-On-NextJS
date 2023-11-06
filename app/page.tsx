@@ -71,11 +71,11 @@ export default async function Index() {
             />
           </div>
         </div>
-        <AddEventDisplay user={user} />
       </div>
 
       <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 px-8 text-foreground'>
         <EventsDisplay events={events || []} user={user} />
+        <AddEventDisplay userStatus={user?.aud} />
       </div>
     </div>
   );

@@ -16,12 +16,14 @@ interface AddSpecialModalProps {
   event: Events | null;
   open: boolean;
   setOpen: any;
+  userLoggedIn?: boolean | null;
 }
 
 const AddSpecialModal: FC<AddSpecialModalProps> = ({
   event,
   open,
   setOpen,
+  userLoggedIn,
 }) => {
   const cancelButtonRef = useRef(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -52,7 +54,12 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
 
       setLoading(false);
       setOpen(false);
-      toast.success('Event added!');
+
+      if (userLoggedIn) {
+        toast.success('Event added!');
+      } else {
+        toast.success('Event submitted for approval!');
+      }
     } catch (error) {
       setLoading(false);
       console.error(error);
@@ -100,31 +107,35 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                     as='h2'
                     className='text-base font-semibold leading-6 text-white mb-2'
                   >
-                    Add Event
+                    {userLoggedIn ? 'Add Event' : 'Add New Event For Review'}
                   </Dialog.Title>
                   <label className='text-md'>Where</label>
                   <input
                     className='rounded-md px-4 py-2 bg-inherit border mb-6'
                     name='venue'
                     required
+                    placeholder='Cheesy Does It Pizzeria'
                   />
                   <label className='text-md'>What</label>
                   <input
                     className='rounded-md px-4 py-2 bg-inherit border mb-6'
                     name='desc'
                     required
+                    placeholder='Cheap Tuesdays'
                   />
                   <label className='text-md'>$ Special $</label>
                   <input
                     className='rounded-md px-4 py-2 bg-inherit border mb-6'
                     name='special_price'
                     required
+                    placeholder='$5 Cheese Pizzas'
                   />
                   <label className='text-md'>Time</label>
                   <input
                     className='rounded-md px-4 py-2 bg-inherit border mb-6'
                     name='event_time'
                     required
+                    placeholder='All day'
                   />
 
                   <label className='text-md'>When</label>

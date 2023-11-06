@@ -9,8 +9,10 @@ interface EventsDisplayProps {
 }
 
 const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
+  let today = new Date().toLocaleString('en-us', { weekday: 'long' });
+
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [searchDay, setSearchDay] = useState<string>('');
+  const [searchDay, setSearchDay] = useState<string>(today);
 
   // If the search has changed.
   const changeSpecialsSearch = (e: any) => {
@@ -23,7 +25,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
       setSearchDay('');
     } else if (e.target.value === 'today') {
       // If the value is today, then we want to show all events that are on today.
-      let today = new Date().toLocaleString('en-us', { weekday: 'long' });
+      today = new Date().toLocaleString('en-us', { weekday: 'long' });
       setSearchDay(today);
     } else {
       // Otherwise, we want to show all events that are on that day.
@@ -61,8 +63,8 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
               handleOptionChange(e);
             }}
           >
-            <option value='blank'>Everyday</option>
             <option value='today'>Today</option>
+            <option value='blank'>Show All</option>
             <option value='monday'>Monday</option>
             <option value='tuesday'>Tuesday</option>
             <option value='wednesday'>Wednesday</option>

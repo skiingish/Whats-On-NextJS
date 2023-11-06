@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const supabase = createRouteHandlerClient({ cookies });
     let session = await supabase.auth.getSession();
 
-    if (!session) {
+    if (!session.data.session) {
       return NextResponse.redirect(
         `${requestUrl.origin}/login?error=You must be logged in to invite users`,
         {

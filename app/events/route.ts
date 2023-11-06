@@ -19,22 +19,46 @@ export async function POST(request: Request) {
     const selectedDays = formData.getAll('days');
     const when = selectedDays.join(' ');
 
-    const { data, error } = await supabase
-      .from('events')
-      .insert([{ desc, venue, when, special_price, event_time }]);
+    // Get the session
+    let session = await supabase.auth.getSession();
 
-    if (error) {
-      console.error(error);
+    // If logged in user add direct to the database else add to the pending table
+    if (!session.data.session) {
+      const { data, error } = await supabase
+        .from('events_pending')
+        .insert([{ desc, venue, when, special_price, event_time }]);
 
-      //return NextResponse.json({ error }, { status: 500 });
+      if (error) {
+        console.error(error);
 
-      return NextResponse.redirect(
-        `${requestUrl.origin}?message=Could not save item`,
-        {
-          // a 301 status is required to redirect from a POST to a GET route
-          status: 301,
-        }
-      );
+        //return NextResponse.json({ error }, { status: 500 });
+
+        return NextResponse.redirect(
+          `${requestUrl.origin}?message=Could not save item`,
+          {
+            // a 301 status is required to redirect from a POST to a GET route
+            status: 301,
+          }
+        );
+      }
+    } else {
+      const { data, error } = await supabase
+        .from('events')
+        .insert([{ desc, venue, when, special_price, event_time }]);
+
+      if (error) {
+        console.error(error);
+
+        //return NextResponse.json({ error }, { status: 500 });
+
+        return NextResponse.redirect(
+          `${requestUrl.origin}?message=Could not save item`,
+          {
+            // a 301 status is required to redirect from a POST to a GET route
+            status: 301,
+          }
+        );
+      }
     }
 
     //return NextResponse.json({ message: 'Event Added!' }, { status: 200 });
