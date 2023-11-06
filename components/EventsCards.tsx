@@ -32,11 +32,11 @@ const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
           events?.map((event) => {
             return (
               <div
-                className='flex flex-wrap py-2 my-8 rounded-lg bg-gray-800'
+                className='flex flex-wrap py-2 my-8 rounded-xl text-foreground border-2 border-foreground bg-white'
                 key={event.id}
               >
                 <button
-                  className='group absolute right-10 bg-slate-900 content-center rounded-lg hover:bg-slate-500'
+                  className='group absolute right-10 text-foreground content-center rounded-lg hover:bg-slate-500'
                   onClick={() => {
                     reportEvent(event);
                   }}

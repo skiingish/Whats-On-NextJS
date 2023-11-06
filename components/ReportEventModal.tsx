@@ -97,20 +97,20 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-xl border-4 border-foreground bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
                 <form onSubmit={handleFormSubmit}>
-                  <div className='bg-gray-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
+                  <div className='bg-background px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
                     <div className='sm:flex sm:items-start'>
                       {/* <div className='mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10'></div> */}
                       <div className='mt-2 text-center sm:ml-4 sm:mt-0 sm:text-left'>
                         <Dialog.Title
                           as='h3'
-                          className='text-base font-semibold leading-6 text-white'
+                          className='text-base font-semibold leading-6 text-foreground'
                         >
                           Report Event - {event?.venue}
                         </Dialog.Title>
                         <div
-                          className='flex flex-wrap py-2 my-3 border rounded-lg bg-gray-800 text-white'
+                          className='flex flex-wrap py-2 my-3 border-2 border-foreground rounded-xl text-foreground bg-white'
                           key={event?.id}
                         >
                           <p className=' text-md tracking-wider font-bold px-6 py-2 whitespace-no-wrap'>
@@ -136,13 +136,13 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                         </div>
                         <div className='mt-6'>
                           <div className='flex flex-col w-full justify-center'>
-                            <label className='text-sm text-white'>
+                            <label className='text-sm font-semibold tracking-wide text-foreground'>
                               What would you like to report?
                             </label>
                             <select
                               name='issueselector'
                               id='issueselector'
-                              className='w-full rounded-md my-3 px-2 py-3.5 text-white bg-inherit border border-gray-500'
+                              className='w-full my-3 px-2 py-3.5 font-semibold border-foreground rounded-xl text-foreground border-2 bg-white '
                               value={issue}
                               onChange={(e) => {
                                 setIssue(e.target.value);
@@ -156,13 +156,13 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                           </div>
                           {issue === 'missinginfo' ? (
                             <>
-                              <p className='text-sm text-white'>
+                              <p className='text-sm font-semibold tracking-wide text-foreground'>
                                 Whats Missing?
                               </p>
                               <textarea
                                 name='missinginfotext'
                                 id='missinginfotext'
-                                className='w-full h-32 mt-2 text-white border-gray-500 bg-inherit rounded-md px-4 py-2 border mb-1 '
+                                className='w-full h-32 mt-2 bg-inherit px-4 py-2 border-2 border-foreground rounded-xl text-foreground bg-white mb-1 '
                               />
                             </>
                           ) : null}
@@ -170,20 +170,20 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                       </div>
                     </div>
                   </div>
-                  <div className='bg-gray-800 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
+                  <div className='bg-background px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
                     {loading ? (
-                      <Loader2 className='animate-spin h-8 w-8 text-white' />
+                      <Loader2 className='animate-spin h-8 w-8 text-foreground' />
                     ) : (
                       <>
                         <button
                           type='submit'
-                          className='inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm bg-green-600 hover:bg-green-400 sm:ml-3 sm:w-auto'
+                          className='inline-flex w-full justify-center px-3 py-2 text-sm font-semibold tracking-wide text-foreground shadow-sm bg-btn-background hover:bg-btn-background-hover border-foreground border-2 rounded-full sm:ml-3 sm:w-auto'
                         >
                           Submit
                         </button>
                         <button
                           type='button'
-                          className='mt-3 inline-flex w-full justify-center rounded-md text-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
+                          className='mt-3 inline-flex w-full justify-center rounded-full text-foreground px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset border-foreground border-2 ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
                           onClick={() => setOpen(false)}
                           ref={cancelButtonRef}
                         >

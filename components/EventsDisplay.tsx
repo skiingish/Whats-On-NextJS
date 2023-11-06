@@ -54,11 +54,11 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
     <>
       <div className='w-full'>
         <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
-          <label className='text-md'>Whats On</label>
+          <label className='text-lg font-bold tracking-wider'>Whats On</label>
           <select
             name='daysoftheweek'
             id='dayselector'
-            className='rounded-md px-4 py-3.5 bg-inherit border mb-6 '
+            className='rounded-full px-4 py-2.5 bg-inherit tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-white'
             onChange={(e) => {
               handleOptionChange(e);
             }}
@@ -75,9 +75,9 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
           </select>
         </div>
         <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
-          <label className='text-md'>Search</label>
+          <label className='text-lg font-bold tracking-wider'>Search</label>
           <input
-            className='rounded-md px-4 py-3 bg-inherit border mb-6'
+            className='rounded-full px-4 py-2 bg-inherit tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-white'
             type='text'
             onChange={changeSpecialsSearch}
             id='search'
@@ -88,7 +88,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
         </div>
         <hr className='py-2'></hr>
         {filteredSearchedEvents?.length === 0 ? (
-          <p className='text-foreground text-center text-2xl'>
+          <p className='text-foreground text-center text-2xl mb-4'>
             No Events Found
           </p>
         ) : (

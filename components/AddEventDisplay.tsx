@@ -21,7 +21,7 @@ const AddEventDisplay: FC<AddEventDisplayProps> = ({
       />
       <button
         onClick={() => setShowForm(true)}
-        className='bg-green-700 hover:bg-green-400 rounded px-4 py-2 text-white mb-2 w-full'
+        className='bg-btn-background hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full px-4 py-2 mb-2 w-full'
       >
         {userStatus ? 'Add New' : 'Something Missing?'}
       </button>

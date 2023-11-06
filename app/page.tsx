@@ -47,7 +47,7 @@ export default async function Index() {
             ) : (
               <Link
                 href='/login'
-                className='py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover'
+                className='py-2 px-4 rounded-full no-underline text-foreground border-foreground border-2 bg-btn-background hover:bg-btn-background-hover'
               >
                 Login
               </Link>
@@ -56,21 +56,18 @@ export default async function Index() {
         </div>
       </nav>
 
-      <div className='animate-in flex flex-col gap-4 opacity-0 max-w-4xl px-3 py-4 lg:py-8 text-foreground'>
+      <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
         <div className='flex flex-col items-center mb-2 lg:mb-8'>
           <p className='flex text-4xl lg:text-4xl tracking-wider italic !leading-tight font-medium mx-auto max-w-xl text-center my-2'>
             <PawPrint size={48} className=' pr-1.5' /> Jasper Specials
           </p>
-          <div className='flex my-4 justify-center items-center'>
-            <Image
-              className='rounded-lg opacity-80'
-              src={randomPicture}
-              alt='Picture logo'
-              width={270}
-              placeholder='blur'
-            />
-          </div>
         </div>
+        <Image
+          className='opacity-80 w-full lg:max-h-96 object-cover'
+          src={randomPicture}
+          alt='Picture logo'
+          placeholder='blur'
+        />
       </div>
 
       <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 px-8 text-foreground'>
