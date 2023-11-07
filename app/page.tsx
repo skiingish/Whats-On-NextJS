@@ -57,9 +57,9 @@ export default async function Index() {
       </nav>
 
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
-        <div className='flex flex-col items-center mb-2 lg:mb-8'>
-          <p className='flex text-4xl lg:text-4xl tracking-wider italic !leading-tight font-medium mx-auto max-w-xl text-center my-2'>
-            <PawPrint size={48} className=' pr-1.5' /> Jasper Specials
+        <div className='flex flex-col items-center mx-2 mb-2 lg:mb-8'>
+          <p className='flex text-4xl lg:text-6xl tracking-wide !leading-tight font-bold mx-auto max-w-xl text-center my-2'>
+            <PawPrint size={48} className=' pr-1.5' /> Jasper Specials!
           </p>
         </div>
         <Image
