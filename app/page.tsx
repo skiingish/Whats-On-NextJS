@@ -8,6 +8,10 @@ import AddEventDisplay from '@/components/AddEventDisplay';
 import { PawPrint } from 'lucide-react';
 import Image from 'next/image';
 
+import localFont from 'next/font/local';
+
+const AgbalumoRegular = localFont({ src: './Agbalumo-Regular.ttf' });
+
 import hamburger from '../public/assets/hamburger_1280.jpg';
 import pizza from '../public/assets/pizza_1280.jpg';
 import neon from '../public/assets/neon_1280.jpg';
@@ -33,7 +37,7 @@ export default async function Index() {
   let randomPicture = pictures[Math.floor(Math.random() * pictures.length)];
 
   return (
-    <div className='font-sans w-full flex flex-col items-center'>
+    <div className='overscroll-contain font-sans w-full flex flex-col items-center'>
       <nav className='w-full flex justify-center border-b border-b-foreground/10 h-16'>
         <div className='w-full max-w-4xl flex justify-between items-center p-3 text-sm text-foreground sm:text-xs'>
           <div />
@@ -58,7 +62,9 @@ export default async function Index() {
 
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
         <div className='flex flex-col items-center mx-2 mb-2 lg:mb-8'>
-          <p className='flex text-4xl lg:text-6xl tracking-wide !leading-tight font-bold mx-auto max-w-xl text-center my-2'>
+          <p
+            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2`}
+          >
             <PawPrint size={48} className=' pr-1.5' /> Jasper Specials!
           </p>
         </div>
@@ -70,7 +76,7 @@ export default async function Index() {
         />
       </div>
 
-      <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 px-8 text-foreground'>
+      <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 text-foreground'>
         <EventsDisplay events={events || []} user={user} />
         <AddEventDisplay userStatus={user?.aud} />
       </div>

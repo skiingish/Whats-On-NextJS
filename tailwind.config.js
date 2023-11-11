@@ -13,10 +13,16 @@ module.exports = {
     extend: {
       colors: {
         background: 'hsl(var(--background))',
+        'background-secondary': 'hsl(var(--background-secondary))',
         foreground: 'hsl(var(--foreground))',
+        'text-foreground': 'hsl(var(--text-foreground))',
+        highlight: 'hsl(var(--highlight))',
         btn: {
           background: 'hsl(var(--btn-background))',
           'background-hover': 'hsl(var(--btn-background-hover))',
+          'secondary-background': 'hsl(var(--btn-secondary-background))',
+          'secondary-background-hover':
+            'hsl(var(--btn-secondary-background-hover))',
         },
       },
     },

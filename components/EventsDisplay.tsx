@@ -1,5 +1,5 @@
 'use client';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import EventsCards from './EventsCards';
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +13,13 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchDay, setSearchDay] = useState<string>(today);
+  const [animateSelector, setAnimateSelector] = useState<boolean>(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setAnimateSelector(false);
+    }, 3000);
+  }, []);
 
   // If the search has changed.
   const changeSpecialsSearch = (e: any) => {
@@ -53,12 +60,16 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
   return (
     <>
       <div className='w-full'>
-        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
+        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground px-8 -mb-3'>
           <label className='text-lg font-bold tracking-wider'>Whats On</label>
           <select
             name='daysoftheweek'
             id='dayselector'
-            className='rounded-full px-4 py-2.5 bg-inherit tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-white '
+            className={
+              animateSelector
+                ? 'animate-bounce rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
+                : 'rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
+            }
             style={{
               appearance: 'none',
               backgroundImage:
@@ -82,13 +93,13 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
             <option value='sunday'>Sunday</option>
           </select>
         </div>
-        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'>
+        <div className='... sticky top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-background z-10 border-b-2 border-foreground px-8'>
           <label className='flex text-lg font-bold tracking-wider'>
             Search
           </label>
 
           <input
-            className='rounded-full px-4 py-2 bg-inherit tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-white'
+            className='rounded-full px-4 py-2 tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-background-secondary'
             type='text'
             onChange={changeSpecialsSearch}
             id='search'
@@ -97,13 +108,16 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
             value={searchTerm}
           />
         </div>
-        <hr className='py-2'></hr>
         {filteredSearchedEvents?.length === 0 ? (
-          <p className='text-foreground text-center text-2xl mb-4'>
-            No Events Found
-          </p>
+          <div className='px-8'>
+            <p className='text-foreground text-center text-2xl mb-4'>
+              No Events Found
+            </p>
+          </div>
         ) : (
-          <EventsCards events={filteredSearchedEvents || []} user={user} />
+          <div className='px-8'>
+            <EventsCards events={filteredSearchedEvents || []} user={user} />
+          </div>
         )}
       </div>
     </>

@@ -12,7 +12,7 @@ const AddEventDisplay: FC<AddEventDisplayProps> = ({
   const [showForm, setShowForm] = useState<boolean>(false);
 
   return (
-    <div>
+    <div className='px-8'>
       <AddSpecialModal
         event={null}
         open={showForm}
