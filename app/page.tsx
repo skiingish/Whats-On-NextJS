@@ -19,6 +19,7 @@ import pasta from '../public/assets/pasta_1280.jpg';
 import poutine from '../public/assets/poutine_1280.jpg';
 import steak from '../public/assets/steak_1280.jpg';
 import InviteUserButton from '@/components/InviteUserButton';
+import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,6 +81,8 @@ export default async function Index() {
         <EventsDisplay events={events || []} user={user} />
         <AddEventDisplay userStatus={user?.aud} />
       </div>
+
+      <Footer />
     </div>
   );
 }
