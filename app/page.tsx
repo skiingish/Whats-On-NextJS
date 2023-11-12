@@ -81,8 +81,9 @@ export default async function Index() {
         <EventsDisplay events={events || []} user={user} />
         <AddEventDisplay userStatus={user?.aud} />
       </div>
-
-      <Footer />
+      <div className='w-full'>
+        <Footer />
+      </div>
     </div>
   );
 }
