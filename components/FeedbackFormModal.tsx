@@ -140,11 +140,11 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                               placeholder='I love pizza! Please create me an account (P.S. I own a venue)'
                               className='w-full h-32 mt-2 bg-inherit px-4 py-2 border-2 border-foreground rounded-xl text-foreground bg-white mb-1 '
                             />
-                            <ReCAPTCHA
+                            {/* <ReCAPTCHA
                               sitekey={siteKey}
                               ref={recaptchaRef}
                               onChange={handleCaptchaSubmission}
-                            />
+                            /> */}
                           </div>
                         </div>
                       </div>
@@ -156,11 +156,8 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                     ) : (
                       <>
                         <button
-                          disabled={!isVerified}
                           type='submit'
-                          className={`${
-                            !isVerified ? 'bg-gray-800' : 'visible'
-                          } invisible inline-flex w-full justify-center px-3 py-2 text-sm font-semibold tracking-wide text-foreground shadow-sm bg-btn-background hover:bg-btn-background-hover border-foreground border-2 rounded-full sm:ml-3 sm:w-auto`}
+                          className={`invisible inline-flex w-full justify-center px-3 py-2 text-sm font-semibold tracking-wide text-foreground shadow-sm bg-btn-background hover:bg-btn-background-hover border-foreground border-2 rounded-full sm:ml-3 sm:w-auto`}
                         >
                           Submit
                         </button>
