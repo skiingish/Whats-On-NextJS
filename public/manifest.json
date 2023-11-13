@@ -1,0 +1,32 @@
+{
+    "theme_color": "#BD9AFE",
+    "background_color": "#F1E5D6",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Special Spotter ",
+    "short_name": "specials-spotter",
+    "description": "A app to help you find local specials, half priced nights, happy hours, trivia, etc... ",
+    "icons": [
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-256x256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
