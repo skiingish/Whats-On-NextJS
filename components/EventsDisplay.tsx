@@ -40,6 +40,11 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
     }
   };
 
+  // Order events by newest first.
+  events?.sort((a, b) => {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
   let filteredEventsByDay = events?.filter((event) => {
     let result = event.when
       .toLowerCase()
@@ -104,7 +109,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
             onChange={changeSpecialsSearch}
             id='search'
             name='search'
-            placeholder='Pizza...'
+            placeholder='Pizza... Whistle Stop... Bingo...'
             value={searchTerm}
           />
         </div>

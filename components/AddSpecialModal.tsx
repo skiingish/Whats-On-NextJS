@@ -123,11 +123,12 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                     required
                     placeholder='Cheap Tuesdays'
                   />
-                  <label className='text-md font-semibold'>$ Special $</label>
+                  <label className='text-md font-semibold'>
+                    Special $ Details (Optional)
+                  </label>
                   <input
                     className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white mb-6'
                     name='special_price'
-                    required
                     placeholder='$5 Cheese Pizzas'
                   />
                   <label className='text-md font-semibold'>Time</label>
@@ -138,7 +139,9 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                     placeholder='All day'
                   />
 
-                  <label className='text-md font-semibold'>When</label>
+                  <label className='text-md font-semibold'>
+                    When (Select All That Apply)
+                  </label>
                   <div className='flex-1 flex max-w-lg flex-row flex-wrap justify-center gap-6 py-4 text-foreground'>
                     <label className='relative inline-flex items-center cursor-pointer'>
                       <input
@@ -227,7 +230,7 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                   </div>
                   <div className='bg-inherit px-0 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
                     {loading ? (
-                      <Loader2 className='animate-spin h-8 w-8 text-white' />
+                      <Loader2 className='animate-spin h-8 w-8 text-black' />
                     ) : (
                       <>
                         <button
