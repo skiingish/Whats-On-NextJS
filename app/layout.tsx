@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from 'sonner';
 
 export const metadata = {
@@ -16,6 +17,7 @@ export default function RootLayout({
       <body>
         <main className='min-h-screen bg-background flex flex-col items-center'>
           {children}
+          <Analytics />
           <Toaster />
         </main>
       </body>

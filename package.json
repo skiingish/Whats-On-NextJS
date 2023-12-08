@@ -11,6 +11,7 @@
     "@supabase/supabase-js": "latest",
     "@types/jsonwebtoken": "^9.0.4",
     "@types/react-google-recaptcha": "^2.1.8",
+    "@vercel/analytics": "^1.1.1",
     "autoprefixer": "10.4.14",
     "eslint-config-next": "latest",
     "jsonwebtoken": "^9.0.2",
