@@ -18,12 +18,13 @@ import neon from '../public/assets/neon_1280.jpg';
 import pasta from '../public/assets/pasta_1280.jpg';
 import poutine from '../public/assets/poutine_1280.jpg';
 import steak from '../public/assets/steak_1280.jpg';
+import bingo from '../public/assets/bingo_1280.png';
 import InviteUserButton from '@/components/InviteUserButton';
 import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
-const pictures = [hamburger, pizza, neon, pasta, poutine, steak];
+const pictures = [hamburger, pizza, neon, pasta, poutine, steak, bingo];
 
 export default async function Index() {
   const supabase = createServerComponentClient({ cookies });

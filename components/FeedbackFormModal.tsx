@@ -113,7 +113,7 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                         <div className='mt-6'>
                           <div className='flex flex-col w-full justify-center'>
                             <label className='text-sm font-semibold tracking-wide text-foreground'>
-                              What shall I call you? (Optional)
+                              Whats Your Name? (Optional)
                             </label>
                             <input
                               name='name'
@@ -122,7 +122,7 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                               placeholder='Frankie Loves Pizzas...'
                             ></input>
                             <label className='text-sm font-semibold tracking-wide text-foreground'>
-                              Where Sure I Email A Reply? (Optional)
+                              Where Shall I Email A Reply? (Optional)
                             </label>
                             <input
                               name='email'
@@ -157,7 +157,7 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                       <>
                         <button
                           type='submit'
-                          className={`invisible inline-flex w-full justify-center px-3 py-2 text-sm font-semibold tracking-wide text-foreground shadow-sm bg-btn-background hover:bg-btn-background-hover border-foreground border-2 rounded-full sm:ml-3 sm:w-auto`}
+                          className={`inline-flex w-full justify-center px-3 py-2 text-sm font-semibold tracking-wide text-foreground shadow-sm bg-btn-background hover:bg-btn-background-hover border-foreground border-2 rounded-full sm:ml-3 sm:w-auto`}
                         >
                           Submit
                         </button>
