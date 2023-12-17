@@ -49,7 +49,7 @@ export default async function Index() {
   let randomPicture = pictures[Math.floor(Math.random() * pictures.length)];
 
   return (
-    <div className='overscroll-contain font-sans w-full flex flex-col items-center'>
+    <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background dark:bg-dark-background'>
       <nav className='w-full flex justify-center border-b border-b-foreground/10 h-16'>
         <div className='w-full max-w-4xl flex justify-between items-center p-3 text-sm text-foreground sm:text-xs'>
           <div />
@@ -75,7 +75,7 @@ export default async function Index() {
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
         <div className='flex flex-col items-center mx-2 mb-2 lg:mb-8'>
           <p
-            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2`}
+            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2 dark:text-dark-text-foreground`}
           >
             <PawPrint size={48} className=' pr-1.5' /> Jasper Specials!
           </p>

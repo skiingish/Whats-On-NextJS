@@ -65,7 +65,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
   return (
     <>
       <div className='w-full'>
-        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground px-8 -mb-3'>
+        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground dark:text-dark-text-foreground px-8 -mb-3'>
           <label className='text-lg font-bold tracking-wider'>Whats On</label>
           <select
             name='daysoftheweek'
@@ -98,7 +98,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
             <option value='sunday'>Sunday</option>
           </select>
         </div>
-        <div className='... sticky top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-background z-10 border-b-2 border-foreground px-8'>
+        <div className='... sticky top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 dark:bg-dark-background text-foreground dark:text-dark-text-foreground z-10 border-b-2 border-foreground px-8'>
           <label className='flex text-lg font-bold tracking-wider'>
             Search
           </label>
