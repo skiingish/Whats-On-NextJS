@@ -40,9 +40,18 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
     }
   };
 
-  // Order events by newest first.
+  // Order events by least number of days the special is on and then by newest first.
   events?.sort((a, b) => {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    const daysA = a.when.split(' ').length;
+    const daysB = b.when.split(' ').length;
+
+    if (daysA !== daysB) {
+      return daysA - daysB; // Order by least number of days the special is on
+    } else {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ); // Order by newest added
+    }
   });
 
   let filteredEventsByDay = events?.filter((event) => {
