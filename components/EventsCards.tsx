@@ -32,7 +32,7 @@ const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
           events?.map((event) => {
             return (
               <div
-                className='flex flex-wrap py-2 my-8 rounded-xl text-foreground border-2 border-foreground bg-background-secondary'
+                className='flex flex-wrap py-2 my-8 rounded-xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
                 key={event.id}
               >
                 <button

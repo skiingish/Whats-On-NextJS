@@ -81,8 +81,8 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
             id='dayselector'
             className={
               animateSelector
-                ? 'animate-bounce rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
-                : 'rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
+                ? 'animate-bounce rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                : 'rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
             }
             style={{
               appearance: 'none',
@@ -113,7 +113,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
           </label>
 
           <input
-            className='rounded-full px-4 py-2 tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-background-secondary'
+            className='rounded-full px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-2 border-foreground mb-6 bg-background-secondary dark:bg-dark-foreground'
             type='text'
             onChange={changeSpecialsSearch}
             id='search'
@@ -124,7 +124,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
         </div>
         {filteredSearchedEvents?.length === 0 ? (
           <div className='px-8'>
-            <p className='text-foreground text-center text-2xl mb-4'>
+            <p className='text-foreground text-center text-2xl mb-4 dark:text-dark-text-foreground'>
               No Events Found
             </p>
           </div>
