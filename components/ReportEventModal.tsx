@@ -156,7 +156,7 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                           </div>
                           {issue === 'missinginfo' ? (
                             <>
-                              <p className='text-sm font-semibold tracking-wide text-foreground'>
+                              <p className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
                                 Whats Missing?
                               </p>
                               <textarea
