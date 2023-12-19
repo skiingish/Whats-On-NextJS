@@ -17,7 +17,12 @@ const Footer = ({}) => {
       </button>
 
       <p className='mt-2'>Copyright © {new Date().getFullYear()}</p>
-      <p className='italic'>Sean Makes Things</p>
+      <a
+        className='italic text-blue-700 font-semibold hover:underline'
+        href='https://www.seanbuildsthings.com/'
+      >
+        Sean Builds Things 👋
+      </a>
     </div>
   );
 };
