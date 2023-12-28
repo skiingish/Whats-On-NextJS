@@ -51,7 +51,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
                   >
                     <Star className='p-1' fill='#8f56fc' size={32} />
                     <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                      Remove Favourite
+                      Favourite
                     </span>
                   </button>
                 ) : (
