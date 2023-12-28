@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import FeedBackFormModal from './FeedbackFormModal';
+import BuyMeACoffee from './BuyMeACoffee';
 
 const Footer = ({}) => {
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -23,6 +24,9 @@ const Footer = ({}) => {
       >
         Sean Builds Things 👋
       </a>
+      <div className='mt-5'>
+        <BuyMeACoffee />
+      </div>
     </div>
   );
 };
