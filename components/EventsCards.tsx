@@ -1,16 +1,22 @@
 import DeleteItemButton from './DeleteItemButton';
 import ReportEventModal from './ReportEventModal';
 import { dayformatter } from '@/utils/dataformatter';
+import { addFavourite, removeFavourite } from '@/utils/favouritesHandler';
 import { FC, use, useState, useEffect } from 'react';
 export const dynamic = 'force-dynamic';
-import { CalendarDays, Clock, Flag, AlertCircle } from 'lucide-react';
+import { CalendarDays, Clock, Flag, AlertCircle, Star } from 'lucide-react';
 
 interface EventsDisplayProps {
   events: Events[] | null;
   user: any;
+  refreshFavourites: () => void;
 }
 
-const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
+const EventsCards: FC<EventsDisplayProps> = ({
+  events,
+  user,
+  refreshFavourites,
+}) => {
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reportedEvent, reportEvent] = useState<Events | null>(null);
 
@@ -35,13 +41,41 @@ const EventsCards: FC<EventsDisplayProps> = ({ events, user }) => {
                 className='flex flex-wrap py-2 my-8 rounded-xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
                 key={event.id}
               >
+                {event.is_favorite ? (
+                  <button
+                    className='group absolute right-[4.5rem] text-foreground content-center rounded-lg hover:bg-slate-500'
+                    onClick={() => {
+                      removeFavourite(event);
+                      refreshFavourites();
+                    }}
+                  >
+                    <Star className='p-1' fill='#8f56fc' size={32} />
+                    <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
+                      Remove Favourite
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    className='group absolute right-[4.5rem] text-foreground content-center rounded-lg hover:bg-slate-500'
+                    onClick={() => {
+                      addFavourite(event);
+                      refreshFavourites();
+                    }}
+                  >
+                    <Star className='p-1' size={32} />
+                    <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
+                      Favourite
+                    </span>
+                  </button>
+                )}
+
                 <button
                   className='group absolute right-10 text-foreground content-center rounded-lg hover:bg-slate-500'
                   onClick={() => {
                     reportEvent(event);
                   }}
                 >
-                  <AlertCircle className='p-1' />
+                  <AlertCircle className='p-1' size={32} />
                   <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
                     Report
                   </span>

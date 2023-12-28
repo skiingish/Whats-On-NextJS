@@ -1,19 +1,29 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
 import EventsCards from './EventsCards';
+import { getFavourites } from '@/utils/favouritesHandler';
 export const dynamic = 'force-dynamic';
 
 interface EventsDisplayProps {
-  events: Events[] | null;
+  events: Events[] | null | undefined;
   user: any;
 }
 
 const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
   let today = new Date().toLocaleString('en-us', { weekday: 'long' });
 
+  const [activeList, setActiveList] = useState<string>('all');
+
+  const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
+
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchDay, setSearchDay] = useState<string>(today);
   const [animateSelector, setAnimateSelector] = useState<boolean>(true);
+
+  const refreshFavourites = () => {
+    console.log('refreshing favourites');
+    setRefreshingEvents(true);
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -39,6 +49,35 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
       setSearchDay(e.target.value);
     }
   };
+
+  // Get the favourites from local storage.
+  const favourites: Events[] = getFavourites();
+
+  // If active list not equal to all, then we want to filter the events by the user's favourites from local storage.
+  if (activeList !== 'all') {
+    // Filter the events by the user's favourites from local storage using the ids from the favourites array, so if the event changed on the db it will display correctly, or if it's deleted it wont show.
+    const favoriteEvents: Events[] | undefined = events?.filter((event) => {
+      const isFavorite = favourites.some(
+        (favorite) => favorite.id === event.id
+      );
+      if (isFavorite) {
+        event.is_favorite = true; // Set isfav to true if matched
+      }
+      return isFavorite;
+    });
+    events = favoriteEvents;
+  } else {
+    events?.forEach((event) => {
+      const isFavorite = favourites.some(
+        (favorite) => favorite.id === event.id
+      );
+      event.is_favorite = isFavorite;
+    });
+  }
+
+  if (refreshingEvents) {
+    setRefreshingEvents(false);
+  }
 
   // Order events by least number of days the special is on and then by newest first.
   events?.sort((a, b) => {
@@ -67,7 +106,6 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
       event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
       event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
       event.venue.toLowerCase().includes(searchTerm.toLocaleLowerCase());
-
     return result;
   });
 
@@ -121,16 +159,46 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
             placeholder='Pizza... Whistle Stop... Bingo...'
             value={searchTerm}
           />
+          <div className='w-full h-12 relative -mb-[2px]'>
+            <button
+              onClick={() => setActiveList('all')}
+              className={`absolute ${
+                activeList === 'all'
+                  ? 'w-[55%] z-10 h-[100%] bg-white dark:bg-dark-foreground'
+                  : 'w-[50%] h-[90%] bg-stone-300 dark:bg-dark-background'
+              } transition-all bottom-0 left-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
+            >
+              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+                All
+              </p>
+            </button>
+            <button
+              onClick={() => setActiveList('favourites')}
+              className={`absolute ${
+                activeList !== 'all'
+                  ? 'left-[45%] w-[55%] h-[100%] bg-white z-10 dark:bg-dark-foreground'
+                  : 'w-[50%] h-[90%] left-[50%] bg-stone-300 dark:bg-dark-background'
+              } transition-all bottom-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
+            >
+              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+                Favourites
+              </p>
+            </button>
+          </div>
         </div>
         {filteredSearchedEvents?.length === 0 ? (
           <div className='px-8'>
-            <p className='text-foreground text-center text-2xl mb-4 dark:text-dark-text-foreground'>
+            <p className='text-foreground text-center text-2xl mb-4 mt-4 dark:text-dark-text-foreground'>
               No Events Found
             </p>
           </div>
         ) : (
           <div className='px-8'>
-            <EventsCards events={filteredSearchedEvents || []} user={user} />
+            <EventsCards
+              events={filteredSearchedEvents || []}
+              user={user}
+              refreshFavourites={refreshFavourites}
+            />
           </div>
         )}
       </div>
