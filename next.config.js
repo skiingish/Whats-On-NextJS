@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disableDevLogs: true,
-});
+const isProd = process.env.NODE_ENV === 'production';
+
+const withPWA = require('next-pwa');
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -13,8 +10,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = withBundleAnalyzer(
   withPWA({
-    experimental: {
-      serverActions: true,
+    pageExtensions: ['tsx'],
+    pwa: {
+      disable: !isProd,
+      dest: 'public',
     },
   })
 );

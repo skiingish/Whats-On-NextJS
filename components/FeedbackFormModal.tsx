@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import { FC, Fragment, useRef, useState, FormEvent } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
-import { verifyCaptcha } from '@/utils/serverActions';
 import { Dialog, Transition } from '@headlessui/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -21,17 +19,9 @@ interface FeedbackFormProps {
 
 const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
   const cancelButtonRef = useRef(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [isVerified, setIsverified] = useState<boolean>(false);
-
-  async function handleCaptchaSubmission(token: string | null) {
-    // Server function to verify captcha
-    await verifyCaptcha(token)
-      .then(() => setIsverified(true))
-      .catch(() => setIsverified(false));
-  }
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     setLoading(true);
