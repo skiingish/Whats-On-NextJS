@@ -14,8 +14,11 @@ module.exports = {
       colors: {
         background: 'hsl(var(--background))',
         'background-secondary': 'hsl(var(--background-secondary))',
+        'dark-background': 'hsl(var(--dark-background))',
         foreground: 'hsl(var(--foreground))',
+        'dark-foreground': 'hsl(var(--dark-foreground))',
         'text-foreground': 'hsl(var(--text-foreground))',
+        'dark-text-foreground': 'hsl(var(--dark-text-foreground))',
         highlight: 'hsl(var(--highlight))',
         btn: {
           background: 'hsl(var(--btn-background))',

@@ -81,7 +81,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = createRouteHandlerClient({ cookies });
   const { data, error } = await supabase.from('events').select('*');
 

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import FeedBackFormModal from './FeedbackFormModal';
+import BuyMeACoffee from './BuyMeACoffee';
 
 const Footer = ({}) => {
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -11,13 +12,21 @@ const Footer = ({}) => {
       <p className=' mb-4'>Thanks For Visiting</p>
       <button
         onClick={() => setShowForm(true)}
-        className='bg-background hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full px-4 py-2 mb-2 w-full lg:w-1/6'
+        className='bg-background dark:bg-dark-foreground dark:text-dark-text-foreground hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full px-4 py-2 mb-2 w-full lg:w-1/6'
       >
         Give Feedback
       </button>
 
       <p className='mt-2'>Copyright © {new Date().getFullYear()}</p>
-      <p className='italic'>Sean Makes Things</p>
+      <a
+        className='italic text-blue-700 font-semibold hover:underline'
+        href='https://www.seanbuildsthings.com/'
+      >
+        Sean Builds Things 👋
+      </a>
+      <div className='mt-5'>
+        <BuyMeACoffee />
+      </div>
     </div>
   );
 };

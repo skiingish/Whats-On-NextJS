@@ -1,19 +1,29 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
 import EventsCards from './EventsCards';
+import { getFavourites } from '@/utils/favouritesHandler';
 export const dynamic = 'force-dynamic';
 
 interface EventsDisplayProps {
-  events: Events[] | null;
+  events: Events[] | null | undefined;
   user: any;
 }
 
 const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
   let today = new Date().toLocaleString('en-us', { weekday: 'long' });
 
+  const [activeList, setActiveList] = useState<string>('all');
+
+  const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
+
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchDay, setSearchDay] = useState<string>(today);
   const [animateSelector, setAnimateSelector] = useState<boolean>(true);
+
+  const refreshFavourites = () => {
+    console.log('refreshing favourites');
+    setRefreshingEvents(true);
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -40,6 +50,49 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
     }
   };
 
+  // Get the favourites from local storage.
+  const favourites: Events[] = getFavourites();
+
+  // If active list not equal to all, then we want to filter the events by the user's favourites from local storage.
+  if (activeList !== 'all') {
+    // Filter the events by the user's favourites from local storage using the ids from the favourites array, so if the event changed on the db it will display correctly, or if it's deleted it wont show.
+    const favoriteEvents: Events[] | undefined = events?.filter((event) => {
+      const isFavorite = favourites.some(
+        (favorite) => favorite.id === event.id
+      );
+      if (isFavorite) {
+        event.is_favorite = true; // Set isfav to true if matched
+      }
+      return isFavorite;
+    });
+    events = favoriteEvents;
+  } else {
+    events?.forEach((event) => {
+      const isFavorite = favourites.some(
+        (favorite) => favorite.id === event.id
+      );
+      event.is_favorite = isFavorite;
+    });
+  }
+
+  if (refreshingEvents) {
+    setRefreshingEvents(false);
+  }
+
+  // Order events by least number of days the special is on and then by newest first.
+  events?.sort((a, b) => {
+    const daysA = a.when.split(' ').length;
+    const daysB = b.when.split(' ').length;
+
+    if (daysA !== daysB) {
+      return daysA - daysB; // Order by least number of days the special is on
+    } else {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ); // Order by newest added
+    }
+  });
+
   let filteredEventsByDay = events?.filter((event) => {
     let result = event.when
       .toLowerCase()
@@ -53,22 +106,21 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
       event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
       event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
       event.venue.toLowerCase().includes(searchTerm.toLocaleLowerCase());
-
     return result;
   });
 
   return (
     <>
       <div className='w-full'>
-        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground px-8 -mb-3'>
+        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground dark:text-dark-text-foreground px-8 -mb-3'>
           <label className='text-lg font-bold tracking-wider'>Whats On</label>
           <select
             name='daysoftheweek'
             id='dayselector'
             className={
               animateSelector
-                ? 'animate-bounce rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
-                : 'rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
+                ? 'animate-bounce rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                : 'rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
             }
             style={{
               appearance: 'none',
@@ -93,30 +145,60 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
             <option value='sunday'>Sunday</option>
           </select>
         </div>
-        <div className='... sticky top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-background z-10 border-b-2 border-foreground px-8'>
+        <div className='... sticky top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 dark:bg-dark-background text-foreground dark:text-dark-text-foreground z-10 border-b-2 border-foreground px-8'>
           <label className='flex text-lg font-bold tracking-wider'>
             Search
           </label>
 
           <input
-            className='rounded-full px-4 py-2 tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-background-secondary'
+            className='rounded-full px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-2 border-foreground mb-6 bg-background-secondary dark:bg-dark-foreground'
             type='text'
             onChange={changeSpecialsSearch}
             id='search'
             name='search'
-            placeholder='Pizza...'
+            placeholder='Pizza... Whistle Stop... Bingo...'
             value={searchTerm}
           />
+          <div className='w-full h-12 relative -mb-[2px]'>
+            <button
+              onClick={() => setActiveList('all')}
+              className={`absolute ${
+                activeList === 'all'
+                  ? 'w-[55%] z-10 h-[100%] bg-white dark:bg-dark-foreground'
+                  : 'w-[50%] h-[90%] bg-stone-300 dark:bg-dark-background'
+              } transition-all bottom-0 left-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
+            >
+              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+                All
+              </p>
+            </button>
+            <button
+              onClick={() => setActiveList('favourites')}
+              className={`absolute ${
+                activeList !== 'all'
+                  ? 'left-[45%] w-[55%] h-[100%] bg-white z-10 dark:bg-dark-foreground'
+                  : 'w-[50%] h-[90%] left-[50%] bg-stone-300 dark:bg-dark-background'
+              } transition-all bottom-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
+            >
+              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+                Favourites
+              </p>
+            </button>
+          </div>
         </div>
         {filteredSearchedEvents?.length === 0 ? (
           <div className='px-8'>
-            <p className='text-foreground text-center text-2xl mb-4'>
+            <p className='text-foreground text-center text-2xl mb-4 mt-4 dark:text-dark-text-foreground'>
               No Events Found
             </p>
           </div>
         ) : (
           <div className='px-8'>
-            <EventsCards events={filteredSearchedEvents || []} user={user} />
+            <EventsCards
+              events={filteredSearchedEvents || []}
+              user={user}
+              refreshFavourites={refreshFavourites}
+            />
           </div>
         )}
       </div>

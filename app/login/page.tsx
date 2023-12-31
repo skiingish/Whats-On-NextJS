@@ -5,7 +5,7 @@ import Messages from './messages';
 
 export default function Login() {
   return (
-    <div className='flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2'>
+    <div className='flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2 dark:bg-dark-background'>
       <Link
         href='/'
         className='absolute left-8 top-8 py-2 px-4 rounded-full border-2 border-foreground no-underline text-foreground bg-btn-background hover:bg-btn-background-hover flex items-center group text-sm'
@@ -28,7 +28,7 @@ export default function Login() {
       </Link>
 
       <form
-        className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'
+        className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground dark:text-dark-text-foreground'
         action='/auth/sign-in'
         method='post'
       >
@@ -36,7 +36,7 @@ export default function Login() {
           Email
         </label>
         <input
-          className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white mb-6'
+          className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-foreground mb-6'
           name='email'
           placeholder='you@example.com'
           required
@@ -48,7 +48,7 @@ export default function Login() {
           Password
         </label>
         <input
-          className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white mb-6'
+          className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-foreground mb-6'
           type='password'
           name='password'
           placeholder='••••••••'

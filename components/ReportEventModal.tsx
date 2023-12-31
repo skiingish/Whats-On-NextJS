@@ -99,18 +99,18 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
             >
               <Dialog.Panel className='relative transform overflow-hidden rounded-xl border-4 border-foreground bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
                 <form onSubmit={handleFormSubmit}>
-                  <div className='bg-background px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
+                  <div className='bg-background dark:bg-dark-background px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
                     <div className='sm:flex sm:items-start'>
                       {/* <div className='mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10'></div> */}
                       <div className='mt-2 text-center sm:ml-4 sm:mt-0 sm:text-left'>
                         <Dialog.Title
                           as='h3'
-                          className='text-base font-semibold leading-6 text-foreground'
+                          className='text-base font-semibold leading-6 text-foreground dark:text-dark-text-foreground'
                         >
                           Report Event - {event?.venue}
                         </Dialog.Title>
                         <div
-                          className='flex flex-wrap py-2 my-3 border-2 border-foreground rounded-xl text-foreground bg-white'
+                          className='flex flex-wrap py-2 my-3 border-2 border-foreground rounded-xl text-foreground bg-white dark:bg-dark-foreground dark:text-dark-text-foreground'
                           key={event?.id}
                         >
                           <p className=' text-md tracking-wider font-bold px-6 py-2 whitespace-no-wrap'>
@@ -136,13 +136,13 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                         </div>
                         <div className='mt-6'>
                           <div className='flex flex-col w-full justify-center'>
-                            <label className='text-sm font-semibold tracking-wide text-foreground'>
+                            <label className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
                               What would you like to report?
                             </label>
                             <select
                               name='issueselector'
                               id='issueselector'
-                              className='w-full my-3 px-2 py-3.5 font-semibold border-foreground rounded-xl text-foreground border-2 bg-white '
+                              className='w-full my-3 px-2 py-3.5 font-semibold border-foreground rounded-xl text-foreground border-2 bg-white dark:bg-dark-foreground dark:text-dark-text-foreground'
                               value={issue}
                               onChange={(e) => {
                                 setIssue(e.target.value);
@@ -156,13 +156,13 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                           </div>
                           {issue === 'missinginfo' ? (
                             <>
-                              <p className='text-sm font-semibold tracking-wide text-foreground'>
+                              <p className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
                                 Whats Missing?
                               </p>
                               <textarea
                                 name='missinginfotext'
                                 id='missinginfotext'
-                                className='w-full h-32 mt-2 bg-inherit px-4 py-2 border-2 border-foreground rounded-xl text-foreground bg-white mb-1 '
+                                className='w-full h-32 mt-2 bg-inherit px-4 py-2 border-2 border-foreground rounded-xl text-foreground dark:text-dark-text-foreground bg-white dark:bg-dark-foreground mb-1 '
                               />
                             </>
                           ) : null}
@@ -170,7 +170,7 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                       </div>
                     </div>
                   </div>
-                  <div className='bg-background px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
+                  <div className='bg-background px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 dark:bg-dark-background'>
                     {loading ? (
                       <Loader2 className='animate-spin h-8 w-8 text-foreground' />
                     ) : (
@@ -183,7 +183,7 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                         </button>
                         <button
                           type='button'
-                          className='mt-3 inline-flex w-full justify-center rounded-full text-foreground px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset border-foreground border-2 ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
+                          className='mt-3 inline-flex w-full justify-center rounded-full text-foreground dark:text-dark-text-foreground px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset border-foreground border-2 ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
                           onClick={() => setOpen(false)}
                           ref={cancelButtonRef}
                         >
