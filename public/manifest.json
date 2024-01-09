@@ -1,7 +1,7 @@
 {
     "theme_color": "#BD9AFE",
     "background_color": "#F1E5D6",
-    "display": "fullscreen",
+    "display": "standalone",
     "scope": "/",
     "start_url": "/",
     "name": "Special Spotter ",
