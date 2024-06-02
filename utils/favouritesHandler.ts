@@ -1,14 +1,16 @@
 // Get all favourites from local storage
 export const getFavourites = (): Events[] => {
-  if (localStorage === undefined) {
+  try {
+    const favourites = localStorage.getItem('favourites');
+    if (favourites) {
+      return JSON.parse(favourites);
+    }
+    return [];
+  } catch (error) {
+    //console.log('localStorage error:', error);
     return [];
   }
-
-  const favourites = localStorage.getItem('favourites');
-  if (favourites) {
-    return JSON.parse(favourites);
-  }
-  return [];
+  
 };
 
 // Add a favourite to local storage

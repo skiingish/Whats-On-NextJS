@@ -20,6 +20,7 @@ import skistore from '../public/assets/skistore_1280.jpg';
 import Footer from '@/components/Footer';
 import EventsSection from '@/components/EventsSection';
 import Navbar from '@/components/Navbar';
+import RainingBurgers from '@/components/RainingAnimatation';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,6 +64,7 @@ export default async function Index() {
 
   return (
     <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background dark:bg-dark-background'>
+      {/* <RainingBurgers /> */}
       <Navbar user={user} />
 
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
