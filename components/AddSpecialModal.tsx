@@ -31,20 +31,30 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
   const [selectedVenue, setSelectedVenue] = useState('');
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    setLoading(true);
     e.preventDefault();
+
+    if (!selectedVenue) {
+      toast.error('Please select or add a venue');
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const formData = new FormData(e.currentTarget);
       formData.set('venue_id', selectedVenue);
-
-      console.log('formData', formData);
 
       const response = await fetch('/events', {
         method: 'POST',
         body: formData,
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to submit event');
+      }
+
       setLoading(false);
+      setSelectedVenue('');
       setOpen(false);
 
       if (userLoggedIn) {

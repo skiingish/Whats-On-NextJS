@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Combobox } from './combobox';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { toast } from 'sonner';
 
 interface Venue {
   id: string;
@@ -51,9 +52,26 @@ export function VenueComboBox({
     label: venue.name,
   }));
 
-  if (loading) {
-    return <div>Loading venues...</div>; // Or use a proper loading component
-  }
+  const handleAddVenue = async (venueName: string) => {
+    venueName = venueName.trim();
+    console.log('Adding venue:', venueName);
+
+    try {
+      const { data, error } = await supabase
+        .from('venues')
+        .insert([{ name: venueName }])
+        .select()
+        .single();
+      if (error) throw error;
+
+      toast.success('Venue added successfully!');
+
+      setVenues([...venues, data]);
+      onChange(data.id);
+    } catch (error) {
+      console.error('Error adding venue:', error);
+    }
+  };
 
   return (
     <Combobox
@@ -64,6 +82,10 @@ export function VenueComboBox({
       searchPlaceholder='Search venues...'
       emptyMessage='No venues found.'
       className={className}
+      handleAddItem={handleAddVenue}
+      addItemLabel='Add New Venue:'
+      loading={loading}
+      loadingMessage='Fetching venues...'
     />
   );
 }
