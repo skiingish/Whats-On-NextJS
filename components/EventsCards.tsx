@@ -81,7 +81,9 @@ const EventsCards: FC<EventsDisplayProps> = ({
                   </span>
                 </button>
                 <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
-                  {event.venue}
+                  {typeof event.venue === 'string'
+                    ? event.venue
+                    : event.venue.name}
                 </p>
                 <p className='px-6 py-2 whitespace-no-wrap min-w-full'>
                   {event.desc}

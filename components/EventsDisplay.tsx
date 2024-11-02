@@ -105,7 +105,10 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
     let result =
       event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
       event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
-      event.venue.toLowerCase().includes(searchTerm.toLocaleLowerCase());
+      (typeof event.venue === 'string'
+        ? event.venue.toLowerCase()
+        : event.venue.name.toLowerCase()
+      ).includes(searchTerm.toLocaleLowerCase());
     return result;
   });
 

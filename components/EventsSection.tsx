@@ -10,7 +10,14 @@ interface EventsSectionProps {
 const EventsSection: FC<EventsSectionProps> = async ({ user }) => {
   const supabase = createServerComponentClient({ cookies });
 
-  let { data: events } = await supabase.from('events').select();
+  let { data: events } = await supabase.from('events').select(`
+      *,
+      venue:venues (
+        *
+      )
+    `);
+
+  console.log(events);
 
   if (!events) return null;
 

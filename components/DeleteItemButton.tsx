@@ -2,7 +2,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function DeleteItemButton({ id }: { id: string }) {
+export default function DeleteItemButton({ id }: { id: number }) {
   const router = useRouter();
 
   async function handleDelete(e: React.FormEvent<HTMLFormElement>) {
