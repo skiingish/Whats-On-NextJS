@@ -17,8 +17,6 @@ const EventsSection: FC<EventsSectionProps> = async ({ user }) => {
       )
     `);
 
-  console.log(events);
-
   if (!events) return null;
 
   return (

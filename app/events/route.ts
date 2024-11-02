@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const supabase = createRouteHandlerClient({ cookies });
 
     const desc = formData.get('desc');
-    const venue = formData.get('venue');
+    const venue_id = formData.get('venue_id');
     const special_price = formData.get('special_price');
     const event_time = formData.get('event_time');
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     if (!session.data.session) {
       const { data, error } = await supabase
         .from('events_pending')
-        .insert([{ desc, venue, when, special_price, event_time }]);
+        .insert([{ desc, venue_id, when, special_price, event_time }]);
 
       if (error) {
         console.error(error);
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     } else {
       const { data, error } = await supabase
         .from('events')
-        .insert([{ desc, venue, when, special_price, event_time }]);
+        .insert([{ desc, venue_id, when, special_price, event_time }]);
 
       if (error) {
         console.error(error);

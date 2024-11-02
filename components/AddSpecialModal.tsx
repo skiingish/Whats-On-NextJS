@@ -1,8 +1,9 @@
-import { z } from 'zod';
-import { FC, Fragment, useRef, useState, FormEvent } from 'react';
+import { set, z } from 'zod';
+import { FC, Fragment, useRef, useState, FormEvent, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { VenueComboBox } from './ui/VenueComboBox';
 
 const eventsSchema = z.object({
   venue: z.string(),
@@ -27,25 +28,16 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
 }) => {
   const cancelButtonRef = useRef(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectedVenue, setSelectedVenue] = useState('');
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     setLoading(true);
     e.preventDefault();
     try {
       const formData = new FormData(e.currentTarget);
+      formData.set('venue_id', selectedVenue);
 
-      // const result = await eventsSchema.safeParseAsync({
-      //   venue: formData.get('venue'),
-      //   desc: formData.get('desc'),
-      //   special_price: formData.get('special_price'),
-      //   days: formData.get('days'),
-      //   event_time: formData.get('event_time'),
-      // });
-
-      // if (!result.success) {
-      //   toast.error(result.error.message);
-      //   throw new Error(result.error.message);
-      // }
+      console.log('formData', formData);
 
       const response = await fetch('/events', {
         method: 'POST',
@@ -110,11 +102,10 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                     {userLoggedIn ? 'Add Event' : 'Add New Event For Review'}
                   </Dialog.Title>
                   <label className='text-md font-semibold'>Where</label>
-                  <input
-                    className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
-                    name='venue'
-                    required
-                    placeholder='Cheesy Does It Pizzeria...'
+                  <VenueComboBox
+                    value={selectedVenue}
+                    onChange={setSelectedVenue}
+                    className='rounded-xl px-4 py-3 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
                   />
                   <label className='text-md font-semibold'>What</label>
                   <input
