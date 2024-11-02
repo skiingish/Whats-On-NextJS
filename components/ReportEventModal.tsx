@@ -107,14 +107,19 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                           as='h3'
                           className='text-base font-semibold leading-6 text-foreground dark:text-dark-text-foreground'
                         >
-                          Report Event - {event?.venue}
+                          Report Event -{' '}
+                          {typeof event?.venue === 'string'
+                            ? event.venue
+                            : event?.venue?.name}
                         </Dialog.Title>
                         <div
                           className='flex flex-wrap py-2 my-3 border-2 border-foreground rounded-xl text-foreground bg-white dark:bg-dark-foreground dark:text-dark-text-foreground'
                           key={event?.id}
                         >
                           <p className=' text-md tracking-wider font-bold px-6 py-2 whitespace-no-wrap'>
-                            {event?.venue}
+                            {typeof event?.venue === 'string'
+                              ? event.venue
+                              : event?.venue.name}
                           </p>
                           <p className='flex px-6 py-2 min-w-full'>
                             {event?.desc}
