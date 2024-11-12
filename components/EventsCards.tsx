@@ -38,53 +38,57 @@ const EventsCards: FC<EventsDisplayProps> = ({
           events?.map((event) => {
             return (
               <div
-                className='flex flex-wrap py-2 my-8 rounded-xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
+                className='flex flex-wrap py-2 my-4 rounded-xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
                 key={event.id}
               >
-                {event.is_favorite ? (
-                  <button
-                    className='group absolute right-[4.5rem] text-foreground content-center rounded-lg hover:bg-slate-500'
-                    onClick={() => {
-                      removeFavourite(event);
-                      refreshFavourites();
-                    }}
-                  >
-                    <Star className='p-1' fill='#8f56fc' size={32} />
-                    <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                      Favourite
-                    </span>
-                  </button>
-                ) : (
-                  <button
-                    className='group absolute right-[4.5rem] text-foreground content-center rounded-lg hover:bg-slate-500'
-                    onClick={() => {
-                      addFavourite(event);
-                      refreshFavourites();
-                    }}
-                  >
-                    <Star className='p-1' size={32} />
-                    <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                      Favourite
-                    </span>
-                  </button>
+                {event.venue && (
+                  <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
+                    {typeof event.venue === 'string'
+                      ? event.venue
+                      : event.venue.name}
+                  </p>
                 )}
+                <div className='px-4 flex'>
+                  {event.is_favorite ? (
+                    <button
+                      className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                      onClick={() => {
+                        removeFavourite(event);
+                        refreshFavourites();
+                      }}
+                    >
+                      <Star className='p-1' fill='#8f56fc' size={32} />
+                      <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
+                        Favourite
+                      </span>
+                    </button>
+                  ) : (
+                    <button
+                      className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                      onClick={() => {
+                        addFavourite(event);
+                        refreshFavourites();
+                      }}
+                    >
+                      <Star className='p-1' size={32} />
+                      <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
+                        Favourite
+                      </span>
+                    </button>
+                  )}
+                  <button
+                    className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                    onClick={() => {
+                      reportEvent(event);
+                    }}
+                  >
+                    <AlertCircle className='p-1' size={32} />
+                    <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
+                      Report
+                    </span>
+                  </button>
+                </div>
 
-                <button
-                  className='group absolute right-10 text-foreground content-center rounded-lg hover:bg-slate-500'
-                  onClick={() => {
-                    reportEvent(event);
-                  }}
-                >
-                  <AlertCircle className='p-1' size={32} />
-                  <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                    Report
-                  </span>
-                </button>
-                <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
-                  {typeof event.venue === 'string'
-                    ? event.venue
-                    : event.venue.name}
-                </p>
                 <p className='px-6 py-2 whitespace-no-wrap min-w-full'>
                   {event.desc}
                 </p>

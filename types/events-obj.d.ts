@@ -6,6 +6,7 @@ interface Venue {
   website?: string;
   latitude?: string;
   longitude?: string;
+  events?: Events[];
 }
 
 interface Events {

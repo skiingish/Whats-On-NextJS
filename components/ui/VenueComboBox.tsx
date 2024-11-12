@@ -69,6 +69,7 @@ export function VenueComboBox({
       setVenues([...venues, data]);
       onChange(data.id);
     } catch (error) {
+      toast.error('Error adding venue. Please try again.');
       console.error('Error adding venue:', error);
     }
   };
