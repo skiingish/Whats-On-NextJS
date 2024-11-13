@@ -4,6 +4,8 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
+export const dynamic = 'force-dynamic';
+
 // export const metadata: Metadata = {
 //   title: 'Specials Spotter',
 //   description: 'App to find the best specials in your area.',
