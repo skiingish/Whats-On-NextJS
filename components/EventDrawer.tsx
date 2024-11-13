@@ -43,7 +43,9 @@ const EventDrawer: FC<EventDrawerProps> = ({
               {children}
               <DrawerFooter>
                 <DrawerClose>
-                  <Button variant='default'>Close</Button>
+                  <button className='bg-btn-background hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full px-4 py-2 mb-2 w-full'>
+                    Close
+                  </button>
                 </DrawerClose>
               </DrawerFooter>
             </div>

@@ -14,6 +14,7 @@ interface Events {
   created_at: string;
   desc: string;
   venue: string | Venue;
+  venue_id?: number;
   when: string;
   special_price: string;
   event_time: string;

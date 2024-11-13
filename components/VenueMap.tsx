@@ -12,16 +12,19 @@ import EventsCards from './EventsCards';
 
 interface VenueMapProps {
   venues: Array<Venue> | null;
+  filteredEvents?: Events[] | undefined;
   user: any;
 }
 
-export default function VenueMap({ venues, user }: VenueMapProps) {
+export default function VenueMap({
+  venues,
+  filteredEvents,
+  user,
+}: VenueMapProps) {
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
-
-  console.log('VenueMap:', venues);
 
   const refreshFavourites = () => {
     console.log('refreshing favourites');
@@ -30,12 +33,16 @@ export default function VenueMap({ venues, user }: VenueMapProps) {
 
   const handleMarkerClick = (venue: Venue) => {
     setDrawerOpen(true);
-    console.log('handleMarkerClick');
     setSelectedVenue(venue);
-    console.log('Venue:', venue);
   };
 
   if (!venues) return <p>No Venues</p>;
+
+  if (filteredEvents) {
+    venues = venues.filter((venue) =>
+      filteredEvents.some((event) => event.venue_id === venue.id)
+    );
+  }
 
   // useEffect(() => {
   //   if (selectedVenue) {
@@ -46,7 +53,7 @@ export default function VenueMap({ venues, user }: VenueMapProps) {
   // Calculate center of all venues, or default to Newcastle, NSW
   const center = useMemo(() => {
     if (venues.length === 0) {
-      return { lat: -32.9283, lng: 151.7817 }; // Newcastle coordinates
+      return { lat: -37.84795481174561, lng: 144.97700103811715 }; // Newcastle coordinates
     }
 
     return {

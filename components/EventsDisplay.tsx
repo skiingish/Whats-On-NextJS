@@ -192,28 +192,35 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             </button>
           </div>
         </div>
-        {filteredSearchedEvents?.length === 0 ? (
-          <div className='px-8'>
-            <p className='text-foreground text-center text-2xl mb-4 mt-4 dark:text-dark-text-foreground'>
-              No Events Found
-            </p>
+
+        <div
+          className={`${
+            filteredSearchedEvents?.length === 0 ? 'block px-8' : 'hidden'
+          }`}
+        >
+          <p className='text-foreground text-center text-2xl mb-4 mt-4 dark:text-dark-text-foreground'>
+            No Events Found
+          </p>
+        </div>
+
+        <div className='px-8'>
+          <div className={`${showList ? 'block' : 'hidden'}`}>
+            <EventsCards
+              events={filteredSearchedEvents || []}
+              user={user}
+              refreshFavourites={refreshFavourites}
+            />
           </div>
-        ) : (
-          <div className='px-8'>
-            <div className={`${showList ? 'block' : 'hidden'}`}>
-              <EventsCards
-                events={filteredSearchedEvents || []}
+          <div className='py-4'>
+            <div className={`${showList ? 'hidden' : 'block'}`}>
+              <VenueMap
+                venues={venues}
+                filteredEvents={filteredSearchedEvents}
                 user={user}
-                refreshFavourites={refreshFavourites}
               />
             </div>
-            <div className='py-4'>
-              <div className={`${showList ? 'hidden' : 'block'}`}>
-                <VenueMap venues={venues} user={user} />
-              </div>
-            </div>
           </div>
-        )}
+        </div>
       </div>
     </>
   );
