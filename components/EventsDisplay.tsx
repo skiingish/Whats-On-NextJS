@@ -151,7 +151,11 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             <option value='sunday'>Sunday</option>
           </select>
         </div>
-        <div className='... sticky top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 dark:bg-dark-background text-foreground dark:text-dark-text-foreground z-10 border-b-2 border-foreground px-8'>
+        <div
+          className={`${
+            showList && 'sticky'
+          } ... top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 dark:bg-dark-background text-foreground dark:text-dark-text-foreground z-10 border-b-2 border-foreground px-8`}
+        >
           <label className='flex text-lg font-bold tracking-wider'>
             Search
           </label>
@@ -203,8 +207,8 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
           </p>
         </div>
 
-        <div className='px-8'>
-          <div className={`${showList ? 'block' : 'hidden'}`}>
+        <div>
+          <div className={`${showList ? 'block' : 'hidden'} px-8`}>
             <EventsCards
               events={filteredSearchedEvents || []}
               user={user}
@@ -212,7 +216,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             />
           </div>
           <div className='py-4'>
-            <div className={`${showList ? 'hidden' : 'block'}`}>
+            <div className={`${showList ? 'hidden' : 'block'} px-1 pb-6`}>
               <VenueMap
                 venues={venues}
                 filteredEvents={filteredSearchedEvents}
