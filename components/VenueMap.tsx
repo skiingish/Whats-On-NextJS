@@ -11,14 +11,17 @@ import EventDrawer from './EventDrawer';
 import EventsCards from './EventsCards';
 
 interface VenueMapProps {
-  venues: Array<Venue>;
+  venues: Array<Venue> | null;
   user: any;
 }
 
 export default function VenueMap({ venues, user }: VenueMapProps) {
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
   const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
+
+  console.log('VenueMap:', venues);
 
   const refreshFavourites = () => {
     console.log('refreshing favourites');
@@ -31,6 +34,8 @@ export default function VenueMap({ venues, user }: VenueMapProps) {
     setSelectedVenue(venue);
     console.log('Venue:', venue);
   };
+
+  if (!venues) return <p>No Venues</p>;
 
   // useEffect(() => {
   //   if (selectedVenue) {
@@ -69,7 +74,7 @@ export default function VenueMap({ venues, user }: VenueMapProps) {
   };
 
   return (
-    <>
+    <div className='h-[70vh] w-full rounded-xl border-2 border-foreground overflow-hidden'>
       <LoadScript
         googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
       >
@@ -118,6 +123,6 @@ export default function VenueMap({ venues, user }: VenueMapProps) {
           </>
         )}
       </EventDrawer>
-    </>
+    </div>
   );
 }

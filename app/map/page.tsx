@@ -19,9 +19,7 @@ export default async function MapPage() {
   return (
     <div className='container mx-auto px-4 py-8'>
       <h1 className='text-2xl font-bold mb-4'>Venue Map</h1>
-      <div className='h-[70vh] w-full rounded-xl border-2 border-foreground overflow-hidden'>
-        <VenueMap user={user} venues={venues || []} />
-      </div>
+      <VenueMap user={user} venues={venues || []} />
     </div>
   );
 }

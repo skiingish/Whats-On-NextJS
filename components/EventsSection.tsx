@@ -17,11 +17,17 @@ const EventsSection: FC<EventsSectionProps> = async ({ user }) => {
       )
     `);
 
+  const { data: venues } = await supabase
+    .from('venues')
+    .select('*, events(*)')
+    .not('latitude', 'is', null)
+    .not('longitude', 'is', null);
+
   if (!events) return null;
 
   return (
     <div>
-      <EventsDisplay events={events} user={user} />
+      <EventsDisplay events={events} venues={venues || []} user={user} />
     </div>
   );
 };

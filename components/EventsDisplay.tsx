@@ -2,17 +2,20 @@
 import { FC, useEffect, useState } from 'react';
 import EventsCards from './EventsCards';
 import { getFavourites } from '@/utils/favouritesHandler';
+import VenueMap from './VenueMap';
 export const dynamic = 'force-dynamic';
 
 interface EventsDisplayProps {
   events: Events[] | null | undefined;
+  venues: Array<Venue> | null;
   user: any;
 }
 
-const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
+const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
   let today = new Date().toLocaleString('en-us', { weekday: 'long' });
 
   const [activeList, setActiveList] = useState<string>('all');
+  const [showList, setShowList] = useState<boolean>(true);
 
   const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
 
@@ -164,27 +167,27 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
           />
           <div className='w-full h-12 relative -mb-[2px]'>
             <button
-              onClick={() => setActiveList('all')}
+              onClick={() => !showList && setShowList(true)}
               className={`absolute ${
-                activeList === 'all'
+                showList
                   ? 'w-[55%] z-10 h-[100%] bg-white dark:bg-dark-foreground'
                   : 'w-[50%] h-[90%] bg-stone-300 dark:bg-dark-background'
               } transition-all bottom-0 left-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
             >
               <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
-                All
+                List
               </p>
             </button>
             <button
-              onClick={() => setActiveList('favourites')}
+              onClick={() => showList && setShowList(false)}
               className={`absolute ${
-                activeList !== 'all'
+                !showList
                   ? 'left-[45%] w-[55%] h-[100%] bg-white z-10 dark:bg-dark-foreground'
                   : 'w-[50%] h-[90%] left-[50%] bg-stone-300 dark:bg-dark-background'
               } transition-all bottom-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
             >
               <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
-                Favourites
+                Map
               </p>
             </button>
           </div>
@@ -197,11 +200,18 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, user }) => {
           </div>
         ) : (
           <div className='px-8'>
-            <EventsCards
-              events={filteredSearchedEvents || []}
-              user={user}
-              refreshFavourites={refreshFavourites}
-            />
+            <div className={`${showList ? 'block' : 'hidden'}`}>
+              <EventsCards
+                events={filteredSearchedEvents || []}
+                user={user}
+                refreshFavourites={refreshFavourites}
+              />
+            </div>
+            <div className='py-4'>
+              <div className={`${showList ? 'hidden' : 'block'}`}>
+                <VenueMap venues={venues} user={user} />
+              </div>
+            </div>
           </div>
         )}
       </div>
