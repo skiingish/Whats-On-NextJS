@@ -71,7 +71,7 @@ export default function VenueMap({
 
   // Calculate center of all venues, or default to Melbourne
   const center = useMemo(() => {
-    if (venues.length === 0) {
+    if (!venues || venues.length === 0) {
       return { lat: -37.84795481174561, lng: 144.97700103811715 }; // Newcastle coordinates
     }
 
