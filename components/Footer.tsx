@@ -13,7 +13,7 @@ const Footer = ({}) => {
       <p className=' mb-4'>Thanks For Visiting</p>
       <Button
         onClick={() => setShowForm(true)}
-        className='bg-background dark:bg-dark-foreground dark:text-dark-text-foreground hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full px-4 py-2 mb-2 w-full lg:w-1/6'
+        className='bg-background dark:bg-dark-foreground dark:text-dark-text-foreground hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 mb-2 w-full lg:w-1/6'
       >
         Give Feedback
       </Button>
@@ -25,9 +25,9 @@ const Footer = ({}) => {
       >
         Sean Builds Things 👋
       </a>
-      <div className='mt-5'>
+      {/* <div className='mt-5'>
         <BuyMeACoffee />
-      </div>
+      </div> */}
     </div>
   );
 };

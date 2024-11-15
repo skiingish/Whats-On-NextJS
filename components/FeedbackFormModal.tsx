@@ -3,6 +3,7 @@ import { FC, Fragment, useRef, useState, FormEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from './ui/button';
 
 const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
 
@@ -145,20 +146,21 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                       <Loader2 className='animate-spin h-8 w-8 text-foreground' />
                     ) : (
                       <>
-                        <button
+                        <Button
                           type='submit'
-                          className={`inline-flex w-full justify-center px-3 py-2 text-sm font-semibold tracking-wide text-foreground shadow-sm bg-btn-background hover:bg-btn-background-hover border-foreground border-2 rounded-full sm:ml-3 sm:w-auto`}
+                          className='inline-flex w-full justify-center px-3 py-2 text-sm sm:ml-3 sm:w-auto'
                         >
                           Submit
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type='button'
-                          className='mt-3 inline-flex w-full justify-center rounded-full text-foreground dark:text-dark-text-foreground px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset border-foreground border-2 ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
+                          variant={'secondary'}
+                          className='mt-3 inline-flex w-full justify-center text-sm font-semibold border-foreground sm:mt-0 sm:w-auto'
                           onClick={() => setOpen(false)}
                           ref={cancelButtonRef}
                         >
                           Cancel
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>

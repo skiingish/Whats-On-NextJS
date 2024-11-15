@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { VenueComboBox } from './ui/VenueComboBox';
+import { Button } from './ui/button';
 
 const eventsSchema = z.object({
   venue: z.string(),
@@ -100,14 +101,14 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
               leaveFrom='opacity-100 translate-y-0 sm:scale-100'
               leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-xl border-4 border-foreground bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+              <Dialog.Panel className='relative transform overflow-hidden rounded-2xl border-4 border-foreground bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
                 <form
                   onSubmit={handleFormSubmit}
                   className='flex flex-col gap-1 max-w-4xl px-4 py-3 lg:py-8 text-foreground bg-background dark:bg-dark-foreground dark:text-dark-text-foreground'
                 >
                   <Dialog.Title
                     as='h2'
-                    className=' text-lg font-semibold leading-6 text-foreground dark:text-dark-text-foreground mb-2'
+                    className='text-lg font-semibold leading-6 text-foreground dark:text-dark-text-foreground mb-2'
                   >
                     {userLoggedIn ? 'Add Event' : 'Add New Event For Review'}
                   </Dialog.Title>
@@ -115,11 +116,11 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                   <VenueComboBox
                     value={selectedVenue}
                     onChange={setSelectedVenue}
-                    className='rounded-xl px-4 py-3 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
+                    className='rounded-2xl px-4 py-5 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
                   />
                   <label className='text-md font-semibold'>What</label>
                   <input
-                    className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
+                    className='rounded-2xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
                     name='desc'
                     required
                     placeholder='Cheap Tuesdays...'
@@ -128,13 +129,13 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                     Special $ Details (Optional)
                   </label>
                   <input
-                    className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
+                    className='rounded-2xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
                     name='special_price'
                     placeholder='$5 Cheese Pizzas...'
                   />
                   <label className='text-md font-semibold'>Time</label>
                   <input
-                    className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
+                    className='rounded-2xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
                     name='event_time'
                     required
                     placeholder='All day...'
@@ -222,20 +223,21 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                       <Loader2 className='animate-spin h-8 w-8 text-black' />
                     ) : (
                       <>
-                        <button
+                        <Button
                           type='submit'
-                          className='inline-flex w-full justify-center px-3 py-2 text-sm font-semibold tracking-wide text-foreground shadow-sm bg-btn-background hover:bg-btn-background-hover border-foreground border-2 rounded-full sm:ml-3 sm:w-auto'
+                          className='inline-flex w-full justify-center px-3 py-2 text-sm sm:ml-3 sm:w-auto'
                         >
                           Submit
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type='button'
-                          className='mt-3 inline-flex w-full justify-center rounded-full text-foreground dark:text-dark-text-foreground px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset border-foreground border-2 ring-gray-300 hover:bg-gray-50 hover:text-black sm:mt-0 sm:w-auto'
+                          variant={'secondary'}
+                          className='mt-3 inline-flex w-full justify-center text-sm font-semibold border-foreground sm:mt-0 sm:w-auto'
                           onClick={() => setOpen(false)}
                           ref={cancelButtonRef}
                         >
                           Cancel
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>

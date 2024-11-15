@@ -119,14 +119,16 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
     <>
       <div className='w-full'>
         <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground dark:text-dark-text-foreground px-8 -mb-3'>
-          <label className='text-lg font-bold tracking-wider'>Whats On</label>
+          <label className='text-lg font-bold tracking-wider ml-1'>
+            Whats On
+          </label>
           <select
             name='daysoftheweek'
             id='dayselector'
             className={
               animateSelector
-                ? 'animate-bounce rounded-2xl px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
-                : 'rounded-2xl px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                ? 'animate-bounce rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                : 'rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
             }
             style={{
               appearance: 'none',
@@ -156,7 +158,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             showList && 'sticky'
           } ... top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 dark:bg-dark-background text-foreground dark:text-dark-text-foreground z-10 border-b-2 border-foreground px-8`}
         >
-          <label className='flex text-lg font-bold tracking-wider'>
+          <label className='flex text-lg font-bold tracking-wider ml-1'>
             Search
           </label>
 

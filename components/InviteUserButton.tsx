@@ -1,8 +1,10 @@
+import { UserPlusIcon } from 'lucide-react';
+
 export default function InviteUserButton() {
   return (
     <form action='/invite' method='get'>
-      <button className='py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover'>
-        Invite
+      <button className='py-2 flex no-underline text-foreground tracking-wider dark:text-dark-text-foreground border-foreground max-h-10'>
+        Invite User <UserPlusIcon className='h-6 w-6 ml-2' />
       </button>
     </form>
   );

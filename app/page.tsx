@@ -68,16 +68,16 @@ export default async function Index() {
       <Navbar user={user} />
 
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
-        <div className='flex flex-col items-center mx-2 mb-2 lg:mb-8'>
+        <div className='flex flex-col items-center mx-2 lg:mb-8'>
           <p
             className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2 dark:text-dark-text-foreground`}
           >
-            <PawPrint size={48} className=' pr-1.5' /> {capitalize(subdomain)}{' '}
-            Specials!
+            {/* <PawPrint size={48} className=' pr-1.5' /> {capitalize(subdomain)}{' '} */}
+            Special Spotter!
           </p>
         </div>
         <Image
-          className='opacity-80 w-full lg:max-h-96 object-cover'
+          className='hidden lg:block opacity-80 w-full lg:max-h-96 object-cover'
           src={randomPicture}
           alt='Picture logo'
           placeholder='blur'

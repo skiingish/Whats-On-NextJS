@@ -38,7 +38,7 @@ const EventDrawer: FC<EventDrawerProps> = ({
     >
       <DrawerPortal>
         <DrawerTitle>{title}</DrawerTitle>
-        <DrawerContent className='bg-background dark:bg-dark-background text-foreground dark:text-dark-text-foreground flex flex-col rounded-t-[30px] mt-24 h-[80%] lg:h-[320px] fixed bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-0 lg:top-0 outline-none border-2 border-foreground'>
+        <DrawerContent className='bg-background dark:bg-dark-background text-foreground dark:text-dark-text-foreground flex flex-col rounded-t-[30px] mt-24 h-[60%] fixed bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-0 lg:top-0 lg:h-full outline-none border-2 border-foreground'>
           <div className='h-4 border-b-2 border-black'></div>
           <div className='px-4 py-2 rounded-t-[10px] flex-1 overflow-y-auto'>
             <div className='max-w-md mx-auto '>
@@ -49,9 +49,7 @@ const EventDrawer: FC<EventDrawerProps> = ({
               {children}
               <DrawerFooter>
                 <DrawerClose>
-                  <button className='bg-btn-background hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full px-4 py-2 mb-2 w-full'>
-                    Close
-                  </button>
+                  <Button className=' w-full'>Close</Button>
                 </DrawerClose>
               </DrawerFooter>
             </div>
