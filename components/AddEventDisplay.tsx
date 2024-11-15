@@ -1,6 +1,7 @@
 'use client';
 import { FC, useState } from 'react';
 import AddSpecialModal from './AddSpecialModal';
+import { Button } from './ui/button';
 
 interface AddEventDisplayProps {
   userStatus: string | null | undefined;
@@ -19,12 +20,9 @@ const AddEventDisplay: FC<AddEventDisplayProps> = ({
         setOpen={setShowForm}
         userLoggedIn={userStatus ? true : false}
       />
-      <button
-        onClick={() => setShowForm(true)}
-        className='bg-btn-background hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full px-4 py-2 mb-2 w-full'
-      >
+      <Button onClick={() => setShowForm(true)} className='w-full'>
         {userStatus ? 'Add New' : 'Something Missing?'}
-      </button>
+      </Button>
     </div>
   );
 };

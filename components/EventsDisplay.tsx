@@ -125,8 +125,8 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             id='dayselector'
             className={
               animateSelector
-                ? 'animate-bounce rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
-                : 'rounded-full px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                ? 'animate-bounce rounded-2xl px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                : 'rounded-2xl px-4 py-2.5 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
             }
             style={{
               appearance: 'none',
@@ -161,7 +161,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
           </label>
 
           <input
-            className='rounded-full px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-2 border-foreground mb-6 bg-background-secondary dark:bg-dark-foreground'
+            className='rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-2 border-foreground mb-6 bg-background-secondary dark:bg-dark-foreground'
             type='text'
             onChange={changeSpecialsSearch}
             id='search'
@@ -176,7 +176,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
                 showList
                   ? 'w-[55%] z-10 h-[100%] bg-white dark:bg-dark-foreground'
                   : 'w-[50%] h-[90%] bg-stone-300 dark:bg-dark-background'
-              } transition-all bottom-0 left-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
+              } transition-all bottom-0 left-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-black justify-center items-center inline-flex`}
             >
               <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
                 List
@@ -188,7 +188,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
                 !showList
                   ? 'left-[45%] w-[55%] h-[100%] bg-white z-10 dark:bg-dark-foreground'
                   : 'w-[50%] h-[90%] left-[50%] bg-stone-300 dark:bg-dark-background'
-              } transition-all bottom-0 rounded-tl-[15px] rounded-tr-[15px] border-2 border-black justify-center items-center inline-flex`}
+              } transition-all bottom-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-black justify-center items-center inline-flex`}
             >
               <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
                 Map
@@ -216,7 +216,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             />
           </div>
           <div className='py-4'>
-            <div className={`${showList ? 'hidden' : 'block'} px-1 pb-6`}>
+            <div className={`${showList ? 'hidden' : 'block'} px-2 pb-6`}>
               <VenueMap
                 venues={venues}
                 filteredEvents={filteredSearchedEvents}

@@ -38,7 +38,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
           events?.map((event) => {
             return (
               <div
-                className='flex flex-wrap py-2 my-4 rounded-xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
+                className='flex flex-wrap py-2 my-4 rounded-2xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
                 key={event.id}
               >
                 {event.venue && (

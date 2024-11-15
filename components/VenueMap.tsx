@@ -104,7 +104,7 @@ export default function VenueMap({
   };
 
   return (
-    <div className='h-[70vh] w-full rounded-xl border-2 border-foreground overflow-hidden'>
+    <div className='h-[70vh] w-full rounded-2xl border-2 border-foreground overflow-hidden'>
       <LoadScript
         googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
       >
