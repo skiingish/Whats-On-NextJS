@@ -20,9 +20,11 @@ const AddEventDisplay: FC<AddEventDisplayProps> = ({
         setOpen={setShowForm}
         userLoggedIn={userStatus ? true : false}
       />
-      <Button onClick={() => setShowForm(true)} className='w-full'>
-        {userStatus ? 'Add New' : 'Something Missing?'}
-      </Button>
+      <div className='flex justify-center'>
+        <Button onClick={() => setShowForm(true)} className='w-1/2 lg:w-1/3'>
+          {userStatus ? 'Add New Event' : 'Something Missing?'}
+        </Button>
+      </div>
     </div>
   );
 };

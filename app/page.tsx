@@ -73,7 +73,7 @@ export default async function Index() {
             className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2 dark:text-dark-text-foreground`}
           >
             {/* <PawPrint size={48} className=' pr-1.5' /> {capitalize(subdomain)}{' '} */}
-            Special Spotter!
+            Specials Spotter!
           </p>
         </div>
         <Image

@@ -10,10 +10,12 @@ const Footer = ({}) => {
   return (
     <div className='w-full py-8 bg-orange-500 px-8 lg:py-8 border-t-2 border-foreground gap-4'>
       <FeedBackFormModal open={showForm} setOpen={setShowForm} />
-      <p className=' mb-4'>Thanks For Visiting</p>
+      <p className=' mb-4'>Thanks For Visiting!</p>
+
       <Button
+        variant={'outline'}
+        className='w-[8rem]'
         onClick={() => setShowForm(true)}
-        className='bg-background dark:bg-dark-foreground dark:text-dark-text-foreground hover:bg-btn-background-hover font-semibold tracking-wide text-foreground border-foreground border-2 mb-2 w-full lg:w-1/6'
       >
         Give Feedback
       </Button>
