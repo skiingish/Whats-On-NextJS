@@ -3,11 +3,8 @@ import { FC, Fragment, useRef, useState, FormEvent, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  VenueComboBox,
-  isNewVenue,
-  newVenueName,
-} from './ui/VenueComboBox';
+import { VenueComboBox } from './ui/VenueComboBox';
+import { isNewVenue, newVenueName } from '@/lib/venue-selection';
 import { Button } from './ui/button';
 
 const eventsSchema = z.object({

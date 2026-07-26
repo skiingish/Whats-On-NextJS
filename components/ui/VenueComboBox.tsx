@@ -4,23 +4,13 @@ import { useEffect, useState } from 'react';
 import { Combobox } from './combobox';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'sonner';
+import { makeNewVenueValue } from '@/lib/venue-selection';
 
 interface Venue {
   id: string;
   name: string;
   // add other venue properties as needed
 }
-
-// Only admins can create venues. When a visitor names a venue we don't know
-// about yet, the name rides along on the pending submission instead of
-// becoming a live venue row, so the combobox value carries the raw name behind
-// this prefix rather than an id.
-const NEW_VENUE_PREFIX = 'new:';
-
-export const isNewVenue = (value: string) => value.startsWith(NEW_VENUE_PREFIX);
-
-export const newVenueName = (value: string) =>
-  value.slice(NEW_VENUE_PREFIX.length);
 
 interface VenueComboBoxProps {
   value: string;
@@ -70,7 +60,7 @@ export function VenueComboBox({
     ...(proposedVenue
       ? [
           {
-            value: NEW_VENUE_PREFIX + proposedVenue,
+            value: makeNewVenueValue(proposedVenue),
             label: `${proposedVenue} (new)`,
           },
         ]
@@ -85,7 +75,7 @@ export function VenueComboBox({
     // submission and let the admin create the venue when they approve it.
     if (!canCreateVenue) {
       setProposedVenue(venueName);
-      onChange(NEW_VENUE_PREFIX + venueName);
+      onChange(makeNewVenueValue(venueName));
       toast.success(`"${venueName}" will be added once your event is approved`);
       return;
     }

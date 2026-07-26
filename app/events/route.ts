@@ -1,6 +1,7 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { parseVenueSelection } from '@/lib/venue-selection';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,19 +18,19 @@ export async function POST(request: Request) {
     // Either an existing venue's id, or a name the submitter typed for a venue
     // we don't have yet. Only admins may create venues, so an unknown name is
     // carried on the pending row until someone approves it.
-    const rawVenueId = String(formData.get('venue_id') ?? '').trim();
-    const venue_id = rawVenueId === '' ? null : Number(rawVenueId);
-    const venue_name = String(formData.get('venue_name') ?? '').trim() || null;
+    const selection = parseVenueSelection(formData);
 
-    if (venue_id === null && venue_name === null) {
+    if (!selection.ok) {
       return NextResponse.redirect(
-        `${requestUrl.origin}?message=Please choose or name a venue`,
+        `${requestUrl.origin}?message=${encodeURIComponent(selection.error)}`,
         {
           // a 301 status is required to redirect from a POST to a GET route
           status: 301,
         }
       );
     }
+
+    const { venue_id, venue_name } = selection;
 
     // Use getAll to retrieve all selected days
     const selectedDays = formData.getAll('days');
