@@ -3,7 +3,11 @@ import { FC, Fragment, useRef, useState, FormEvent, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { VenueComboBox } from './ui/VenueComboBox';
+import {
+  VenueComboBox,
+  isNewVenue,
+  newVenueName,
+} from './ui/VenueComboBox';
 import { Button } from './ui/button';
 
 const eventsSchema = z.object({
@@ -43,7 +47,15 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
 
     try {
       const formData = new FormData(e.currentTarget);
-      formData.set('venue_id', selectedVenue);
+
+      // A venue the visitor named themselves doesn't exist yet, so send the
+      // name rather than an id and let an admin create it on approval.
+      if (isNewVenue(selectedVenue)) {
+        formData.delete('venue_id');
+        formData.set('venue_name', newVenueName(selectedVenue));
+      } else {
+        formData.set('venue_id', selectedVenue);
+      }
 
       const response = await fetch('/events', {
         method: 'POST',
@@ -116,6 +128,7 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                   <VenueComboBox
                     value={selectedVenue}
                     onChange={setSelectedVenue}
+                    canCreateVenue={!!userLoggedIn}
                     className='rounded-2xl px-4 py-5 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
                   />
                   <label className='text-md font-semibold'>What</label>

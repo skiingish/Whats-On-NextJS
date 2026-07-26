@@ -1,5 +1,3 @@
-insert into todos(title)
-values
-  ('Create Supabase project'),
-  ('Create Next.js app from Supabase Starter template'),
-  ('Keep building cool stuff!');
+-- Seed data for local development.
+-- The project was restarted with an empty database; add sample venues/events
+-- here as needed. Runs after all migrations on `supabase db reset`.
