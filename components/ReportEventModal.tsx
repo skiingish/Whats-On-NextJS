@@ -165,7 +165,7 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                                 setIssue(e.target.value);
                               }}
                             >
-                              <option value='notvaild'>Doesn't Exist</option>
+                              <option value='notvaild'>Doesn&apos;t Exist</option>
                               <option value='missinginfo'>
                                 Incorrect Info
                               </option>

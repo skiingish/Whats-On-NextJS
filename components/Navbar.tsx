@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import Link from 'next/link';
 import LogoutButton from '../components/LogoutButton';
-import InviteUserButton from '@/components/InviteUserButton';
 import InstallAppButton from '@/components/InstallAppButton';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Button } from './ui/button';
@@ -50,7 +49,6 @@ const Navbar: FC<NavbarProps> = async ({ user }) => {
                     Hey, {user.email}{' '}
                   </p>
                   <LogoutButton />
-                  <InviteUserButton />
                 </>
               )}
             </div>

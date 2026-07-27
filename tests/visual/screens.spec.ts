@@ -271,11 +271,7 @@ test('login', async ({ page }) => {
   await expect(page).toHaveScreenshot('login.png');
 });
 
-test('sign-up', async ({ page }) => {
-  await page.goto('/sign-up');
-
-  await expect(page.locator('input[name="email"]')).toBeVisible();
-  await expect(page.locator('input[name="password"]')).toBeVisible();
-
-  await expect(page).toHaveScreenshot('sign-up.png');
-});
+// The /sign-up screen was removed with the invite flow (backlog D11). It was
+// only reachable via a JWT invite link that could never be generated, since
+// JWT_SECRET was never set. Admin accounts are created in the Supabase
+// dashboard now, so there is no public signup page left to capture.

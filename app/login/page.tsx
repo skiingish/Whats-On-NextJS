@@ -59,12 +59,6 @@ export default function Login() {
         <button className='bg-btn-background hover:bg-btn-background-hover px-4 py-2 font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full mb-2'>
           Sign In
         </button>
-        {/* <button
-          formAction='/auth/sign-up'
-          className='border border-gray-700 rounded px-4 py-2 text-white mb-2'
-        >
-          Sign Up
-        </button> */}
         <Messages />
       </form>
     </div>
