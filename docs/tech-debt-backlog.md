@@ -55,6 +55,12 @@ delete. Fence this before building any venue UI.
 ### D2. There is no way to create the first admin without leaving signup open
 **Infrastructure · Impact 4 · Risk 5 · Effort 2 · Priority 36**
 
+**Partially done (2026-07-27):** `supabase/config.toml` now exists and
+version-controls `enable_signup = false` for local `supabase start`. It does
+not, and cannot, change the hosted project's signup toggle — that's a
+separate manual step in the Supabase dashboard. Creating the first admin via
+`auth.admin.createUser` is still outstanding.
+
 `auth.users` is empty. The access model rests entirely on accounts being
 handed out deliberately — but the only mechanism that can create one is the
 public signup form, which has to be disabled for the model to hold. Disable it
@@ -109,6 +115,26 @@ than drilling once the admin UI adds consumers.
 
 ### D6. ESLint is installed but completely inert
 **Infrastructure · Impact 3 · Risk 3 · Effort 1 · Priority 30**
+
+**Done (2026-07-27), with a wrinkle:** `eslint.config.mjs` and a `lint`
+script exist and `npm run lint` finds real issues (see below). It does
+**not** `extend eslint-config-next` as originally planned — that import
+chain requires the `typescript-eslint` package, which throws synchronously
+under TypeScript 7 (`typescript-eslint does not support TS 7.0`,
+https://github.com/typescript-eslint/typescript-eslint/issues/10940), and
+bypassing that guard just fails one layer deeper in
+`@typescript-eslint/typescript-estree` (`ts.Extension.Cjs` doesn't exist on
+TS 7's API). The config instead hand-assembles the same plugins
+eslint-config-next itself uses (`eslint-plugin-react`,
+`eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `eslint-plugin-import`,
+`@next/eslint-plugin-next`) with the same merged rule set, parsed via a
+current `@babel/eslint-parser` (Next's own vendored parser export predates
+ESLint 10's scope-manager API and crashes on every file; `next/babel` in
+turn predates `@babel/core` 8 and had to be swapped for
+`@babel/preset-react` + `@babel/preset-typescript`). See the comments at the
+top of `eslint.config.mjs` for the full chain. Revert to
+`eslint-config-next/core-web-vitals` once typescript-eslint ships TS 7
+support.
 
 `eslint` and `eslint-config-next` are both dependencies, but there is no
 `eslint.config.*` or `.eslintrc*` anywhere and no `lint` script. Nothing has
@@ -175,6 +201,16 @@ raw Vercel function logs — no aggregation, no alerting, no fallback UI.
 ### D11. The invite feature is broken and visible to users right now
 **Code · Impact 3 · Risk 4 · Effort 2 · Priority 28**
 
+**Done (2026-07-27):** `app/invite/`, `app/sign-up/`, `app/auth/sign-up/`,
+`app/auth/generate-invite/`, `components/InviteUserButton.tsx` deleted, its
+usage removed from `components/Navbar.tsx`, and `jsonwebtoken` +
+`@types/jsonwebtoken` dropped from `package.json`. Two dangling references
+found but not fixed (out of file-ownership scope): `app/login/page.tsx:61`
+has a commented-out `formAction='/auth/sign-up'` button (dead, but should be
+deleted); `tests/visual/screens.spec.ts:274-280` has a Playwright test that
+navigates to `/sign-up` and screenshots it, which will now fail whenever
+that suite runs.
+
 Every signed-in user sees an "Invite User" button in the nav. It routes to
 `/invite` → `/auth/generate-invite`, which throws immediately because
 `JWT_SECRET` is unset, and redirects to a generic error. The downstream
@@ -193,6 +229,10 @@ an admin. Do not fix this by setting `JWT_SECRET`.
 
 ### D12. No CI
 **Infrastructure · Impact 5 · Risk 4 · Effort 3 · Priority 27**
+
+**Done (2026-07-27):** `.github/workflows/ci.yml` runs `npm ci`,
+`npm run typecheck`, `npm run lint` and `npm test` on pull requests and
+pushes. Playwright is deliberately left out, per D14/D12's own note.
 
 No `.github/` directory. Because `experimental.useTypeScriptCli` is set, a
 Vercel deploy does typecheck as a side effect of `next build` — but that is the
@@ -228,6 +268,14 @@ mistaken for functional coverage.
 ### D15. Dead code sweep
 **Code · Impact 3 · Risk 2 · Effort 1 · Priority 25**
 
+**Done (2026-07-27):** all six paths below deleted (re-verified unreferenced
+by grep before deleting). `app/page.tsx`'s `getSubdomainFromUrl`,
+`capitalize`, the `PawPrint` import, the call site, and the commented-out
+JSX at the old line 75 are all removed, along with the commented-out
+`RainingBurgers` import/usage. `EventsDisplay.tsx:17`'s unreachable
+`setActiveList` branch is **not** touched — that file is owned by another
+agent in this pass.
+
 Verified unreferenced by repo-wide grep:
 
 | Path | Origin |
@@ -251,18 +299,18 @@ unreachable.
 | ID | Item | Cat | Pri |
 |---|---|---|---|
 | D17 | `ReportEventModal.tsx:34-37` throws before the `try`, leaving the spinner stuck with no reachable Cancel | Code | 25 |
-| D18 | `public/sitemap.xml` is invalid XML (malformed prolog, HTML comment before the document) and lists only `/` with a 2023 `lastmod` | Doc | 25 |
-| D19 | No `.env.example`; `JWT_SECRET` is required by two routes and set nowhere, failing invisibly inside a try/catch | Infra | 24 |
+| D18 | **Done 2026-07-27.** `public/sitemap.xml` is invalid XML (malformed prolog, HTML comment before the document) and lists only `/` with a 2023 `lastmod` | Doc | 25 |
+| D19 | **Done 2026-07-27.** No `.env.example`; `JWT_SECRET` is required by two routes and set nowhere, failing invisibly inside a try/catch | Infra | 24 |
 | D20 | `EventsDisplay.tsx:60-97` mutates prop objects and the prop array, and re-sorts/filters on every keystroke unmemoized | Code | 24 |
 | D21 | `venues.name` is uniquely indexed case- and whitespace-sensitively, but the publish path inserts unnormalised while the planned approve RPC normalises — "The Local" and "the local " become two venues | Code | 24 |
 | D22 | `EventsCards.tsx:112` renders an Edit button with no handler on every card | Code | 21 |
 | D23 | The auth/invite routes — the actual authorisation boundary — have zero test coverage | Test | 21 |
-| D24 | `proxy.ts` has no `config.matcher`, so every request including static assets triggers a `getUser()` round trip | Infra | 20 |
-| D25 | README is 7 lines with no env vars, scripts, or pointers to the migrations and test suites; no CLAUDE.md | Doc | 20 |
+| D24 | **Done 2026-07-27.** `proxy.ts` has no `config.matcher`, so every request including static assets triggers a `getUser()` round trip | Infra | 20 |
+| D25 | **Done 2026-07-27.** README is 7 lines with no env vars, scripts, or pointers to the migrations and test suites; no CLAUDE.md | Doc | 20 |
 | D26 | Validation is inconsistent — `AddSpecialModal` defines a Zod schema it never parses; the two modals that do validate surface `error.message`, the raw JSON issues array | Code | 20 |
 | D27 | `dayformatter`'s separator bug is pinned by tests rather than fixed — the two collapse branches have never fired in production | Code | 16 |
 | D28 | `EventDrawer.tsx:30` reads `window.innerWidth` in the render body, never recomputes, and risks a hydration mismatch | Code | 16 |
-| D29 | `bun.lockb` predates the entire Next 13→16 upgrade; npm is canonical | Dep | 15 |
+| D29 | **Done 2026-07-27.** `bun.lockb` predates the entire Next 13→16 upgrade; npm is canonical | Dep | 15 |
 | D30 | `"when"` stores multiple days as one space-joined string — no index-backed "what's on today" query is possible | Arch | 12 |
 
 ---

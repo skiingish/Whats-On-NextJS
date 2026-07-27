@@ -1,7 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { headers } from 'next/headers';
 import AddEventDisplay from '@/components/AddEventDisplay';
-import { PawPrint } from 'lucide-react';
 import Image from 'next/image';
 
 import localFont from 'next/font/local';
@@ -20,7 +18,6 @@ import skistore from '../public/assets/skistore_1280.jpg';
 import Footer from '@/components/Footer';
 import EventsSection from '@/components/EventsSection';
 import Navbar from '@/components/Navbar';
-import RainingBurgers from '@/components/RainingAnimatation';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,24 +32,7 @@ const pictures = [
   skistore,
 ];
 
-const getSubdomainFromUrl = (url: string | null) => {
-  if (!url) return '';
-  const u = 'https://jasper.specials-spotter.com/';
-  const subdomain = u.split('://')[1].split('.')[0];
-  console.log(subdomain);
-  return subdomain;
-};
-
-// Capitalize the first letter of a string.
-const capitalize = (s: string) => {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-};
-
 export default async function Index() {
-  const headersList = await headers();
-  const url = headersList.get('referer');
-  const subdomain = getSubdomainFromUrl(url);
-
   const supabase = await createClient();
 
   const {
@@ -64,7 +44,6 @@ export default async function Index() {
 
   return (
     <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background dark:bg-dark-background'>
-      {/* <RainingBurgers /> */}
       <Navbar user={user} />
 
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
@@ -72,7 +51,6 @@ export default async function Index() {
           <p
             className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2 dark:text-dark-text-foreground`}
           >
-            {/* <PawPrint size={48} className=' pr-1.5' /> {capitalize(subdomain)}{' '} */}
             Specials Spotter!
           </p>
         </div>
