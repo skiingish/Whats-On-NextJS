@@ -37,6 +37,7 @@ export default function Login() {
         </label>
         <input
           className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-foreground mb-6'
+          id='email'
           name='email'
           placeholder='you@example.com'
           required
@@ -49,6 +50,7 @@ export default function Login() {
         </label>
         <input
           className='rounded-xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-foreground mb-6'
+          id='password'
           type='password'
           name='password'
           placeholder='••••••••'

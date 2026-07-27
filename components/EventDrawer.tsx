@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   Drawer,
   DrawerClose,
@@ -27,7 +27,20 @@ const EventDrawer: FC<EventDrawerProps> = ({
   title = '',
   children,
 }) => {
-  const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+  // Match Tailwind's `lg` breakpoint via matchMedia rather than reading
+  // window.innerWidth once in the render body — that read only happened at
+  // mount (risking a server/client hydration mismatch) and never updated on
+  // resize. Same pattern VenueMap uses for its dark-mode media query.
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 1024px)');
+    const sync = () => setIsDesktop(query.matches);
+
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
 
   return (
     <Drawer

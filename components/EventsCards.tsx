@@ -5,10 +5,11 @@ import { addFavourite, removeFavourite } from '@/utils/favouritesHandler';
 import { FC, use, useState, useEffect } from 'react';
 export const dynamic = 'force-dynamic';
 import { CalendarDays, Clock, Flag, AlertCircle, Star } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 
 interface EventsDisplayProps {
   events: Events[] | null;
-  user: any;
+  user: User | null;
   refreshFavourites: () => void;
 }
 
@@ -107,12 +108,11 @@ const EventsCards: FC<EventsDisplayProps> = ({
                   <Clock className='pr-1.5' /> {event.event_time}
                 </p>
                 {user ? (
+                  // Edit button removed (D22): there is no edit flow built
+                  // yet, and admin inline editing is planned for Phase 5 of
+                  // the admin plan. A dead button here would only look
+                  // broken to a logged-in user.
                   <div className='flex' style={{ minWidth: '100%' }}>
-                    <div className='px-6 py-2 whitespace-no-wrap'>
-                      <button className=' bg-yellow-600 hover:bg-yellow-400 rounded px-4 py-2 text-white mb-2'>
-                        Edit
-                      </button>
-                    </div>
                     <div className='px-6 py-2 whitespace-no-wrap'>
                       <DeleteItemButton id={event.id} />
                     </div>

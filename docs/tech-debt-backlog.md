@@ -84,7 +84,7 @@ generic message, so there are two contradictory error contracts in one file.
 
 ## Tier 2 — cheap fixes with real leverage
 
-### D4. Delete is unguarded and fails silently
+### D4. Delete is unguarded and fails silently — Fixed
 **Code · Impact 3 · Risk 4 · Effort 1 · Priority 35**
 
 `components/DeleteItemButton.tsx:17-19` — no confirmation step, and on error it
@@ -95,8 +95,16 @@ propagates if not fixed first.
 
 *Fix:* confirmation dialog plus an error toast mirroring the success path.
 
-### D5. `user: any` in every component that gates admin UI
+### D5. `user: any` in every component that gates admin UI — Partially fixed
 **Code · Impact 4 · Risk 4 · Effort 2 · Priority 32**
+
+**Status:** `EventsDisplay.tsx`, `EventsSection.tsx`, `EventsCards.tsx` and
+`VenueMap.tsx` now type `user` as `User | null` from `@supabase/supabase-js`.
+`Navbar.tsx` and the call sites in `app/page.tsx` are out of scope for this
+pass (owned by another agent / off-limits respectively) — still `any` there.
+`app/page.tsx:89` still passes `user?.aud` to `AddEventDisplay` as the signal
+for "is this an admin"; that call site needs to change to something like
+`!!user` (or a real role once one exists) by whoever owns `app/page.tsx`.
 
 Six independent `any` declarations for the single value that authorises
 destructive actions: `EventsDisplay.tsx:11`, `EventsSection.tsx:6`,
@@ -117,8 +125,21 @@ dependency violations are exactly what a linter catches.
 
 *Fix:* `eslint.config.mjs` extending `eslint-config-next`, plus a `lint` script.
 
-### D7. Labels are not associated with their inputs
+### D7. Labels are not associated with their inputs — Mostly fixed
 **Code · Impact 3 · Risk 3 · Effort 1 · Priority 30**
+
+**Status:** Fixed in `app/login/page.tsx` (both email and password — the
+password input was missing an `id` too, not just email as originally
+scoped), `AddSpecialModal.tsx`, `ReportEventModal.tsx` and
+`FeedbackFormModal.tsx` (same defect, not explicitly named here but present).
+`app/sign-up/page.tsx` is untouched — that tree is being deleted by another
+agent per D11. The day-toggle switches in `AddSpecialModal` were checked:
+each `sr-only peer` checkbox is already wrapped by its `<label>`, so it has
+an implicit accessible name and remains keyboard-reachable (`sr-only` hides
+visually, not from the accessibility tree or tab order) — no change needed
+there. One label (`AddSpecialModal`'s "Where", paired with `VenueComboBox`)
+is still unassociated: the combobox trigger in `components/ui/combobox.tsx`
+exposes no `id`, and that file is out of scope for this pass.
 
 `app/login/page.tsx:35` has `htmlFor='email'` but the input at line 40 carries
 only `name='email'` — no `id`. Same defect on `app/sign-up/page.tsx`, and the
@@ -250,18 +271,18 @@ unreachable.
 
 | ID | Item | Cat | Pri |
 |---|---|---|---|
-| D17 | `ReportEventModal.tsx:34-37` throws before the `try`, leaving the spinner stuck with no reachable Cancel | Code | 25 |
+| D17 | ~~`ReportEventModal.tsx:34-37` throws before the `try`, leaving the spinner stuck with no reachable Cancel~~ **Fixed** — guard moved before `setLoading(true)`, returns early instead of throwing | Code | 25 |
 | D18 | `public/sitemap.xml` is invalid XML (malformed prolog, HTML comment before the document) and lists only `/` with a 2023 `lastmod` | Doc | 25 |
 | D19 | No `.env.example`; `JWT_SECRET` is required by two routes and set nowhere, failing invisibly inside a try/catch | Infra | 24 |
-| D20 | `EventsDisplay.tsx:60-97` mutates prop objects and the prop array, and re-sorts/filters on every keystroke unmemoized | Code | 24 |
+| D20 | ~~`EventsDisplay.tsx:60-97` mutates prop objects and the prop array, and re-sorts/filters on every keystroke unmemoized~~ **Fixed** — derives into new arrays via a chain of `useMemo`s, props untouched | Code | 24 |
 | D21 | `venues.name` is uniquely indexed case- and whitespace-sensitively, but the publish path inserts unnormalised while the planned approve RPC normalises — "The Local" and "the local " become two venues | Code | 24 |
-| D22 | `EventsCards.tsx:112` renders an Edit button with no handler on every card | Code | 21 |
+| D22 | ~~`EventsCards.tsx:112` renders an Edit button with no handler on every card~~ **Fixed** — button removed (Phase 5 of the admin plan builds real editing) | Code | 21 |
 | D23 | The auth/invite routes — the actual authorisation boundary — have zero test coverage | Test | 21 |
 | D24 | `proxy.ts` has no `config.matcher`, so every request including static assets triggers a `getUser()` round trip | Infra | 20 |
 | D25 | README is 7 lines with no env vars, scripts, or pointers to the migrations and test suites; no CLAUDE.md | Doc | 20 |
-| D26 | Validation is inconsistent — `AddSpecialModal` defines a Zod schema it never parses; the two modals that do validate surface `error.message`, the raw JSON issues array | Code | 20 |
+| D26 | ~~Validation is inconsistent — `AddSpecialModal` defines a Zod schema it never parses; the two modals that do validate surface `error.message`, the raw JSON issues array~~ **Fixed** — `AddSpecialModal` now parses its schema (and its stray unused `set` import is gone); all three modals show `z.prettifyError(result.error)` and return early on failure instead of double-toasting (validation toast + generic catch-all toast) | Code | 20 |
 | D27 | `dayformatter`'s separator bug is pinned by tests rather than fixed — the two collapse branches have never fired in production | Code | 16 |
-| D28 | `EventDrawer.tsx:30` reads `window.innerWidth` in the render body, never recomputes, and risks a hydration mismatch | Code | 16 |
+| D28 | ~~`EventDrawer.tsx:30` reads `window.innerWidth` in the render body, never recomputes, and risks a hydration mismatch~~ **Fixed** — now uses a `matchMedia('(min-width: 1024px)')` listener, same pattern as `VenueMap`'s dark-mode query | Code | 16 |
 | D29 | `bun.lockb` predates the entire Next 13→16 upgrade; npm is canonical | Dep | 15 |
 | D30 | `"when"` stores multiple days as one space-joined string — no index-backed "what's on today" query is possible | Arch | 12 |
 

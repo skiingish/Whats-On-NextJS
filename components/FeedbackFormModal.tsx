@@ -22,24 +22,26 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    setLoading(true);
     e.preventDefault();
 
+    const formData = new FormData(e.currentTarget);
+
+    // Validate the form data before showing a spinner for a request we're
+    // not going to send.
+    const result = await feedbackSchema.safeParseAsync({
+      name: formData.get('name'),
+      email: formData.get('email'),
+      message: formData.get('message'),
+    });
+
+    if (!result.success) {
+      toast.error(z.prettifyError(result.error));
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const formData = new FormData(e.currentTarget);
-
-      // Validate the form data.
-      const result = await feedbackSchema.safeParseAsync({
-        name: formData.get('name'),
-        email: formData.get('email'),
-        message: formData.get('message'),
-      });
-
-      if (!result.success) {
-        toast.error(result.error.message);
-        throw new Error(result.error.message);
-      }
-
       const response = await fetch('/feedback', {
         method: 'POST',
         body: formData,
@@ -100,7 +102,10 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                         </Dialog.Title>
                         <div className='mt-6'>
                           <div className='flex flex-col w-full justify-center'>
-                            <label className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
+                            <label
+                              className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'
+                              htmlFor='name'
+                            >
                               Whats Your Name? (Optional)
                             </label>
                             <input
@@ -109,7 +114,10 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                               className='w-full my-3 px-2 py-3.5 font-semibold border-foreground rounded-xl text-foreground border-2 bg-white dark:bg-dark-foreground dark:text-dark-text-foreground '
                               placeholder='Frankie Loves Pizzas...'
                             ></input>
-                            <label className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
+                            <label
+                              className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'
+                              htmlFor='email'
+                            >
                               Where Shall I Email A Reply? (Optional)
                             </label>
                             <input
@@ -119,9 +127,12 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                               type='email'
                               placeholder='frankie@pizzalovers.com...'
                             ></input>
-                            <p className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
+                            <label
+                              className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'
+                              htmlFor='message'
+                            >
                               Whats Your Message?
-                            </p>
+                            </label>
                             <textarea
                               name='message'
                               id='message'
