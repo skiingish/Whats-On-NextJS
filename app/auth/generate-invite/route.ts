@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
@@ -8,11 +7,15 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   const requestUrl = new URL(request.url);
   try {
-    // Make sure the user is logged in before continuing.
-    const supabase = createRouteHandlerClient({ cookies });
-    let session = await supabase.auth.getSession();
+    // Make sure the user is logged in before continuing. This gates invite
+    // creation, so it's an authorization decision — getUser() revalidates
+    // the token against the Auth server rather than trusting the cookie.
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session.data.session) {
+    if (!user) {
       return NextResponse.redirect(
         `${requestUrl.origin}/login?error=You must be logged in to invite users`,
         {
@@ -27,11 +30,9 @@ export async function POST(request: Request) {
     }
 
     // Create JWT invite token with 7 day expiry
-    const token = jwt.sign(
-      { data: session.data.session?.user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = jwt.sign({ data: user.id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
     return NextResponse.redirect(`${requestUrl.origin}/invite?token=${token}`, {
       // a 301 status is required to redirect from a POST to a GET route

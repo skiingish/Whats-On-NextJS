@@ -1,14 +1,13 @@
 import { FC } from 'react';
 import EventsDisplay from './EventsDisplay';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 
 interface EventsSectionProps {
   user: any;
 }
 
 const EventsSection: FC<EventsSectionProps> = async ({ user }) => {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
 
   let { data: events } = await supabase.from('events').select(`
       *,

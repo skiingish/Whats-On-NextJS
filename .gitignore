@@ -51,3 +51,6 @@ _examples
 **/public/worker-*.js.map
 public/sw.js
 public/workbox-*.js
+
+# Claude Code local state and agent worktrees
+.claude/

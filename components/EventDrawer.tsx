@@ -48,7 +48,10 @@ const EventDrawer: FC<EventDrawerProps> = ({
               /> */}
               {children}
               <DrawerFooter>
-                <DrawerClose>
+                {/* asChild merges the close trigger into the Button. Without
+                    it, DrawerClose renders its own <button> around Button's,
+                    which is invalid HTML and trips React 19's DOM validation. */}
+                <DrawerClose asChild>
                   <Button className=' w-full'>Close</Button>
                 </DrawerClose>
               </DrawerFooter>

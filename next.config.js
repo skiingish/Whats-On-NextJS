@@ -24,6 +24,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // intentionally left out here rather than "fixed" — that preserves the
 // default extensions that were actually in effect all along and keeps the
 // build green.
-const nextConfig = withBundleAnalyzer({});
+const nextConfig = withBundleAnalyzer({
+  // Next 16 renders a Dev Tools badge in the bottom-left corner under
+  // `next dev`. It never appears in a production build, but the Playwright
+  // visual suite runs against the dev server, so it lands in every screenshot
+  // and swamps the diff. Turning it off keeps the baselines meaningful.
+  devIndicators: false,
+});
 
 module.exports = nextConfig;

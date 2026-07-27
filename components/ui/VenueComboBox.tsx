@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Combobox } from './combobox';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { makeNewVenueValue } from '@/lib/venue-selection';
 
@@ -29,7 +29,7 @@ export function VenueComboBox({
   const [venues, setVenues] = useState<Venue[]>([]);
   const [proposedVenue, setProposedVenue] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   useEffect(() => {
     async function fetchVenues() {

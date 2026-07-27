@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { parseVenueSelection } from '@/lib/venue-selection';
 
@@ -9,7 +8,7 @@ export async function POST(request: Request) {
   const requestUrl = new URL(request.url);
   try {
     const formData = await request.formData();
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createClient();
 
     const desc = formData.get('desc');
     const special_price = formData.get('special_price');
@@ -36,11 +35,16 @@ export async function POST(request: Request) {
     const selectedDays = formData.getAll('days');
     const when = selectedDays.join(' ');
 
-    // Get the session
-    let session = await supabase.auth.getSession();
+    // Get the authenticated user. getUser() (not getSession()) revalidates
+    // the token against the Auth server — this decision (publish directly
+    // vs. queue for review) is a real authorization decision, so it must not
+    // trust an unverified cookie.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     // If logged in user add direct to the database else add to the pending table
-    if (!session.data.session) {
+    if (!user) {
       const { data, error } = await supabase
         .from('events_pending')
         .insert([
@@ -135,7 +139,7 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
   const { data, error } = await supabase.from('events').select('*');
 
   if (error) {
@@ -148,7 +152,7 @@ export async function GET(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
   const formData = await request.formData();
   const requestUrl = new URL(request.url);
   const id = formData.get('id');

@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -8,7 +8,7 @@ export default function DeleteItemButton({ id }: { id: number }) {
   async function handleDelete(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('events')
       .delete()

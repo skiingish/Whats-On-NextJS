@@ -1,5 +1,5 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies, headers } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
+import { headers } from 'next/headers';
 import AddEventDisplay from '@/components/AddEventDisplay';
 import { PawPrint } from 'lucide-react';
 import Image from 'next/image';
@@ -49,11 +49,11 @@ const capitalize = (s: string) => {
 };
 
 export default async function Index() {
-  const headersList = headers();
+  const headersList = await headers();
   const url = headersList.get('referer');
   const subdomain = getSubdomainFromUrl(url);
 
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
 
   const {
     data: { user },

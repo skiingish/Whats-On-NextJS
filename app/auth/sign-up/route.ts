@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
@@ -11,7 +10,7 @@ export async function POST(request: Request) {
   const email = String(formData.get('email'));
   const password = String(formData.get('password'));
   const token = String(formData.get('token'));
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   try {
     // Check the JWT token is valid
