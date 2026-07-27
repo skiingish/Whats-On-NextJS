@@ -37,6 +37,16 @@ needs to *add* a geocoding dependency, not reuse one.
 ### D1. Deleting a venue silently destroys every event attached to it
 **Architecture · Impact 5 · Risk 5 · Effort 2 · Priority 40**
 
+**Done (2026-07-27):** `supabase/migrations/20260727010000_restrict_venue_deletion.sql`
+changed both FKs to `ON DELETE RESTRICT`. `issues_event_id_fkey` was left on
+CASCADE, as this doc says to. Soft delete (`deleted_at`) was considered and
+deliberately not done here — it has real knock-on effects on every read of
+`venues` and on the `venues` RLS policies, and nothing in the app exposes
+venue deletion yet, so there's no UI in front of this to design against.
+Left for whoever builds the Phase 4 venue screen. Covered by two new
+assertions in `supabase/tests/rls_access_model.sql`: a venue with live events
+is refused, a venue with none still deletes.
+
 `events_venue_id_fkey` and `events_pending_venue_id_fkey` are both
 `ON DELETE CASCADE` (verified via `pg_constraint`), and the policy
 `"authenticated users can delete venues"` is `using (true)`. So any admin
@@ -71,6 +81,11 @@ reviewable.
 
 ### D3. Route handlers return raw Postgres errors to the client
 **Code · Impact 3 · Risk 3 · Effort 1 · Priority 30**
+
+**Done (2026-07-27):** all three handlers now log the `PostgrestError`
+server-side with `console.error` and return a generic message to the
+client — `app/events/route.ts` GET, `app/feedback/route.ts` POST, and
+`app/issues/route.ts` POST.
 
 `app/events/route.ts:148`, `app/feedback/route.ts:30` and
 `app/issues/route.ts:34` forward the `PostgrestError` object straight to the
@@ -142,6 +157,11 @@ correctness and defence-in-depth issue, not a live vulnerability.
 *Fix:* delete the handler, or add a `getUser()` guard and check the affected
 row count before redirecting.
 
+**Done (2026-07-27):** deleted the handler. Confirmed nothing calls it —
+`DeleteItemButton` uses the Supabase client directly and
+`AddSpecialModal.tsx` only POSTs — so there was no caller to migrate to a
+guarded version.
+
 ---
 
 ## Tier 3 — structural, do before the admin UI
@@ -212,6 +232,15 @@ two admins editing the same row race silently, last write wins, invisibly.
 
 *Fix:* one migration adding `updated_at` plus a `BEFORE UPDATE` trigger.
 
+**Done (2026-07-27):** `supabase/migrations/20260727020000_add_updated_at.sql`
+added `updated_at` to all five tables plus one shared
+`public.set_updated_at()` trigger function, attached to each. A follow-up,
+`20260727021000_updated_at_use_clock_timestamp.sql`, switched the function
+from `now()` to `clock_timestamp()` — `now()` is fixed for the whole
+enclosing transaction, so two updates to the same row inside one transaction
+would get an identical timestamp, which defeats the point for the race D13
+describes. Covered in `supabase/tests/rls_access_model.sql`.
+
 ---
 
 ## Tier 4 — hygiene
@@ -254,7 +283,7 @@ unreachable.
 | D18 | `public/sitemap.xml` is invalid XML (malformed prolog, HTML comment before the document) and lists only `/` with a 2023 `lastmod` | Doc | 25 |
 | D19 | No `.env.example`; `JWT_SECRET` is required by two routes and set nowhere, failing invisibly inside a try/catch | Infra | 24 |
 | D20 | `EventsDisplay.tsx:60-97` mutates prop objects and the prop array, and re-sorts/filters on every keystroke unmemoized | Code | 24 |
-| D21 | `venues.name` is uniquely indexed case- and whitespace-sensitively, but the publish path inserts unnormalised while the planned approve RPC normalises — "The Local" and "the local " become two venues | Code | 24 |
+| D21 | ~~`venues.name` is uniquely indexed case- and whitespace-sensitively, but the publish path inserts unnormalised while the planned approve RPC normalises — "The Local" and "the local " become two venues~~ **Done 2026-07-27** | Code | 24 |
 | D22 | `EventsCards.tsx:112` renders an Edit button with no handler on every card | Code | 21 |
 | D23 | The auth/invite routes — the actual authorisation boundary — have zero test coverage | Test | 21 |
 | D24 | `proxy.ts` has no `config.matcher`, so every request including static assets triggers a `getUser()` round trip | Infra | 20 |
@@ -264,6 +293,19 @@ unreachable.
 | D28 | `EventDrawer.tsx:30` reads `window.innerWidth` in the render body, never recomputes, and risks a hydration mismatch | Code | 16 |
 | D29 | `bun.lockb` predates the entire Next 13→16 upgrade; npm is canonical | Dep | 15 |
 | D30 | `"when"` stores multiple days as one space-joined string — no index-backed "what's on today" query is possible | Arch | 12 |
+
+**D21, done 2026-07-27:** `venues_name_key` (plain `UNIQUE (name)`) was
+replaced by `venues_name_normalized_key`, a unique index on
+`lower(btrim(name))`, in
+`supabase/migrations/20260727030000_normalize_venue_names.sql`. Replaced
+rather than kept alongside, since the normalised index is strictly stronger
+— nothing that passed the old constraint and fails the new one was ever a
+distinct venue, and no existing rows collided when checked beforehand. The
+same migration added `public.find_venue_id_by_name(text)`, a small
+`security invoker` lookup helper; `app/events/route.ts` now trims a
+submitted venue name and calls it to reuse a matching venue before falling
+back to inserting a new one, matching the normalisation the planned
+`approve_pending_event` RPC uses.
 
 ---
 

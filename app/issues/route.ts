@@ -29,9 +29,14 @@ export async function POST(request: Request) {
       .insert([{ event_id, issue, info }]);
 
     if (error) {
+      // Log the real Postgres error server-side only; the client gets a
+      // generic message so constraint names/hints never leak (D3).
       console.error(error);
 
-      return NextResponse.json({ error }, { status: 500 });
+      return NextResponse.json(
+        { message: 'Could not report issue, server error!' },
+        { status: 500 }
+      );
     }
 
     //return NextResponse.json({ message: 'Event Added!' }, { status: 200 });

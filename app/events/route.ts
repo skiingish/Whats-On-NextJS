@@ -70,14 +70,21 @@ export async function POST(request: Request) {
       let resolved_venue_id = venue_id;
 
       if (resolved_venue_id === null && venue_name !== null) {
-        const { data: venue, error: venueError } = await supabase
-          .from('venues')
-          .insert([{ name: venue_name }])
-          .select('id')
-          .single();
+        const normalizedVenueName = venue_name.trim();
 
-        if (venueError) {
-          console.error(venueError);
+        // Reuse an existing venue if one already matches case- and
+        // whitespace-insensitively (venues_name_normalized_key), the same
+        // normalisation the planned approve_pending_event RPC uses
+        // (docs/admin-moderation-plan.md), so this path and that one agree
+        // on what counts as "the same venue" and "The Local" / "the local "
+        // cannot become two separate rows.
+        const { data: existingVenueId, error: lookupError } =
+          await supabase.rpc('find_venue_id_by_name', {
+            p_name: normalizedVenueName,
+          });
+
+        if (lookupError) {
+          console.error(lookupError);
 
           return NextResponse.redirect(
             `${requestUrl.origin}?message=Could not save venue`,
@@ -88,7 +95,29 @@ export async function POST(request: Request) {
           );
         }
 
-        resolved_venue_id = venue.id;
+        if (existingVenueId) {
+          resolved_venue_id = existingVenueId;
+        } else {
+          const { data: venue, error: venueError } = await supabase
+            .from('venues')
+            .insert([{ name: normalizedVenueName }])
+            .select('id')
+            .single();
+
+          if (venueError) {
+            console.error(venueError);
+
+            return NextResponse.redirect(
+              `${requestUrl.origin}?message=Could not save venue`,
+              {
+                // a 301 status is required to redirect from a POST to a GET route
+                status: 301,
+              }
+            );
+          }
+
+          resolved_venue_id = venue.id;
+        }
       }
 
       const { data, error } = await supabase
@@ -143,28 +172,23 @@ export async function GET(request: Request) {
   const { data, error } = await supabase.from('events').select('*');
 
   if (error) {
+    // Log the real Postgres error server-side only — the client gets a
+    // generic message, same contract as the POST handler above, so this
+    // route no longer disagrees with itself about how much detail leaks.
     console.error(error);
 
-    return NextResponse.json({ error }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Could not load events' },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json(data, { status: 200 });
 }
 
-export async function DELETE(request: Request) {
-  const supabase = await createClient();
-  const formData = await request.formData();
-  const requestUrl = new URL(request.url);
-  const id = formData.get('id');
-  const { data, error } = await supabase.from('events').delete().match({ id });
-
-  if (error) {
-    console.error(error);
-    return new Response('Error', { status: 500 });
-  }
-
-  return NextResponse.redirect(`${requestUrl.origin}`, {
-    // a 301 status is required to redirect from a POST to a GET route
-    status: 301,
-  });
-}
+// D8 (docs/tech-debt-backlog.md): DELETE was removed rather than fixed.
+// Nothing in the app called it — DeleteItemButton talks to Supabase
+// directly and AddSpecialModal only POSTs — and it had two problems anyway:
+// it returned a 301 whether or not a row was actually affected, and it had
+// no application-level auth check, relying entirely on RLS to no-op for an
+// anonymous caller. Dead, silently-lying code is worse than no code.
