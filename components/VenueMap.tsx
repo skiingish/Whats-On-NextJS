@@ -2,6 +2,7 @@
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useMemo, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import EventDrawer from './EventDrawer';
 import EventsCards from './EventsCards';
 import { VenueMarker } from './ui/mapmarker';
@@ -9,7 +10,7 @@ import { VenueMarker } from './ui/mapmarker';
 interface VenueMapProps {
   venues: Array<Venue> | null;
   filteredEvents?: Events[] | undefined;
-  user: any;
+  user: User | null;
 }
 
 // Melbourne, used when there is nothing to centre on yet.

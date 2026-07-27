@@ -1,5 +1,6 @@
 'use client';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import EventsCards from './EventsCards';
 import { getFavourites } from '@/utils/favouritesHandler';
 import VenueMap from './VenueMap';
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic';
 interface EventsDisplayProps {
   events: Events[] | null | undefined;
   venues: Array<Venue> | null;
-  user: any;
+  user: User | null;
 }
 
 const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
@@ -53,67 +54,71 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
     }
   };
 
-  // Get the favourites from local storage.
-  const favourites: Events[] = getFavourites();
+  // refreshingEvents flips true->false in one tick purely to force the
+  // memo below to re-read localStorage after addFavourite/removeFavourite
+  // mutate it outside of React state.
+  useEffect(() => {
+    if (refreshingEvents) {
+      setRefreshingEvents(false);
+    }
+  }, [refreshingEvents]);
 
-  // If active list not equal to all, then we want to filter the events by the user's favourites from local storage.
-  if (activeList !== 'all') {
-    // Filter the events by the user's favourites from local storage using the ids from the favourites array, so if the event changed on the db it will display correctly, or if it's deleted it wont show.
-    const favoriteEvents: Events[] | undefined = events?.filter((event) => {
-      const isFavorite = favourites.some(
-        (favorite) => favorite.id === event.id
-      );
-      if (isFavorite) {
-        event.is_favorite = true; // Set isfav to true if matched
-      }
-      return isFavorite;
-    });
-    events = favoriteEvents;
-  } else {
-    events?.forEach((event) => {
-      const isFavorite = favourites.some(
-        (favorite) => favorite.id === event.id
-      );
-      event.is_favorite = isFavorite;
-    });
-  }
+  // Attach is_favorite without mutating the incoming `events` prop — the
+  // original code wrote onto the prop objects directly, which meant a
+  // re-render with the same prop reference (e.g. from a parent re-fetch)
+  // could see favourites "stick" from a previous render, and made `events`
+  // unsafe to reuse elsewhere. Mapping to new objects avoids both.
+  const eventsWithFavourites = useMemo(() => {
+    const favourites: Events[] = getFavourites();
+    return events?.map((event) => ({
+      ...event,
+      is_favorite: favourites.some((favorite) => favorite.id === event.id),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events, refreshingEvents]);
 
-  if (refreshingEvents) {
-    setRefreshingEvents(false);
-  }
+  // If active list not equal to all, then we want to filter the events by the user's favourites.
+  const activeListEvents = useMemo(() => {
+    if (activeList === 'all') return eventsWithFavourites;
+    return eventsWithFavourites?.filter((event) => event.is_favorite);
+  }, [eventsWithFavourites, activeList]);
 
   // Order events by least number of days the special is on and then by newest first.
-  events?.sort((a, b) => {
-    const daysA = a.when.split(' ').length;
-    const daysB = b.when.split(' ').length;
+  const sortedEvents = useMemo(() => {
+    if (!activeListEvents) return activeListEvents;
+    return [...activeListEvents].sort((a, b) => {
+      const daysA = a.when.split(' ').length;
+      const daysB = b.when.split(' ').length;
 
-    if (daysA !== daysB) {
-      return daysA - daysB; // Order by least number of days the special is on
-    } else {
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ); // Order by newest added
-    }
-  });
+      if (daysA !== daysB) {
+        return daysA - daysB; // Order by least number of days the special is on
+      } else {
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ); // Order by newest added
+      }
+    });
+  }, [activeListEvents]);
 
-  let filteredEventsByDay = events?.filter((event) => {
-    let result = event.when
-      .toLowerCase()
-      .includes(searchDay.toLocaleLowerCase());
-    return result;
-  });
+  const filteredEventsByDay = useMemo(() => {
+    return sortedEvents?.filter((event) => {
+      return event.when.toLowerCase().includes(searchDay.toLocaleLowerCase());
+    });
+  }, [sortedEvents, searchDay]);
 
   // Search for different items, including day of the week, title, and the place.
-  let filteredSearchedEvents = filteredEventsByDay?.filter((event) => {
-    let result =
-      event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
-      event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
-      (typeof event.venue === 'string'
-        ? event.venue.toLowerCase()
-        : event.venue.name.toLowerCase()
-      ).includes(searchTerm.toLocaleLowerCase());
-    return result;
-  });
+  const filteredSearchedEvents = useMemo(() => {
+    return filteredEventsByDay?.filter((event) => {
+      return (
+        event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
+        event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
+        (typeof event.venue === 'string'
+          ? event.venue.toLowerCase()
+          : event.venue.name.toLowerCase()
+        ).includes(searchTerm.toLocaleLowerCase())
+      );
+    });
+  }, [filteredEventsByDay, searchTerm]);
 
   return (
     <>

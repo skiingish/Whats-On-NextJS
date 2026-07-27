@@ -1,9 +1,10 @@
 import { FC } from 'react';
+import type { User } from '@supabase/supabase-js';
 import EventsDisplay from './EventsDisplay';
 import { createClient } from '@/lib/supabase/server';
 
 interface EventsSectionProps {
-  user: any;
+  user: User | null;
 }
 
 const EventsSection: FC<EventsSectionProps> = async ({ user }) => {

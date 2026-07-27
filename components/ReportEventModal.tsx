@@ -28,30 +28,38 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    setLoading(true);
     e.preventDefault();
-    let eventId = event?.id;
-    // If no event id is found, then we don't want to submit the form.
+
+    const eventId = event?.id;
+    // If no event id is found, then we don't want to submit the form. This
+    // guard used to run after setLoading(true) and throw outside the try
+    // below, which left the spinner stuck forever with no reachable Cancel
+    // button — bail out before touching loading state instead.
     if (!eventId) {
-      throw new Error('No event id found');
+      console.error('No event id found');
+      toast.error('Something went wrong — no event to report.');
+      return;
     }
 
+    const formData = new FormData(e.currentTarget);
+    formData.append('eventid', eventId.toString());
+
+    // Validate the form data before showing a spinner for a request we're
+    // not going to send.
+    const result = await issueSchema.safeParseAsync({
+      eventid: eventId,
+      issueselector: formData.get('issueselector'),
+      missinginfotext: formData.get('missinginfotext'),
+    });
+
+    if (!result.success) {
+      toast.error(z.prettifyError(result.error));
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const formData = new FormData(e.currentTarget);
-      formData.append('eventid', eventId.toString());
-
-      // Validate the form data.
-      const result = await issueSchema.safeParseAsync({
-        eventid: eventId,
-        issueselector: formData.get('issueselector'),
-        missinginfotext: formData.get('missinginfotext'),
-      });
-
-      if (!result.success) {
-        toast.error(result.error.message);
-        throw new Error(result.error.message);
-      }
-
       const response = await fetch('/issues', {
         method: 'POST',
         body: formData,
@@ -142,7 +150,10 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                         </div>
                         <div className='mt-6'>
                           <div className='flex flex-col w-full justify-center'>
-                            <label className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
+                            <label
+                              className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'
+                              htmlFor='issueselector'
+                            >
                               What would you like to report?
                             </label>
                             <select
@@ -162,9 +173,12 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
                           </div>
                           {issue === 'missinginfo' ? (
                             <>
-                              <p className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'>
+                              <label
+                                className='text-sm font-semibold tracking-wide text-foreground dark:text-dark-text-foreground'
+                                htmlFor='missinginfotext'
+                              >
                                 Whats Missing?
-                              </p>
+                              </label>
                               <textarea
                                 name='missinginfotext'
                                 id='missinginfotext'

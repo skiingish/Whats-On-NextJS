@@ -18,5 +18,5 @@ interface Events {
   when: string;
   special_price: string;
   event_time: string;
-  is_favorite: boolean = false;
+  is_favorite?: boolean;
 }

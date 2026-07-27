@@ -1,4 +1,4 @@
-import { set, z } from 'zod';
+import { z } from 'zod';
 import { FC, Fragment, useRef, useState, FormEvent, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Loader2 } from 'lucide-react';
@@ -7,12 +7,15 @@ import { VenueComboBox } from './ui/VenueComboBox';
 import { isNewVenue, newVenueName } from '@/lib/venue-selection';
 import { Button } from './ui/button';
 
+// Fields match what's actually collected from this form (see handleFormSubmit
+// below) — venue selection is a combobox validated separately, since it's
+// controlled state rather than a plain form field, and "when" is built
+// server-side by joining the selected `days`.
 const eventsSchema = z.object({
-  venue: z.string(),
-  desc: z.string(),
-  special_price: z.string().nullable().optional(),
-  when: z.string(),
-  event_time: z.string(),
+  desc: z.string().trim().min(1, 'Please describe the special'),
+  special_price: z.string().trim().nullable().optional(),
+  event_time: z.string().trim().min(1, 'Please add a time'),
+  days: z.array(z.string()).min(1, 'Please select at least one day'),
 });
 
 interface AddSpecialModalProps {
@@ -40,11 +43,23 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
       return;
     }
 
+    const formData = new FormData(e.currentTarget);
+
+    const result = eventsSchema.safeParse({
+      desc: formData.get('desc'),
+      special_price: formData.get('special_price'),
+      event_time: formData.get('event_time'),
+      days: formData.getAll('days'),
+    });
+
+    if (!result.success) {
+      toast.error(z.prettifyError(result.error));
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
-
       // A venue the visitor named themselves doesn't exist yet, so send the
       // name rather than an id and let an admin create it on approval.
       if (isNewVenue(selectedVenue)) {
@@ -121,6 +136,10 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                   >
                     {userLoggedIn ? 'Add Event' : 'Add New Event For Review'}
                   </Dialog.Title>
+                  {/* No htmlFor here: VenueComboBox (components/ui/combobox.tsx)
+                      doesn't expose an id on its trigger, and that file is
+                      out of scope for this pass — flagging rather than
+                      reaching into components/ui. */}
                   <label className='text-md font-semibold'>Where</label>
                   <VenueComboBox
                     value={selectedVenue}
@@ -128,24 +147,34 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                     canCreateVenue={!!userLoggedIn}
                     className='rounded-2xl px-4 py-5 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
                   />
-                  <label className='text-md font-semibold'>What</label>
+                  <label className='text-md font-semibold' htmlFor='desc'>
+                    What
+                  </label>
                   <input
                     className='rounded-2xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
+                    id='desc'
                     name='desc'
                     required
                     placeholder='Cheap Tuesdays...'
                   />
-                  <label className='text-md font-semibold'>
+                  <label
+                    className='text-md font-semibold'
+                    htmlFor='special_price'
+                  >
                     Special $ Details (Optional)
                   </label>
                   <input
                     className='rounded-2xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
+                    id='special_price'
                     name='special_price'
                     placeholder='$5 Cheese Pizzas...'
                   />
-                  <label className='text-md font-semibold'>Time</label>
+                  <label className='text-md font-semibold' htmlFor='event_time'>
+                    Time
+                  </label>
                   <input
                     className='rounded-2xl px-4 py-2 bg-inherit border-2 border-foreground bg-white dark:bg-dark-background mb-6'
+                    id='event_time'
                     name='event_time'
                     required
                     placeholder='All day...'
