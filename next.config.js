@@ -30,6 +30,14 @@ const nextConfig = withBundleAnalyzer({
   // visual suite runs against the dev server, so it lands in every screenshot
   // and swamps the diff. Turning it off keeps the baselines meaningful.
   devIndicators: false,
+  // TypeScript 7 (the Go-based rewrite) no longer exposes the classic JS
+  // compiler API that `next build` used for its built-in type-check step.
+  // This tells Next.js to shell out to the `tsc` CLI instead, which still
+  // works fine with TS 7. Without this, `next build` fails with:
+  // "TypeScript 7.0.2 does not provide the compiler API required by Next.js."
+  experimental: {
+    useTypeScriptCli: true,
+  },
 });
 
 module.exports = nextConfig;

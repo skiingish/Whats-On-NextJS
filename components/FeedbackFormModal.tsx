@@ -5,8 +5,6 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
 
-const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
-
 const feedbackSchema = z.object({
   name: z.string().optional().nullable(),
   email: z.string().optional().nullable(),
@@ -22,7 +20,6 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
   const cancelButtonRef = useRef(null);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [isVerified, setIsverified] = useState<boolean>(false);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     setLoading(true);
@@ -131,11 +128,6 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
                               placeholder='I love pizza! Please create me an account (P.S. I own a venue)...'
                               className='w-full h-32 mt-2 bg-inherit px-4 py-2 border-2 border-foreground rounded-xl text-foreground bg-white dark:text-dark-text-foreground dark:bg-dark-foreground mb-1 '
                             />
-                            {/* <ReCAPTCHA
-                              sitekey={siteKey}
-                              ref={recaptchaRef}
-                              onChange={handleCaptchaSubmission}
-                            /> */}
                           </div>
                         </div>
                       </div>

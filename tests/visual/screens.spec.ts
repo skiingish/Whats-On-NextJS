@@ -56,6 +56,16 @@ async function pinHeroImage(page: Page) {
         max-height: 24rem !important;
         min-height: 24rem !important;
       }
+
+      /* app/globals.css defines a bespoke .animate-in keyframe that fades the
+         page wrappers up from opacity-0 after a 0.15s delay. Playwright's
+         animations:'disabled' does not reliably land it on its end state, so
+         the background behind the modal could still be mid-fade when the
+         screenshot fired. Force it to the finished state. */
+      .animate-in {
+        animation: none !important;
+        opacity: 1 !important;
+      }
     `,
   });
 }
@@ -191,6 +201,12 @@ test.describe('home', () => {
     await expect(
       page.getByRole('heading', { name: 'Add New Event For Review' })
     ).toBeVisible();
+
+    // Visible is not the same as settled. Headless UI's Transition scales and
+    // fades the panel in, and `animations: 'disabled'` does not reliably
+    // freeze it — the same reason the drawer needs this. Without it this test
+    // failed roughly one run in three, mid-transition.
+    await waitForNoMotion(page.getByRole('dialog'));
 
     await expect(page).toHaveScreenshot('home-add-event-modal.png', {
       mask: [heroImageMask(page)],
