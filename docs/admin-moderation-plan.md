@@ -261,10 +261,16 @@ missing them. A venue born from an approval has a name and nothing else, so the
 admin needs a fast way to fix that:
 
 1. Type an address
-2. **Find on map** — Google Geocoding, using the existing
-   `@react-google-maps/api` dependency and API key
+2. **Find on map** — geocoding via the Mapbox Geocoding API, reusing the
+   `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` the map already uses
 3. Drag the marker to fine-tune
 4. Save writes address + lat/lng together
+
+Note on effort: this phase was originally written assuming Google Maps could be
+reused. That dependency has since been removed and the app is Mapbox-only, so
+this needs a geocoding integration added rather than an existing one reused —
+`@mapbox/search-js-react` is the usual choice and is already proven in the
+user's coffee-spy project.
 
 Show an "incomplete" badge on venues without coordinates, since those are
 invisible on the public map. A filter for them turns the venue list into a
@@ -358,8 +364,9 @@ If you want the shortest path to "I can stop using the Supabase dashboard":
   `rejected_reason` soft delete instead?
 - **No submission rate limit.** `events_pending`, `issues` and `feedback` all
   accept unlimited anonymous inserts. The queue is the thing that suffers.
-  Cloudflare Turnstile or a per-IP limit is the usual answer —
-  `react-google-recaptcha` is already a dependency but appears unused.
+  Cloudflare Turnstile or a per-IP limit is the usual answer. Note that
+  `react-google-recaptcha` was removed as an unused dependency, so any CAPTCHA
+  here means adding a library fresh.
 - **Map API key exposure.** `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` ships in the
   bundle, which is normal, but it must be restricted by HTTP referrer in the
   Google Cloud console or it can be used from anywhere and billed to you.
