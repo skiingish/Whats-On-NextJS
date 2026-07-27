@@ -38,6 +38,29 @@ function heroImageMask(page: Page): Locator {
 }
 
 /**
+ * app/page.tsx picks the hero image at random per server render, and it is
+ * laid out with `w-full lg:max-h-96 object-cover`. Source images have
+ * different aspect ratios, so the rendered HEIGHT varies between runs and
+ * everything below it shifts.
+ *
+ * Masking cannot fix this — a mask hides pixels, not layout. So pin the
+ * element's box to the height `max-h-96` caps it at. Nothing is lost: the
+ * image is masked out of the comparison anyway, and this makes the rest of
+ * the page land at the same offset every run.
+ */
+async function pinHeroImage(page: Page) {
+  await page.addStyleTag({
+    content: `
+      img[alt="Picture logo"] {
+        height: 24rem !important;
+        max-height: 24rem !important;
+        min-height: 24rem !important;
+      }
+    `,
+  });
+}
+
+/**
  * Mapbox raster tiles are fetched from a live tile server and will never be
  * byte-identical between runs (CDN routing, cache state, label placement can
  * all vary). Masking the canvas is the reliable option: the markers and the
@@ -149,6 +172,8 @@ test.describe('home', () => {
       page.getByRole('button', { name: 'Something Missing?' })
     ).toBeVisible();
 
+    await pinHeroImage(page);
+
     await expect(page).toHaveScreenshot('home-logged-out.png', {
       mask: [heroImageMask(page)],
     });
@@ -157,6 +182,8 @@ test.describe('home', () => {
   test('add event modal open', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('PWTEST', { exact: false }).first()).toBeVisible();
+
+    await pinHeroImage(page);
 
     await page.getByRole('button', { name: 'Something Missing?' }).click();
 

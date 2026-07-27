@@ -68,11 +68,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // `next dev` rather than a production build: next-pwa's service worker is
-    // disabled outside production (`disable: !isProd` in next.config.js), and
-    // Next 13.4 has no persistent dev-mode overlay/indicator, so dev mode is
-    // actually the more visually-stable option here — and much faster to
-    // start than `next build && next start` for every run.
+    // `next dev` rather than a production build: Next 13.4 has no persistent
+    // dev-mode overlay/indicator, so dev mode is actually the more
+    // visually-stable option here — and much faster to start than
+    // `next build && next start` for every run. (next-pwa has been removed;
+    // it was already inert, see next.config.js.)
     command: `npx next dev -p ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
