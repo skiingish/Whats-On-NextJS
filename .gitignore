@@ -36,6 +36,12 @@ next-env.d.ts
 
 _examples
 
+# Playwright (visual-regression harness) — baselines in
+# tests/visual/**/__screenshots__ ARE committed; only run artifacts are ignored.
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # Auto Generated PWA files
 **/public/sw.js
 **/public/workbox-*.js

@@ -6,6 +6,8 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -46,6 +48,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@types/node": "20.3.1",
     "@types/react": "^18.2.34",
     "@types/react-dom": "^18.2.14",
