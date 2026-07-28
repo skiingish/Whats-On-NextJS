@@ -317,14 +317,36 @@ describes. Covered in `supabase/tests/rls_access_model.sql`.
 
 ## Tier 4 — hygiene
 
-### D14. Playwright verifies pixels, nothing else
+### D14. Playwright verifies pixels, nothing else — Fixed
 **Test · Impact 3 · Risk 3 · Effort 3 · Priority 18**
 
-Every scenario asserts element visibility, then screenshots. `login` and
-`sign-up` never submit; nothing posts an event. Even once the seeding gap is
-solved, the suite covers CSS and layout drift only — no auth or submission
-regression coverage. Worth stating plainly so "we have Playwright" isn't
-mistaken for functional coverage.
+**Done (2026-07-28):** `tests/functional/anonymous-flows.spec.ts` (its own
+Playwright config, `playwright.functional.config.ts`, own port 3101) actually
+drives the anonymous paths: submitting an event via the Add Event modal
+(asserted to land in `events_pending`, not `events`, via the Supabase MCP
+tools), submitting feedback, reporting an issue on an event, a bad-credentials
+login showing the error message instead of crashing, and the RLS rule that an
+anonymous visitor naming an unknown venue sends `venue_name` rather than
+creating a live venue. All 5 pass. Every row these tests insert is deleted
+afterwards (via MCP; anon has insert-only access to `events_pending`,
+`feedback` and `issues`, so the browser session itself can't clean up) —
+nothing was left behind, and the `PWTEST`-prefixed visual fixtures were left
+untouched throughout.
+
+Not done: an `npm run test:functional` script. `package.json` is off-limits
+for this pass — another agent has it mid-edit (uncommitted Tailwind 4
+migration) in the same checkout — so the suite is only runnable directly via
+`npx playwright test --config=playwright.functional.config.ts`. Also not
+wired into CI: like the visual suite, it needs `next dev` to boot at all,
+which needs `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and
+neither is available to the CI runner as a secret today. Authenticated paths
+remain untested — `auth.users` is empty (D2).
+
+Every scenario in the *visual* suite (`tests/visual/`) still only asserts
+element visibility, then screenshots. `login` and `sign-up` never submit
+there; nothing posts an event — that suite covers CSS and layout drift only,
+which is exactly why the functional suite above is a separate spec file and
+config rather than an addition to it.
 
 ### D15. Dead code sweep
 **Code · Impact 3 · Risk 2 · Effort 1 · Priority 25**
@@ -369,7 +391,7 @@ unreachable.
 | D24 | ~~`proxy.ts` has no `config.matcher`, so every request including static assets triggers a `getUser()` round trip~~ **Fixed** — matcher excludes static assets, images, favicon, robots and sitemap | Infra | 20 |
 | D25 | ~~README is 7 lines with no env vars, scripts, or pointers to the migrations and test suites; no CLAUDE.md~~ **Fixed** — real quick-start with env vars, script table and doc pointers. `CLAUDE.md` added 2026-07-29 covering the admin-only access model, RLS test invariants, test setup, TS 7/ESLint wrinkles and key gotchas | Doc | 20 |
 | D26 | ~~Validation is inconsistent — `AddSpecialModal` defines a Zod schema it never parses; the two modals that do validate surface `error.message`, the raw JSON issues array~~ **Fixed** — `AddSpecialModal` now parses its schema (and its stray unused `set` import is gone); all three modals show `z.prettifyError(result.error)` and return early on failure instead of double-toasting (validation toast + generic catch-all toast) | Code | 20 |
-| D27 | `dayformatter`'s separator bug is pinned by tests rather than fixed — the two collapse branches have never fired in production | Code | 16 |
+| D27 | ~~`dayformatter`'s separator bug is pinned by tests rather than fixed — the two collapse branches have never fired in production~~ **Fixed** — splits on comma or whitespace and compares day sets instead of substring-matching a hardcoded comma-joined phrase; also fixes a related bug where a weekday run with a trailing day misread as "Weekdays". `utils/dataformatter.test.ts`'s two pinned tests now assert the collapsed form | Code | 16 |
 | D28 | ~~`EventDrawer.tsx:30` reads `window.innerWidth` in the render body, never recomputes, and risks a hydration mismatch~~ **Fixed** — now uses a `matchMedia('(min-width: 1024px)')` listener, same pattern as `VenueMap`'s dark-mode query | Code | 16 |
 | D29 | ~~`bun.lockb` predates the entire Next 13→16 upgrade; npm is canonical~~ **Fixed** — deleted | Dep | 15 |
 | D30 | `"when"` stores multiple days as one space-joined string — no index-backed "what's on today" query is possible | Arch | 12 |
@@ -409,5 +431,4 @@ D22 into whatever builds the admin screens. D21 into the approve RPC in
 Phase 3.
 
 **Deliberately deferred:** D30 is a real modelling problem but a large migration
-with no forcing function yet. D14 matters once there is functionality worth
-regression-testing.
+with no forcing function yet.

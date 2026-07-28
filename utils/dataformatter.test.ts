@@ -41,29 +41,24 @@ describe('dayformatter', () => {
   });
 
   /**
-   * BUG — pinned, not endorsed.
-   *
-   * The two branches above only match comma-separated strings, but the submit
-   * form builds `when` with `selectedDays.join(' ')` (app/events/route.ts), so
-   * every real value is space-separated. Confirmed against the 2025 backup:
-   * of 76 events, every multi-day value used spaces and none used commas.
-   *
-   * So 'Weekdays' and 'Weekends' have never actually rendered in production —
-   * only 'Everyday' works, because it is the one case with both a comma and a
-   * space branch.
-   *
-   * Fix is to normalise separators before matching. These tests should flip to
-   * the collapsed form when that happens.
+   * D27, fixed: dayformatter now splits on comma OR whitespace and compares
+   * the resulting set of day names, instead of substring-matching a
+   * hardcoded comma-joined phrase. The submit form has only ever produced
+   * space-separated values (`selectedDays.join(' ')` in
+   * app/events/route.ts) — confirmed against the 2025 backup, where all 76
+   * events used spaces and none used commas — so these two branches used to
+   * never fire in production. They now collapse the same as the
+   * comma-separated form above.
    */
   describe('space-separated input (what the form actually submits)', () => {
-    it('does NOT collapse the weekdays — falls through unchanged', () => {
+    it('collapses the weekdays', () => {
       expect(dayformatter('Monday Tuesday Wednesday Thursday Friday')).toBe(
-        'Monday Tuesday Wednesday Thursday Friday'
+        'Weekdays'
       );
     });
 
-    it('does NOT collapse the weekend — falls through unchanged', () => {
-      expect(dayformatter('Saturday Sunday')).toBe('Saturday Sunday');
+    it('collapses the weekend', () => {
+      expect(dayformatter('Saturday Sunday')).toBe('Weekends');
     });
   });
 
@@ -73,8 +68,12 @@ describe('dayformatter', () => {
     );
   });
 
-  describe('the 10-character shortcut', () => {
-    // Anything <= 10 chars skips the matching entirely.
+  describe('single-day and short values', () => {
+    // Every single day name passes straight through unchanged: a set of one
+    // day never equals the weekday, weekend, or every-day sets. (The old
+    // implementation short-circuited on string length <= 10 to reach the
+    // same result; that check was removed as dead weight — see the comment
+    // in dataformatter.ts — but the observable output here is identical.)
     it.each(['Monday', 'Tuesday', 'Saturday', 'Wednesday'])(
       'returns the single day %s unchanged',
       (day) => {
@@ -82,19 +81,20 @@ describe('dayformatter', () => {
       }
     );
 
-    // 'Wednesday' is exactly 9 characters, so it takes the short path. Any
-    // value over 10 characters goes through the matching branches instead.
-    it('sends a value longer than 10 characters down the matching path', () => {
+    it('passes an unnamed two-day combination through unchanged', () => {
       expect(dayformatter('Tuesday Sunday')).toBe('Tuesday Sunday');
     });
   });
 
-  // Known quirk worth pinning: the weekday branch is a substring test, so a
-  // full week written with commas is caught by the earlier 'Everyday' branch,
-  // but a weekday run with anything appended still reads as 'Weekdays'.
-  it('treats a weekday run with a trailing day as Weekdays', () => {
+  // D27, fixed: this used to be a pinned quirk — the old "Weekdays" check was
+  // a substring match, so a full weekday run with an extra day tacked on
+  // (here, a trailing Sunday) still matched and silently dropped that extra
+  // day from what was displayed. Set equality requires an exact match, so a
+  // six-day combination with no name of its own is now left unchanged
+  // instead of being mis-reported as "Weekdays".
+  it('leaves a weekday run with a trailing day unchanged (not mis-reported as Weekdays)', () => {
     expect(
       dayformatter('Monday, Tuesday, Wednesday, Thursday, Friday, Sunday')
-    ).toBe('Weekdays');
+    ).toBe('Monday, Tuesday, Wednesday, Thursday, Friday, Sunday');
   });
 });
