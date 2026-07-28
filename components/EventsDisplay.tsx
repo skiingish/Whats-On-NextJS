@@ -123,7 +123,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
   return (
     <>
       <div className='w-full'>
-        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground dark:text-dark-text-foreground px-8 -mb-3'>
+        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground px-8 -mb-3'>
           <label className='text-lg font-bold tracking-wider ml-1'>
             Whats On
           </label>
@@ -132,8 +132,8 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             id='dayselector'
             className={
               animateSelector
-                ? 'animate-bounce rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
-                : 'rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                ? 'animate-bounce rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
+                : 'rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
             }
             style={{
               appearance: 'none',
@@ -161,14 +161,14 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
         <div
           className={`${
             showList && 'sticky'
-          } ... top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 dark:bg-dark-background text-foreground dark:text-dark-text-foreground z-10 border-b-2 border-foreground px-8`}
+          } ... top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 bg-background text-foreground z-10 border-b-2 border-foreground px-8`}
         >
           <label className='flex text-lg font-bold tracking-wider ml-1'>
             Search
           </label>
 
           <input
-            className='rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-2 border-foreground mb-6 bg-background-secondary dark:bg-dark-foreground'
+            className='rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-background-secondary'
             type='text'
             onChange={changeSpecialsSearch}
             id='search'
@@ -176,16 +176,16 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             placeholder='Pizza... Whistle Stop... Bingo...'
             value={searchTerm}
           />
-          <div className='w-full h-12 relative -mb-[2px]'>
+          <div className='w-full h-12 relative mb-[-2px]'>
             <button
               onClick={() => !showList && setShowList(true)}
               className={`absolute ${
                 showList
-                  ? 'w-[55%] z-10 h-[100%] bg-white dark:bg-dark-foreground'
-                  : 'w-[50%] h-[90%] bg-stone-300 dark:bg-dark-background'
-              } transition-all bottom-0 left-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-black justify-center items-center inline-flex`}
+                  ? 'w-[55%] z-10 h-full bg-background-secondary'
+                  : 'w-[50%] h-[90%] bg-muted'
+              } transition-all bottom-0 left-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-foreground justify-center items-center inline-flex`}
             >
-              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+              <p className='text-foreground text-[21.40px] font-bold leading-normal tracking-wide'>
                 List
               </p>
             </button>
@@ -193,11 +193,11 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
               onClick={() => showList && setShowList(false)}
               className={`absolute ${
                 !showList
-                  ? 'left-[45%] w-[55%] h-[100%] bg-white z-10 dark:bg-dark-foreground'
-                  : 'w-[50%] h-[90%] left-[50%] bg-stone-300 dark:bg-dark-background'
-              } transition-all bottom-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-black justify-center items-center inline-flex`}
+                  ? 'left-[45%] w-[55%] h-full bg-background-secondary z-10'
+                  : 'w-[50%] h-[90%] left-[50%] bg-muted'
+              } transition-all bottom-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-foreground justify-center items-center inline-flex`}
             >
-              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+              <p className='text-foreground text-[21.40px] font-bold leading-normal tracking-wide'>
                 Map
               </p>
             </button>
@@ -209,7 +209,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             filteredSearchedEvents?.length === 0 ? 'block px-8' : 'hidden'
           }`}
         >
-          <p className='text-foreground text-center text-2xl mb-4 mt-4 dark:text-dark-text-foreground'>
+          <p className='text-foreground text-center text-2xl mb-4 mt-4'>
             No Events Found
           </p>
         </div>

@@ -14,7 +14,7 @@ const LoginButton = () => {
   return (
     <Link
       href='/login'
-      className='py-2 px-4 flex no-underline text-foreground tracking-wider dark:text-dark-text-foreground border-foreground max-h-10'
+      className='py-2 px-4 flex no-underline text-foreground tracking-wider border-foreground max-h-10'
     >
       <p>Login</p>
       <LogInIcon className='h-6 w-6 ml-2' />
@@ -31,21 +31,21 @@ const Navbar: FC<NavbarProps> = async ({ user }) => {
             <Button
               variant='ghost'
               size='icon'
-              className='text-primary-foreground border-0'
+              className='text-foreground border-0'
             >
               <Menu className='h-6 w-6' />
               <span className='sr-only'>Open menu</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className='w-[20rem] bg-background dark:bg-dark-foreground border-black rounded-2xl'
+            className='w-[20rem] bg-popover text-popover-foreground border-foreground rounded-2xl'
             align='end'
           >
             <div className='grid gap-4'>
               {!user && <LoginButton />}
               {user && (
                 <>
-                  <p className='text-foreground dark:text-dark-text-foreground tracking-wider'>
+                  <p className='text-foreground tracking-wider'>
                     Hey, {user.email}{' '}
                   </p>
                   <LogoutButton />
@@ -61,25 +61,3 @@ const Navbar: FC<NavbarProps> = async ({ user }) => {
 };
 
 export default Navbar;
-
-{
-  /* <div>
-          {user ? (
-            <div className='flex items-center gap-4  '>
-              Hey, {user.email}!
-              <LogoutButton />
-              <InviteUserButton />
-            </div>
-          ) : (
-            <div className='flex items-center gap-4'>
-              <Link
-                href='/login'
-                className='py-2 px-4 rounded-full no-underline text-foreground border-foreground border-2 bg-btn-background hover:bg-btn-background-hover max-h-10'
-              >
-                Login
-              </Link>
-              <InstallAppButton />
-            </div>
-          )}
-        </div> */
-}

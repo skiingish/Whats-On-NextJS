@@ -43,13 +43,13 @@ export default async function Index() {
   let randomPicture = pictures[Math.floor(Math.random() * pictures.length)];
 
   return (
-    <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background dark:bg-dark-background'>
+    <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background'>
       <Navbar user={user} />
 
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
         <div className='flex flex-col items-center mx-2 lg:mb-8'>
           <p
-            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2 dark:text-dark-text-foreground`}
+            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl leading-tight! mx-auto max-w-xl text-center my-2`}
           >
             Specials Spotter!
           </p>

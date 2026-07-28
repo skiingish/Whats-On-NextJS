@@ -35,7 +35,7 @@ export default function DeleteItemButton({ id }: { id: number }) {
   return (
     <form onSubmit={handleDelete}>
       <input type='hidden' name='id' value={id} />
-      <button className='bg-red-700 hover:bg-red-500 rounded px-4 py-2 text-white mb-2'>
+      <button className='bg-destructive hover:bg-destructive/90 rounded px-4 py-2 text-destructive-foreground mb-2'>
         Delete
       </button>
     </form>

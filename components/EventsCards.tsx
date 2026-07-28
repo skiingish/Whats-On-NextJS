@@ -39,7 +39,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
           events?.map((event) => {
             return (
               <div
-                className='flex flex-wrap py-2 my-4 rounded-2xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
+                className='flex flex-wrap py-2 my-4 rounded-2xl text-foreground border-2 border-foreground bg-background-secondary'
                 key={event.id}
               >
                 {event.venue && (
@@ -52,7 +52,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
                 <div className='px-4 flex'>
                   {event.is_favorite ? (
                     <button
-                      className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                      className='text-foreground content-center rounded-lg hover:bg-muted'
                       onClick={() => {
                         removeFavourite(event);
                         refreshFavourites();
@@ -65,7 +65,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
                     </button>
                   ) : (
                     <button
-                      className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                      className='text-foreground content-center rounded-lg hover:bg-muted'
                       onClick={() => {
                         addFavourite(event);
                         refreshFavourites();
@@ -78,7 +78,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
                     </button>
                   )}
                   <button
-                    className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                    className='text-foreground content-center rounded-lg hover:bg-muted'
                     onClick={() => {
                       reportEvent(event);
                     }}

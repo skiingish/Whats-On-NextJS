@@ -8,13 +8,13 @@ const Footer = ({}) => {
   const [showForm, setShowForm] = useState<boolean>(false);
 
   return (
-    <div className='w-full py-8 bg-orange-500 px-8 lg:py-8 border-t-2 border-foreground gap-4'>
+    <div className='w-full py-8 bg-accent px-8 lg:py-8 border-t-2 border-foreground gap-4'>
       <FeedBackFormModal open={showForm} setOpen={setShowForm} />
       <p className=' mb-4'>Thanks For Visiting!</p>
 
       <Button
         variant={'outline'}
-        className='w-[8rem]'
+        className='w-32'
         onClick={() => setShowForm(true)}
       >
         Give Feedback

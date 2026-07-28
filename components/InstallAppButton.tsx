@@ -65,7 +65,7 @@ export default function InstallAppButton() {
 
   return (
     <button
-      className='whitespace-no-wrap py-2 px-4 rounded-full text-foreground border-foreground border-2 bg-btn-background hover:bg-btn-background-hover flex items-center'
+      className='whitespace-no-wrap py-2 px-4 rounded-full text-foreground border-foreground border-2 bg-primary hover:bg-primary-hover flex items-center'
       onClick={promptToInstall}
     >
       <Download size={16} className='mr-1' /> Install App
