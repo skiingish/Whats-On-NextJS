@@ -234,6 +234,17 @@ this mess into `@theme` unchanged.
 ### D10. No error tracking, no error boundaries
 **Infrastructure · Impact 3 · Risk 4 · Effort 2 · Priority 28**
 
+**Partially done (2026-07-29):** `app/error.tsx` (route-segment boundary,
+retry action), `app/global-error.tsx` (root-layout boundary, renders its own
+`<html>`/`<body>`, deliberately dependency-free), and `app/not-found.tsx`
+added, all matching the neo-brutalist look via semantic token classes only.
+Both error boundaries `console.error` so failures still reach Vercel's
+function logs. No tracking service installed — see
+`docs/observability-options.md` for the evaluated options (Sentry, Vercel's
+built-in monitoring, Axiom, self-hosted GlitchTip) and the recommendation
+to adopt Sentry's free tier once a DSN exists; that step needs an account
+only the project owner can create, so it's out of scope for an agent pass.
+
 `@vercel/analytics` and `speed-insights` are page-view and performance metrics,
 not error capture. There is no `app/error.tsx` or `app/global-error.tsx`, and
 route handlers only `console.error`. Production failures surface nowhere except
@@ -356,7 +367,7 @@ unreachable.
 | D22 | ~~`EventsCards.tsx:112` renders an Edit button with no handler on every card~~ **Fixed** — button removed (Phase 5 of the admin plan builds real editing) | Code | 21 |
 | D23 | **Partly obsolete** — the invite/sign-up routes it referenced were deleted with D11. The surviving auth routes (`sign-in`, `sign-out`, `callback`) still have no test coverage, and they remain the authorisation boundary | Test | 21 |
 | D24 | ~~`proxy.ts` has no `config.matcher`, so every request including static assets triggers a `getUser()` round trip~~ **Fixed** — matcher excludes static assets, images, favicon, robots and sitemap | Infra | 20 |
-| D25 | ~~README is 7 lines with no env vars, scripts, or pointers to the migrations and test suites; no CLAUDE.md~~ **Fixed** — real quick-start with env vars, script table and doc pointers. CLAUDE.md still absent | Doc | 20 |
+| D25 | ~~README is 7 lines with no env vars, scripts, or pointers to the migrations and test suites; no CLAUDE.md~~ **Fixed** — real quick-start with env vars, script table and doc pointers. `CLAUDE.md` added 2026-07-29 covering the admin-only access model, RLS test invariants, test setup, TS 7/ESLint wrinkles and key gotchas | Doc | 20 |
 | D26 | ~~Validation is inconsistent — `AddSpecialModal` defines a Zod schema it never parses; the two modals that do validate surface `error.message`, the raw JSON issues array~~ **Fixed** — `AddSpecialModal` now parses its schema (and its stray unused `set` import is gone); all three modals show `z.prettifyError(result.error)` and return early on failure instead of double-toasting (validation toast + generic catch-all toast) | Code | 20 |
 | D27 | `dayformatter`'s separator bug is pinned by tests rather than fixed — the two collapse branches have never fired in production | Code | 16 |
 | D28 | ~~`EventDrawer.tsx:30` reads `window.innerWidth` in the render body, never recomputes, and risks a hydration mismatch~~ **Fixed** — now uses a `matchMedia('(min-width: 1024px)')` listener, same pattern as `VenueMap`'s dark-mode query | Code | 16 |
