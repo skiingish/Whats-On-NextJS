@@ -6,7 +6,7 @@ export default function NotFound() {
           Nothing here
         </h1>
         <p className='text-foreground'>
-          There's no page at this address. It may have moved, or the link
+          There&apos;s no page at this address. It may have moved, or the link
           you followed was wrong.
         </p>
         <div className='pt-2'>
