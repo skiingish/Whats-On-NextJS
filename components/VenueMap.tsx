@@ -89,24 +89,46 @@ export default function VenueMap({
     );
   }, [venues, filteredEvents]);
 
-  // Centre on the average of whatever is on screen, or fall back to Melbourne.
+  // Fit the viewport to the venues rather than centring on their average at a
+  // fixed zoom. Averaging put the centre in roughly the right place but said
+  // nothing about how far apart the pins were, so a hardcoded zoom of 13 (a
+  // few km across) left most of them off-screen as soon as the data spread
+  // past one suburb.
   const initialViewState = useMemo(() => {
-    if (visibleVenues.length === 0) {
+    // parseFloat('') and parseFloat(null) are both NaN, and the old `|| '0'`
+    // default turned a missing coordinate into a pin off West Africa — which
+    // would then stretch the bounds across the planet. Drop those rows here.
+    const points = visibleVenues
+      .map((venue) => ({
+        latitude: parseFloat(venue.latitude ?? ''),
+        longitude: parseFloat(venue.longitude ?? ''),
+      }))
+      .filter(
+        (point) => Number.isFinite(point.latitude) && Number.isFinite(point.longitude)
+      );
+
+    if (points.length === 0) {
       return { ...FALLBACK_CENTRE, zoom: 13 };
     }
 
-    const total = visibleVenues.reduce(
-      (acc, venue) => ({
-        latitude: acc.latitude + parseFloat(venue.latitude || '0'),
-        longitude: acc.longitude + parseFloat(venue.longitude || '0'),
-      }),
-      { latitude: 0, longitude: 0 }
-    );
+    // A single venue has no extent to fit, so bounds would collapse to a point
+    // and Mapbox would zoom to its maximum. Centre on it instead.
+    if (points.length === 1) {
+      return { ...points[0], zoom: 14 };
+    }
+
+    const latitudes = points.map((point) => point.latitude);
+    const longitudes = points.map((point) => point.longitude);
 
     return {
-      latitude: total.latitude / visibleVenues.length,
-      longitude: total.longitude / visibleVenues.length,
-      zoom: 13,
+      bounds: [
+        [Math.min(...longitudes), Math.min(...latitudes)],
+        [Math.max(...longitudes), Math.max(...latitudes)],
+      ] as [[number, number], [number, number]],
+      // Padding keeps edge pins clear of the frame and of the NavigationControl
+      // in the top-right; maxZoom stops a tight cluster from slamming to
+      // street level.
+      fitBoundsOptions: { padding: 64, maxZoom: 15 },
     };
     // Deliberately only the initial view — remounting on every filter change
     // would yank the map out from under someone who has panned away.
