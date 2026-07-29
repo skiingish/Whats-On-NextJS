@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import Link from 'next/link';
+import type { User } from '@supabase/supabase-js';
 import LogoutButton from '../components/LogoutButton';
 import InstallAppButton from '@/components/InstallAppButton';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -7,7 +8,7 @@ import { Button } from './ui/button';
 import { LogInIcon, Menu } from 'lucide-react';
 
 interface NavbarProps {
-  user: any;
+  user: User | null;
 }
 
 const LoginButton = () => {

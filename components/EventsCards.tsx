@@ -2,7 +2,7 @@ import DeleteItemButton from './DeleteItemButton';
 import ReportEventModal from './ReportEventModal';
 import { dayformatter } from '@/utils/dataformatter';
 import { addFavourite, removeFavourite } from '@/utils/favouritesHandler';
-import { FC, use, useState, useEffect } from 'react';
+import { FC, use, useState } from 'react';
 export const dynamic = 'force-dynamic';
 import { CalendarDays, Clock, Flag, AlertCircle, Star } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
@@ -21,11 +21,14 @@ const EventsCards: FC<EventsDisplayProps> = ({
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reportedEvent, reportEvent] = useState<Events | null>(null);
 
-  useEffect(() => {
-    if (reportedEvent && !showReportModal) {
-      setShowReportModal(true);
-    }
-  }, [reportedEvent]);
+  // Opening the modal is a direct consequence of the user's click, not a
+  // reaction to reportedEvent changing behind the scenes — so it's set here
+  // rather than synced afterwards via an effect (which also needed
+  // showReportModal itself as a dependency it didn't declare).
+  const handleReportClick = (event: Events) => {
+    reportEvent(event);
+    setShowReportModal(true);
+  };
 
   return (
     <>
@@ -80,7 +83,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
                   <button
                     className='text-foreground content-center rounded-lg hover:bg-muted'
                     onClick={() => {
-                      reportEvent(event);
+                      handleReportClick(event);
                     }}
                   >
                     <AlertCircle className='p-1' size={32} />

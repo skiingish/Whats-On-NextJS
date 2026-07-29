@@ -32,6 +32,28 @@ const pictures = [
   skistore,
 ];
 
+// Picks the hero image deterministically, seeded by the day of the year, so
+// it still rotates day to day but two renders on the same day — including
+// the two back-to-back requests Playwright's light/dark projects make in
+// the same run — produce the exact same pick. `Math.random()` here used to
+// violate react-hooks/purity (D31) and was also the root cause of the
+// visual-test flakiness that `tests/visual/screens.spec.ts` works around:
+// the source images have different aspect ratios (verified: most are
+// ~1.5:1, but poutine is 1.25:1 and bingo is ~1.47:1), so a different pick
+// shifted the rendered height of everything below the hero. Determinism
+// fixes the within-run flakiness; the images' differing aspect ratios mean
+// the height can still legitimately differ from one day to the next, so
+// `pinHeroImage`'s height pin in the visual suite is still needed (see the
+// comment there).
+function pickHeroImage(): (typeof pictures)[number] {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor(
+    (now.getTime() - startOfYear.getTime()) / 86_400_000
+  );
+  return pictures[dayOfYear % pictures.length];
+}
+
 export default async function Index() {
   const supabase = await createClient();
 
@@ -39,8 +61,7 @@ export default async function Index() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Randomly select a picture from the array.
-  let randomPicture = pictures[Math.floor(Math.random() * pictures.length)];
+  const heroPicture = pickHeroImage();
 
   return (
     <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background'>
@@ -56,7 +77,7 @@ export default async function Index() {
         </div>
         <Image
           className='hidden lg:block opacity-80 w-full lg:max-h-96 object-cover'
-          src={randomPicture}
+          src={heroPicture}
           alt='Picture logo'
           placeholder='blur'
         />
@@ -64,7 +85,7 @@ export default async function Index() {
 
       <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 text-foreground'>
         <EventsSection user={user} />
-        <AddEventDisplay userStatus={user?.aud} />
+        <AddEventDisplay userLoggedIn={!!user} />
       </div>
       <div className='w-full'>
         <Footer />

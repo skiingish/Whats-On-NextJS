@@ -150,12 +150,11 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
                   >
                     {userLoggedIn ? 'Add Event' : 'Add New Event For Review'}
                   </Dialog.Title>
-                  {/* No htmlFor here: VenueComboBox (components/ui/combobox.tsx)
-                      doesn't expose an id on its trigger, and that file is
-                      out of scope for this pass — flagging rather than
-                      reaching into components/ui. */}
-                  <label className='text-md font-semibold'>Where</label>
+                  <label className='text-md font-semibold' htmlFor='venue'>
+                    Where
+                  </label>
                   <VenueComboBox
+                    id='venue'
                     value={selectedVenue}
                     onChange={setSelectedVenue}
                     canCreateVenue={!!userLoggedIn}

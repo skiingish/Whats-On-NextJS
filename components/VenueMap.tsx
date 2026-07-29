@@ -1,7 +1,7 @@
 'use client';
 import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type { User } from '@supabase/supabase-js';
 import EventDrawer from './EventDrawer';
 import EventsCards from './EventsCards';
@@ -25,16 +25,20 @@ export default function VenueMap({
   user,
 }: VenueMapProps) {
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
 
-  // react-map-gl touches window on first render, so keep it off the server.
-  const [mounted, setMounted] = useState(false);
+  // react-map-gl touches `window` on first render, so it can only mount once
+  // we're definitely on the client. useSyncExternalStore's server snapshot
+  // is always `false` and its client snapshot is always `true` — there is
+  // nothing to subscribe to, so `subscribe` never fires — which reports
+  // "mounted" without the setState-in-effect round trip a
+  // useState+useEffect guard would need.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Tailwind's default dark mode is media-based, so follow the same signal.
   useEffect(() => {
@@ -46,17 +50,15 @@ export default function VenueMap({
     return () => query.removeEventListener('change', sync);
   }, []);
 
-  useEffect(() => {
-    if (selectedVenue) {
-      setDrawerOpen(true);
-    }
-  }, [selectedVenue]);
+  // The drawer's open state is derived from selectedVenue rather than kept
+  // in its own piece of state synced via effects — the previous version had
+  // two effects (one opening the drawer when a venue was selected, one
+  // clearing the venue when the drawer closed) cascading off each other.
+  const drawerOpen = selectedVenue !== null;
 
-  useEffect(() => {
-    if (selectedVenue && !drawerOpen) {
-      setSelectedVenue(null);
-    }
-  }, [drawerOpen]);
+  const handleDrawerOpenChange = (open: boolean) => {
+    if (!open) setSelectedVenue(null);
+  };
 
   const refreshFavourites = () => {
     setRefreshingEvents(true);
@@ -143,7 +145,7 @@ export default function VenueMap({
         </Map>
       )}
 
-      <EventDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+      <EventDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
         {selectedVenue ? (
           <div className=''>
             <h1 className='text-xl text-center mb-4'>{selectedVenue.name}</h1>

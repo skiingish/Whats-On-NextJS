@@ -48,15 +48,15 @@ function useAddToHomescreenPrompt(): [
 
 export default function InstallAppButton() {
   const [prompt, promptToInstall] = useAddToHomescreenPrompt();
-  const [isVisible, setVisibleState] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(false);
 
-  const hide = () => setVisibleState(false);
+  const hide = () => setDismissed(true);
 
-  React.useEffect(() => {
-    if (prompt) {
-      setVisibleState(true);
-    }
-  }, [prompt]);
+  // Visible once the browser has actually offered to install, unless the
+  // visitor dismissed it — derived directly from `prompt` rather than
+  // mirrored into its own state via an effect, which was only ever
+  // syncing one piece of state to another with no external system involved.
+  const isVisible = !!prompt && !dismissed;
 
   // if no need for the button, don't render anything.
   if (!isVisible) {

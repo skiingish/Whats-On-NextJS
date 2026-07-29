@@ -4,12 +4,10 @@ import AddSpecialModal from './AddSpecialModal';
 import { Button } from './ui/button';
 
 interface AddEventDisplayProps {
-  userStatus: string | null | undefined;
+  userLoggedIn: boolean;
 }
 
-const AddEventDisplay: FC<AddEventDisplayProps> = ({
-  userStatus: userStatus,
-}) => {
+const AddEventDisplay: FC<AddEventDisplayProps> = ({ userLoggedIn }) => {
   const [showForm, setShowForm] = useState<boolean>(false);
 
   return (
@@ -18,11 +16,11 @@ const AddEventDisplay: FC<AddEventDisplayProps> = ({
         event={null}
         open={showForm}
         setOpen={setShowForm}
-        userLoggedIn={userStatus ? true : false}
+        userLoggedIn={userLoggedIn}
       />
       <div className='flex justify-center'>
         <Button onClick={() => setShowForm(true)} className='w-1/2 lg:w-1/3'>
-          {userStatus ? 'Add New Event' : 'Something Missing?'}
+          {userLoggedIn ? 'Add New Event' : 'Something Missing?'}
         </Button>
       </div>
     </div>

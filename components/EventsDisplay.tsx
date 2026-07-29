@@ -13,20 +13,28 @@ interface EventsDisplayProps {
 }
 
 const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
-  let today = new Date().toLocaleString('en-us', { weekday: 'long' });
-
   const [activeList, setActiveList] = useState<string>('all');
   const [showList, setShowList] = useState<boolean>(true);
 
-  const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
+  // Bumped (not toggled) whenever a favourite changes, purely so the memo
+  // below has a dependency that changes on every call and re-reads
+  // localStorage — addFavourite/removeFavourite mutate it outside of React
+  // state, so there's nothing else to depend on. A previous version used a
+  // boolean flipped true->false by an effect for this same purpose, which
+  // is exactly the setState-in-effect pattern react-hooks/set-state-in-effect
+  // flags (D31): the effect existed solely to synchronize two pieces of
+  // React state with each other, with no external system involved.
+  const [favouritesVersion, setFavouritesVersion] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [searchDay, setSearchDay] = useState<string>(today);
+  const [searchDay, setSearchDay] = useState<string>(() =>
+    new Date().toLocaleString('en-us', { weekday: 'long' })
+  );
   const [animateSelector, setAnimateSelector] = useState<boolean>(true);
 
   const refreshFavourites = () => {
     console.log('refreshing favourites');
-    setRefreshingEvents(true);
+    setFavouritesVersion((version) => version + 1);
   };
 
   useEffect(() => {
@@ -46,22 +54,12 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
       setSearchDay('');
     } else if (e.target.value === 'today') {
       // If the value is today, then we want to show all events that are on today.
-      today = new Date().toLocaleString('en-us', { weekday: 'long' });
-      setSearchDay(today);
+      setSearchDay(new Date().toLocaleString('en-us', { weekday: 'long' }));
     } else {
       // Otherwise, we want to show all events that are on that day.
       setSearchDay(e.target.value);
     }
   };
-
-  // refreshingEvents flips true->false in one tick purely to force the
-  // memo below to re-read localStorage after addFavourite/removeFavourite
-  // mutate it outside of React state.
-  useEffect(() => {
-    if (refreshingEvents) {
-      setRefreshingEvents(false);
-    }
-  }, [refreshingEvents]);
 
   // Attach is_favorite without mutating the incoming `events` prop — the
   // original code wrote onto the prop objects directly, which meant a
@@ -75,7 +73,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
       is_favorite: favourites.some((favorite) => favorite.id === event.id),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, refreshingEvents]);
+  }, [events, favouritesVersion]);
 
   // If active list not equal to all, then we want to filter the events by the user's favourites.
   const activeListEvents = useMemo(() => {

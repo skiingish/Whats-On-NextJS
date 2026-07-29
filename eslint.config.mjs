@@ -120,21 +120,20 @@ const config = [
       'jsx-a11y/role-supports-aria-props': 'warn',
       'react/jsx-no-target-blank': 'off',
 
-      // eslint-plugin-react-hooks v7 ships the React Compiler rules, which
-      // flag long-standing patterns in this codebase rather than anything the
-      // recent work introduced — setState inside effects (VenueMap's drawer
-      // sync, EventsCards, InstallAppButton), a mutated local in
-      // EventsDisplay, and Math.random() during render in app/page.tsx.
-      //
-      // They are warnings, not off: each one is a real signal and they are
-      // tracked as D31 in docs/tech-debt-backlog.md. Left as errors they would
-      // make CI red from its very first run, which teaches everyone to ignore
-      // it. Promote these back to 'error' once D31 is cleared.
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/immutability': 'warn',
-      'react-hooks/purity': 'warn',
-      'react-hooks/preserve-manual-memoization': 'warn',
-      'react-hooks/static-components': 'warn',
+      // eslint-plugin-react-hooks v7 ships the React Compiler rules. D31
+      // (docs/tech-debt-backlog.md) tracked five of them as temporarily
+      // downgraded to 'warn' so CI wouldn't be red from day one, covering
+      // long-standing patterns: setState inside effects (VenueMap's mount
+      // guard and drawer sync, EventsCards, EventsDisplay,
+      // InstallAppButton), a mutated local in EventsDisplay, and
+      // Math.random() during render in app/page.tsx. All of those were
+      // fixed rather than suppressed — see the components themselves for
+      // the reasoning at each site — so these are back to 'error'.
+      'react-hooks/set-state-in-effect': 'error',
+      'react-hooks/immutability': 'error',
+      'react-hooks/purity': 'error',
+      'react-hooks/preserve-manual-memoization': 'error',
+      'react-hooks/static-components': 'error',
     },
   },
   {

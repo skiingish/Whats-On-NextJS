@@ -116,16 +116,18 @@ propagates if not fixed first.
 
 *Fix:* confirmation dialog plus an error toast mirroring the success path.
 
-### D5. `user: any` in every component that gates admin UI — Partially fixed
+### D5. `user: any` in every component that gates admin UI — Fixed
 **Code · Impact 4 · Risk 4 · Effort 2 · Priority 32**
 
-**Status:** `EventsDisplay.tsx`, `EventsSection.tsx`, `EventsCards.tsx` and
-`VenueMap.tsx` now type `user` as `User | null` from `@supabase/supabase-js`.
-`Navbar.tsx` and the call sites in `app/page.tsx` are out of scope for this
-pass (owned by another agent / off-limits respectively) — still `any` there.
-`app/page.tsx:89` still passes `user?.aud` to `AddEventDisplay` as the signal
-for "is this an admin"; that call site needs to change to something like
-`!!user` (or a real role once one exists) by whoever owns `app/page.tsx`.
+**Status:** `EventsDisplay.tsx`, `EventsSection.tsx`, `EventsCards.tsx`,
+`VenueMap.tsx` and now `Navbar.tsx` type `user` as `User | null` from
+`@supabase/supabase-js`. `app/page.tsx:89` passed `user?.aud` to
+`AddEventDisplay` as the "is this an admin" signal — Supabase's audience
+claim, `"authenticated"` for every logged-in user, not a role — and only
+worked because every login in this app is an admin. Changed to `!!user`;
+`AddEventDisplay`'s prop was renamed `userLoggedIn: boolean` to match what it
+actually is, rather than keeping the misleading `userStatus: string | null`
+shape.
 
 Six independent `any` declarations for the single value that authorises
 destructive actions: `EventsDisplay.tsx:11`, `EventsSection.tsx:6`,
@@ -166,7 +168,7 @@ dependency violations are exactly what a linter catches.
 
 *Fix:* `eslint.config.mjs` extending `eslint-config-next`, plus a `lint` script.
 
-### D7. Labels are not associated with their inputs — Mostly fixed
+### D7. Labels are not associated with their inputs — Fixed
 **Code · Impact 3 · Risk 3 · Effort 1 · Priority 30**
 
 **Status:** Fixed in `app/login/page.tsx` (both email and password — the
@@ -178,9 +180,10 @@ agent per D11. The day-toggle switches in `AddSpecialModal` were checked:
 each `sr-only peer` checkbox is already wrapped by its `<label>`, so it has
 an implicit accessible name and remains keyboard-reachable (`sr-only` hides
 visually, not from the accessibility tree or tab order) — no change needed
-there. One label (`AddSpecialModal`'s "Where", paired with `VenueComboBox`)
-is still unassociated: the combobox trigger in `components/ui/combobox.tsx`
-exposes no `id`, and that file is out of scope for this pass.
+there. The last gap, `AddSpecialModal`'s "Where" label paired with
+`VenueComboBox`, is closed too: `components/ui/combobox.tsx` now accepts an
+`id` prop applied to its trigger `Button`, `VenueComboBox` forwards it, and
+`AddSpecialModal` passes `id='venue'` matched to the label's `htmlFor`.
 
 `app/login/page.tsx:35` has `htmlFor='email'` but the input at line 40 carries
 only `name='email'` — no `id`. Same defect on `app/sign-up/page.tsx`, and the
@@ -395,7 +398,7 @@ unreachable.
 | D28 | ~~`EventDrawer.tsx:30` reads `window.innerWidth` in the render body, never recomputes, and risks a hydration mismatch~~ **Fixed** — now uses a `matchMedia('(min-width: 1024px)')` listener, same pattern as `VenueMap`'s dark-mode query | Code | 16 |
 | D29 | ~~`bun.lockb` predates the entire Next 13→16 upgrade; npm is canonical~~ **Fixed** — deleted | Dep | 15 |
 | D30 | `"when"` stores multiple days as one space-joined string — no index-backed "what's on today" query is possible | Arch | 12 |
-| D31 | 13 React Compiler lint warnings, downgraded from error so CI is not red from day one: `setState` inside effects (`VenueMap` drawer sync, `EventsCards`, `InstallAppButton`), a mutated local in `EventsDisplay`, and `Math.random()` during render in `app/page.tsx:43`. Promote back to `error` in `eslint.config.mjs` once cleared | Code | 21 |
+| D31 | ~~React Compiler lint warnings, downgraded from error so CI is not red from day one: `setState` inside effects (`VenueMap` mount guard and drawer sync, `EventsCards`, `EventsDisplay`, `InstallAppButton`), a mutated local in `EventsDisplay`, and `Math.random()` during render in `app/page.tsx:43`~~ **Fixed** — each site restructured rather than suppressed (`VenueMap`'s mount guard now uses `useSyncExternalStore`; its drawer state is derived from `selectedVenue` instead of synced via two cascading effects; `EventsCards` sets `showReportModal` directly in the click handler; `EventsDisplay`'s `today` is no longer a mutable render-local, and its favourites-refresh effect became a version counter; `InstallAppButton` derives visibility from `prompt` directly; the hero image is now picked deterministically, seeded by day). All five rules (`set-state-in-effect`, `immutability`, `purity`, `preserve-manual-memoization`, `static-components`) are back to `error` in `eslint.config.mjs`; `npm run lint` exits 0 | Code | 21 |
 | D32 | ESLint cannot use `eslint-config-next` directly — `typescript-eslint` throws under TypeScript 7 ([#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)), so `eslint.config.mjs` hand-assembles the same plugins with `@babel/eslint-parser`. It works, but diverges from upstream and needs `legacy-peer-deps`. Revert to the real config once the ecosystem supports TS 7 | Dep | 20 |
 | D33 | Visual baselines are all captured logged out, so no admin-only UI is covered — removing the dead Edit button changed rendering and the suite could not see it. Needs an authenticated Playwright fixture, which needs D2 | Test | 18 |
 

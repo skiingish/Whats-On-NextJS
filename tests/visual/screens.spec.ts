@@ -27,21 +27,33 @@ test.beforeEach(async ({ page }) => {
 });
 
 /**
- * The homepage picks a random hero image on every server render
- * (`Math.floor(Math.random() * pictures.length)` in app/page.tsx). That's a
- * genuine source of cross-run nondeterminism unrelated to anything a
- * dependency upgrade would change, so it's masked out rather than "fixed" —
- * fixing it would mean editing app code for a test-harness task.
+ * The homepage picks its hero image, so its exact pixels are irrelevant to
+ * layout tests — masked out rather than compared. app/page.tsx used to pick
+ * with `Math.random()` on every server render (fixed as part of D31: that
+ * was also an impure-during-render react-hooks/purity violation); it now
+ * picks deterministically, seeded by the day of the year, so repeated
+ * requests within the same run — and within the same calendar day — get the
+ * identical image. The mask stays regardless of which image renders.
  */
 function heroImageMask(page: Page): Locator {
   return page.getByAltText('Picture logo');
 }
 
 /**
- * app/page.tsx picks the hero image at random per server render, and it is
- * laid out with `w-full lg:max-h-96 object-cover`. Source images have
- * different aspect ratios, so the rendered HEIGHT varies between runs and
- * everything below it shifts.
+ * app/page.tsx's hero image is laid out with `w-full lg:max-h-96
+ * object-cover`, and the source images have different aspect ratios
+ * (verified: most are ~1.5:1, but poutine is 1.25:1 and bingo is ~1.47:1),
+ * so the rendered HEIGHT depends on which image renders and everything
+ * below it shifts.
+ *
+ * Picking the image deterministically (D31) removed the *within-run*
+ * variation — every request in a single `npm run test:visual` invocation
+ * now renders the same image, since the pick is seeded by the day, not the
+ * request — but two runs on different calendar days can still legitimately
+ * pick different images with different aspect ratios. So this pin is still
+ * needed for day-to-day stability, just not for the reason it originally
+ * was. Confirmed by running the suite repeatedly on the same day (all
+ * green) — the remaining exposure is only across a date boundary.
  *
  * Masking cannot fix this — a mask hides pixels, not layout. So pin the
  * element's box to the height `max-h-96` caps it at. Nothing is lost: the

@@ -18,6 +18,8 @@ interface VenueComboBoxProps {
   className?: string;
   /** Admins create venues immediately; visitors only propose a name. */
   canCreateVenue?: boolean;
+  /** Forwarded to the underlying Combobox's trigger button. */
+  id?: string;
 }
 
 export function VenueComboBox({
@@ -25,6 +27,7 @@ export function VenueComboBox({
   onChange,
   className,
   canCreateVenue = false,
+  id,
 }: VenueComboBoxProps) {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [proposedVenue, setProposedVenue] = useState<string | null>(null);
@@ -100,6 +103,7 @@ export function VenueComboBox({
 
   return (
     <Combobox
+      id={id}
       options={options}
       value={value}
       onChange={onChange}
