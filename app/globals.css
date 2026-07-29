@@ -16,14 +16,22 @@
  * doesn't change between themes, so its foreground stays a fixed
  * near-black in both the light and dark blocks rather than tracking
  * `--foreground`.
+ *
+ * Dark mode is driven by `prefers-color-scheme` alone — deliberately, not by
+ * omission. shadcn's convention is a `.dark` class plus
+ * `@custom-variant dark (&:is(.dark *))`, toggled by something like
+ * next-themes, which lets a user override their OS. That was considered and
+ * declined: nothing in this app ever toggled a class, so a media query is an
+ * honest description of the behaviour, and it avoids a dependency and the
+ * hydration dance that a toggle requires. Adding one later means introducing
+ * the custom variant, swapping these `@media` blocks for `:root.dark`, and
+ * switching the visual suite's dark project from `colorScheme` to setting
+ * the class.
  */
 @theme {
   --color-background: hsl(var(--background));
   --color-background-secondary: hsl(var(--background-secondary));
   --color-foreground: hsl(var(--foreground));
-
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
 
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
@@ -60,9 +68,6 @@
     --background: 34 47% 89%;
     --background-secondary: 0 0% 100%;
     --foreground: 200 50% 3%;
-
-    --card: var(--background-secondary);
-    --card-foreground: var(--foreground);
 
     --popover: var(--background-secondary);
     --popover-foreground: var(--foreground);
