@@ -1,20 +1,31 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
 
 /**
- * Visual-regression baselines for the pre-upgrade app.
+ * Visual-regression baselines.
  *
- * Requires fixture data to already be seeded in Supabase (3x `PWTEST `-
- * prefixed venues, one event each) — see tests/visual/README.md. Without it,
- * the map has no markers and the events list is empty, and several of these
- * tests will fail (rather than silently pass against an empty page).
+ * These used to depend on three `PWTEST `-prefixed fixture venues seeded into
+ * an otherwise-empty database. That assumption no longer holds: the database
+ * now carries real venue and event data permanently, so the fixtures were
+ * deleted and the page is never empty. Nothing needs seeding before a run.
+ *
+ * The consequence, stated plainly because it will bite otherwise: **these
+ * baselines are pinned to the live dataset.** Adding, editing or removing a
+ * venue or special legitimately changes what these screenshots capture, and
+ * the suite will fail until `npm run test:visual:update` is re-run. That is a
+ * property of testing against a shared live database, not a flake — see
+ * tests/visual/README.md for why there is no isolated test database yet.
+ *
+ * To keep the diff meaningful despite that, the *waits* below deliberately do
+ * not encode how much data exists (no hardcoded marker count, no fixture
+ * venue name). They wait for "the data has rendered" and let the screenshot
+ * itself be the assertion. So a data change alters the baseline images but
+ * never breaks the test logic.
  *
  * Each test runs twice — once under the `light` project, once under `dark`
  * (see playwright.config.ts) — because VenueMap.tsx swaps the Mapbox style
  * based on `prefers-color-scheme`, so dark mode is a genuinely different
  * render, not just a CSS filter.
  */
-
-const FIXTURE_MARKER_COUNT = 3;
 
 test.beforeEach(async ({ page }) => {
   // Vercel's analytics/speed-insights scripts and Mapbox's telemetry beacon
@@ -83,60 +94,38 @@ async function pinHeroImage(page: Page) {
 }
 
 /**
- * Mapbox raster tiles are fetched from a live tile server and will never be
- * byte-identical between runs (CDN routing, cache state, label placement can
- * all vary). Masking the canvas is the reliable option: the markers and the
- * event drawer are ordinary DOM the browser lays out deterministically, so
- * they still get compared pixel-for-pixel; only the tile imagery itself is
- * excluded. The alternative — waiting for tile 'idle' and accepting a small
- * maxDiffPixelRatio — was rejected because it trades a hard guarantee for a
- * fuzzy one, and the whole point of this harness is a baseline you can trust.
+ * Removes the Mapbox tile imagery from the comparison while leaving
+ * everything drawn on top of it intact.
  *
- * `coveredBy`, when passed, is an element that renders on top of the right
- * portion of the canvas (the event drawer, at z-50, sits over the map).
- * Playwright's mask paints over a locator's bounding box regardless of what
- * Chromium actually stacked on top of it — so naively masking the *whole*
- * canvas would blot out the drawer's real, deterministic content (the venue
- * heading, the event card) anywhere it happens to overlap the canvas's
- * bounding box. Instead, a synthetic element is sized to just the sliver of
- * canvas to the left of `coveredBy`, so only genuinely-visible tile pixels
- * get masked and the drawer stays fully comparable.
+ * Tiles come from a live server and will never be byte-identical between runs
+ * (CDN routing, cache state, label placement), so they have to be excluded
+ * somehow. This used to be done with Playwright's `mask` option pointed at
+ * `.mapboxgl-canvas` — but a mask paints an opaque box over the locator's
+ * *bounding box*, regardless of what Chromium actually stacked above it. The
+ * canvas's bounding box is the entire map, and the markers are siblings
+ * rendered over it, so masking the canvas blotted out the markers too. The
+ * `map > markers visible` baseline was a solid magenta rectangle: the test
+ * could not have detected a marker regression, or the markers disappearing
+ * entirely. It went from three markers to seven without producing a diff,
+ * which is how this was noticed.
+ *
+ * Hiding the canvas element instead is strictly better. `visibility: hidden`
+ * removes the tile pixels but leaves layout untouched, and the markers, the
+ * navigation control and the event drawer are separate DOM nodes that keep
+ * rendering — so they are genuinely compared pixel-for-pixel, which is what
+ * the mask was only ever claimed to do. It also removes the need for the
+ * synthetic partial-mask element the drawer test previously required.
+ *
+ * The tradeoff is unchanged and still accepted: a regression visible *only*
+ * in the tile imagery (say a Mapbox GL major bump altering raster rendering)
+ * is invisible here. Waiting for tile idle and accepting a small
+ * `maxDiffPixelRatio` was rejected for trading a hard guarantee for a fuzzy
+ * one.
  */
-async function mapboxCanvasMask(
-  page: Page,
-  coveredBy?: Locator
-): Promise<Locator> {
-  const canvas = page.locator('.mapboxgl-canvas');
-  if (!coveredBy) return canvas;
-
-  const canvasBox = await canvas.boundingBox();
-  const coveringBox = await coveredBy.boundingBox();
-  if (!canvasBox || !coveringBox) return canvas; // fall back rather than crash
-
-  const visibleWidth = Math.max(0, coveringBox.x - canvasBox.x);
-
-  await page.evaluate(
-    ({ x, y, width, height }) => {
-      const id = 'pw-visible-canvas-mask';
-      let el = document.getElementById(id);
-      if (!el) {
-        el = document.createElement('div');
-        el.id = id;
-        document.body.appendChild(el);
-      }
-      Object.assign(el.style, {
-        position: 'fixed',
-        left: `${x}px`,
-        top: `${y}px`,
-        width: `${width}px`,
-        height: `${height}px`,
-        pointerEvents: 'none',
-      });
-    },
-    { x: canvasBox.x, y: canvasBox.y, width: visibleWidth, height: canvasBox.height }
-  );
-
-  return page.locator('#pw-visible-canvas-mask');
+async function hideMapTiles(page: Page): Promise<void> {
+  await page.addStyleTag({
+    content: `.mapboxgl-canvas { visibility: hidden !important; }`,
+  });
 }
 
 /**
@@ -181,15 +170,49 @@ async function waitForNoMotion(
   // comparison itself catch a genuinely-unstable render.
 }
 
+/**
+ * Waits until every venue marker has rendered.
+ *
+ * Deliberately does not assert an exact count. The old version pinned this to
+ * the three seeded fixtures, which meant the number of rows in a shared
+ * database was baked into the test logic — adding a venue broke the wait
+ * itself, not just the baseline image. Instead: require at least one marker
+ * (so an empty map is still a failure rather than a silent pass against blank
+ * chrome), then wait for the count to stop changing so the screenshot can't
+ * fire mid-render.
+ */
+async function waitForMarkers(page: Page): Promise<void> {
+  const markers = page.locator('.mapboxgl-marker');
+  await expect(markers.first()).toBeVisible();
+
+  let last = -1;
+  for (let i = 0; i < 20; i++) {
+    const count = await markers.count();
+    if (count === last && count > 0) return;
+    last = count;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
+/**
+ * Every event card renders a "Report" button, so this is a data-independent
+ * signal that the events list has actually populated — as opposed to waiting
+ * on a specific venue's name, which ties the test to whichever rows happen to
+ * be in the database.
+ */
+function anyEventCard(page: Page): Locator {
+  return page.getByRole('button', { name: 'Report' }).first();
+}
+
 test.describe('home', () => {
   test('logged out', async ({ page }) => {
     await page.goto('/');
 
-    // Real signal: wait for the seeded fixture data to actually be on the
-    // page, not just for the network to go quiet. (The Navbar's "Login" link
-    // lives inside a closed-by-default Popover, so it isn't a usable signal
-    // for the logged-out landing state without opening the menu first.)
-    await expect(page.getByText('PWTEST', { exact: false }).first()).toBeVisible();
+    // Real signal: wait for event data to actually be on the page, not just
+    // for the network to go quiet. (The Navbar's "Login" link lives inside a
+    // closed-by-default Popover, so it isn't a usable signal for the
+    // logged-out landing state without opening the menu first.)
+    await expect(anyEventCard(page)).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Something Missing?' })
     ).toBeVisible();
@@ -203,7 +226,7 @@ test.describe('home', () => {
 
   test('add event modal open', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('PWTEST', { exact: false }).first()).toBeVisible();
+    await expect(anyEventCard(page)).toBeVisible();
 
     await pinHeroImage(page);
 
@@ -230,9 +253,7 @@ test.describe('map', () => {
   test('markers visible', async ({ page }) => {
     await page.goto('/map');
 
-    await expect(page.locator('.mapboxgl-marker')).toHaveCount(
-      FIXTURE_MARKER_COUNT
-    );
+    await waitForMarkers(page);
     // Best-effort: let the tile/style requests settle so marker projection
     // has stabilised. Non-fatal — the canvas is masked regardless, so a
     // lingering telemetry-style request here can't affect the comparison.
@@ -240,27 +261,26 @@ test.describe('map', () => {
       .waitForLoadState('networkidle', { timeout: 5_000 })
       .catch(() => {});
 
-    await expect(page).toHaveScreenshot('map-markers.png', {
-      mask: [await mapboxCanvasMask(page)],
-    });
+    await hideMapTiles(page);
+
+    await expect(page).toHaveScreenshot('map-markers.png');
   });
 
   test('drawer open', async ({ page }) => {
     await page.goto('/map');
 
-    await expect(page.locator('.mapboxgl-marker')).toHaveCount(
-      FIXTURE_MARKER_COUNT
-    );
+    await waitForMarkers(page);
     await page
       .waitForLoadState('networkidle', { timeout: 5_000 })
       .catch(() => {});
 
     await page.locator('.mapboxgl-marker').first().click();
 
-    // Real signal: the drawer renders the selected venue's name as an <h1>,
-    // and our fixture venues are all named "PWTEST ...".
+    // Real signal: the drawer renders the selected venue's name as an <h1>.
+    // Matching the element rather than a specific venue's name keeps this
+    // working whichever venue happens to be first in the data.
     await expect(
-      page.getByRole('heading', { name: 'PWTEST', exact: false })
+      page.locator('[data-vaul-drawer] h1')
     ).toBeVisible();
     // vaul's DrawerClose wraps our Button in its own <button>, so the
     // accessible name "Close" matches two nested elements — take the outer
@@ -268,9 +288,9 @@ test.describe('map', () => {
     await expect(page.getByRole('button', { name: 'Close' }).first()).toBeVisible();
     await waitForNoMotion(page.locator('[data-vaul-drawer]'));
 
-    await expect(page).toHaveScreenshot('map-drawer-open.png', {
-      mask: [await mapboxCanvasMask(page, page.locator('[data-vaul-drawer]'))],
-    });
+    await hideMapTiles(page);
+
+    await expect(page).toHaveScreenshot('map-drawer-open.png');
   });
 });
 

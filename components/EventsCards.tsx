@@ -55,6 +55,14 @@ const EventsCards: FC<EventsDisplayProps> = ({
                 <div className='px-4 flex'>
                   {event.is_favorite ? (
                     <button
+                      // The visible label below is `invisible` until hover,
+                      // and visibility:hidden removes it from the
+                      // accessibility tree — so without this the button had
+                      // no accessible name at all and announced as just
+                      // "button". aria-label also gives the visual-regression
+                      // suite a stable, data-independent handle on an event
+                      // card.
+                      aria-label='Remove favourite'
                       className='text-foreground content-center rounded-lg hover:bg-muted'
                       onClick={() => {
                         removeFavourite(event);
@@ -68,6 +76,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
                     </button>
                   ) : (
                     <button
+                      aria-label='Add favourite'
                       className='text-foreground content-center rounded-lg hover:bg-muted'
                       onClick={() => {
                         addFavourite(event);
@@ -81,6 +90,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
                     </button>
                   )}
                   <button
+                    aria-label='Report'
                     className='text-foreground content-center rounded-lg hover:bg-muted'
                     onClick={() => {
                       handleReportClick(event);
