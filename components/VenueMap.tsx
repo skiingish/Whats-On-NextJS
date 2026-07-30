@@ -1,7 +1,14 @@
 'use client';
-import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
+import Map, { Marker, NavigationControl, type MapRef } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type { User } from '@supabase/supabase-js';
 import EventDrawer from './EventDrawer';
 import EventsCards from './EventsCards';
@@ -39,6 +46,13 @@ export default function VenueMap({
     () => false
   );
   const [darkMode, setDarkMode] = useState(false);
+
+  const mapRef = useRef<MapRef | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  // Whether the bounds have been fitted against a container that actually had
+  // a size. Guards the re-fit below so it corrects the initial state once and
+  // then never fights the user's panning or zooming.
+  const hasFittedRef = useRef(false);
 
   // Tailwind's default dark mode is media-based, so follow the same signal.
   useEffect(() => {
@@ -94,7 +108,7 @@ export default function VenueMap({
   // nothing about how far apart the pins were, so a hardcoded zoom of 13 (a
   // few km across) left most of them off-screen as soon as the data spread
   // past one suburb.
-  const initialViewState = useMemo(() => {
+  const { initialViewState, fitTarget } = useMemo(() => {
     // parseFloat('') and parseFloat(null) are both NaN, and the old `|| '0'`
     // default turned a missing coordinate into a pin off West Africa — which
     // would then stretch the bounds across the planet. Drop those rows here.
@@ -108,39 +122,116 @@ export default function VenueMap({
       );
 
     if (points.length === 0) {
-      return { ...FALLBACK_CENTRE, zoom: 13 };
+      return {
+        initialViewState: { ...FALLBACK_CENTRE, zoom: 13 },
+        fitTarget: null,
+      };
     }
 
     // A single venue has no extent to fit, so bounds would collapse to a point
-    // and Mapbox would zoom to its maximum. Centre on it instead.
+    // and Mapbox would zoom to its maximum. Centre on it instead — and there is
+    // nothing to re-fit later, since a point has no extent to get wrong.
     if (points.length === 1) {
-      return { ...points[0], zoom: 14 };
+      return {
+        initialViewState: { ...points[0], zoom: 14 },
+        fitTarget: null,
+      };
     }
 
     const latitudes = points.map((point) => point.latitude);
     const longitudes = points.map((point) => point.longitude);
 
+    const bounds: [[number, number], [number, number]] = [
+      [Math.min(...longitudes), Math.min(...latitudes)],
+      [Math.max(...longitudes), Math.max(...latitudes)],
+    ];
+    // Padding keeps edge pins clear of the frame and of the NavigationControl
+    // in the top-right; maxZoom stops a tight cluster from slamming to
+    // street level.
+    const options = { padding: 64, maxZoom: 15 };
+
     return {
-      bounds: [
-        [Math.min(...longitudes), Math.min(...latitudes)],
-        [Math.max(...longitudes), Math.max(...latitudes)],
-      ] as [[number, number], [number, number]],
-      // Padding keeps edge pins clear of the frame and of the NavigationControl
-      // in the top-right; maxZoom stops a tight cluster from slamming to
-      // street level.
-      fitBoundsOptions: { padding: 64, maxZoom: 15 },
+      initialViewState: { bounds, fitBoundsOptions: options },
+      fitTarget: { bounds, options },
     };
     // Deliberately only the initial view — remounting on every filter change
     // would yank the map out from under someone who has panned away.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Keep the map's canvas in step with its container.
+   *
+   * Mapbox sizes its canvas once at construction and then, per the docs, only
+   * re-measures when the *browser window* resizes — `trackResize` watches the
+   * window, not the container. Anything that changes the container's size
+   * without a window resize leaves the canvas stale, and a canvas smaller than
+   * its container paints tiles for only part of the frame: the classic
+   * "missing tiles down the right and along the bottom on first load".
+   *
+   * This app hits that squarely. On the homepage `EventsDisplay` renders the
+   * map inside `${showList ? 'hidden' : 'block'}`, and `showList` starts
+   * `true` — so the map is constructed inside a `display: none` box, measures
+   * itself as 0x0, and is still that size when the Map toggle reveals it. The
+   * Mapbox docs call this case out explicitly: a container "initially hidden
+   * with CSS" must be resized manually once shown.
+   *
+   * A ResizeObserver on the container handles that and every other variant
+   * (layout settling after fonts or the hero image load, an orientation
+   * change, a future collapsible panel) without `VenueMap` needing to know why
+   * it was hidden — which is why this lives here rather than as a callback
+   * wired up from EventsDisplay.
+   */
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !mounted) return;
+
+    const observer = new ResizeObserver(() => {
+      // Only meaningful once the box actually has an area; resizing to 0x0 as
+      // the container is hidden again would just thrash.
+      if (container.clientWidth === 0 || container.clientHeight === 0) return;
+
+      const map = mapRef.current;
+      if (!map) return;
+
+      map.resize();
+
+      // Resizing corrects the canvas, but not the framing. `initialViewState`
+      // fits the bounds at construction time — which, in the hidden-container
+      // case, means fitting them to a 0x0 viewport and arriving at a
+      // meaningless zoom. So the first time we see a real box, redo the fit
+      // properly. `duration: 0` because this is correcting a never-correct
+      // initial state, not animating a change the user asked for.
+      if (!hasFittedRef.current) {
+        hasFittedRef.current = true;
+        if (fitTarget) {
+          map.fitBounds(fitTarget.bounds, { ...fitTarget.options, duration: 0 });
+        }
+      }
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [mounted, fitTarget]);
+
+  // Belt and braces: if the style finishes loading while the container already
+  // has its final size, resize once here too. Cheap, idempotent, and covers
+  // the ordering where the observer fired before the map instance existed.
+  const handleMapLoad = useCallback(() => {
+    mapRef.current?.resize();
+  }, []);
+
   if (!venues) return <p>No Venues</p>;
 
   return (
-    <div className='h-[70vh] w-full rounded-2xl border-2 border-foreground overflow-hidden'>
+    <div
+      ref={containerRef}
+      className='h-[70vh] w-full rounded-2xl border-2 border-foreground overflow-hidden'
+    >
       {mounted && (
         <Map
+          ref={mapRef}
+          onLoad={handleMapLoad}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
           initialViewState={initialViewState}
           style={{ width: '100%', height: '100%' }}
