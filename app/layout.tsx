@@ -45,19 +45,31 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      {/* overflow-x-hidden is a safety net for the full-bleed nav/footer
-          bars below, which break out of the max-width container with a
-          100vw-based trick (see components/Navbar.tsx, components/Footer.tsx)
-          — this absorbs the sub-scrollbar-width rounding some browsers
-          introduce, per the spec's "no horizontal scroll at any width" rule. */}
+      {/* overflow-x-hidden is a belt-and-braces safety net for the mobile-
+          first "no horizontal scroll at any width" rule. It is NOT load-
+          bearing for layout width the way it once was: the shell used to
+          rely on it to contain a `w-screen`-based full-bleed trick in
+          components/Navbar.tsx, components/EventsDisplay.tsx and
+          components/Footer.tsx, but `100vw` measures the viewport
+          *including* the scrollbar gutter, which is wider than the visible,
+          scrollable area (`document.documentElement.clientWidth`) whenever a
+          vertical scrollbar is present. That mismatch was perturbing layout
+          width during a window resize and was the root cause of the Mapbox
+          canvas/container size drift covered by
+          tests/functional/map-sizing.spec.ts. Those three components now go
+          full-bleed by simply being `w-full` with no page-shell wrapper
+          around them, so there is no vw-vs-clientWidth gap left to contain —
+          this is now just cheap insurance, not the fix itself. */}
       <body className='overflow-x-hidden'>
         <main className='min-h-screen bg-background flex flex-col items-center'>
-          {/* Page shell: content max-width and responsive gutters live here
-              once, per the redesign spec, instead of being re-declared by
-              every page. */}
-          <div className='w-full max-w-[72rem] mx-auto flex flex-col items-center px-4 sm:px-6 lg:px-8'>
-            {children}
-          </div>
+          {/* No max-width wrapper here on purpose (see above): Navbar,
+              EventsDisplay's sticky filter bar and Footer need to span the
+              true, unconstrained width of `main` to be genuinely full-bleed.
+              Each page is responsible for constraining its own non-full-bleed
+              content to `max-w-[72rem]` with the standard gutters
+              (`px-4 sm:px-6 lg:px-8`), same as those three components do
+              internally for their own row of content. */}
+          {children}
           <Analytics />
           <SpeedInsights />
           <Toaster />

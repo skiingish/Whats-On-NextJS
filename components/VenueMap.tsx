@@ -255,7 +255,7 @@ export default function VenueMap({
   return (
     <div
       ref={containerRef}
-      className='h-[70vh] w-full rounded-2xl border-2 border-foreground overflow-hidden'
+      className='h-[70vh] w-full overflow-hidden rounded-xl border border-border shadow-sm'
     >
       {mounted && (
         <Map

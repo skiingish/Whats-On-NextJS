@@ -69,7 +69,10 @@ export default async function Index() {
     <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background'>
       <Navbar user={user} />
 
-      <div className='w-full flex flex-col gap-8 py-8 lg:gap-12 lg:py-12'>
+      {/* Non-full-bleed page content: constrained to the shared 72rem shell
+          width with the standard gutters, now that app/layout.tsx no longer
+          applies that wrapper globally (see the comment there). */}
+      <div className='w-full max-w-[72rem] mx-auto flex flex-col gap-8 px-4 py-8 sm:px-6 lg:gap-12 lg:px-8 lg:py-12'>
         <div className='animate-in flex flex-col items-center gap-6 opacity-0'>
           <h1
             className={`text-display text-center text-foreground ${AgbalumoRegular.className}`}
@@ -97,9 +100,7 @@ export default async function Index() {
         </div>
       </div>
 
-      <div className='w-full'>
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

@@ -51,14 +51,16 @@ const EventDrawer: FC<EventDrawerProps> = ({
     >
       <DrawerPortal>
         <DrawerTitle>{title}</DrawerTitle>
-        <DrawerContent className='bg-background text-foreground flex flex-col rounded-t-[30px] mt-24 h-[60%] fixed bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-0 lg:top-0 lg:h-full outline-hidden border-2 border-foreground'>
-          <div className='h-4 border-b-2 border-foreground'></div>
-          <div className='px-4 py-2 rounded-t-[10px] flex-1 overflow-y-auto'>
-            <div className='max-w-md mx-auto '>
-              {/* <div
-                aria-hidden
-                className='bg-black mx-auto w-12 h-1.5 shrink-0 rounded-full mb-8'
-              /> */}
+        {/*
+          `components/ui/drawer.tsx`'s DrawerContent already supplies the
+          raised-surface look this spec calls for: rounded-xl top corners,
+          hairline border, shadow, and a grab handle — so only positioning
+          (the bottom sheet on mobile vs. the right-hand panel on desktop)
+          is added here.
+        */}
+        <DrawerContent className='text-foreground fixed bottom-0 left-0 right-0 mt-24 h-[60%] outline-hidden lg:bottom-auto lg:left-auto lg:right-0 lg:top-0 lg:h-full lg:max-h-full lg:rounded-l-xl lg:rounded-t-none'>
+          <div className='flex-1 overflow-y-auto px-4 py-2'>
+            <div className='mx-auto max-w-md'>
               {children}
               <DrawerFooter>
                 {/* asChild merges the close trigger into the Button. Without

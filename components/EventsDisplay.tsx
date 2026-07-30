@@ -126,12 +126,14 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
 
       {/* Single sticky control bar: search, day filter and the List/Map
           toggle, reachable one-handed while scrolling a long list (spec
-          mobile rule 3). Full-bleed like the navbar/footer (same
-          left-1/2/w-screen breakout, see components/Navbar.tsx) so the
-          blurred surface spans the viewport while its inner row still
-          aligns to this section's own max-w-4xl column. Sits right under
-          the navbar (`top-16` == the navbar's `h-16`). */}
-      <div className='sticky top-16 z-30 left-1/2 w-screen -translate-x-1/2 border-b border-border bg-background/85 backdrop-blur-md'>
+          mobile rule 3). Full-bleed like the navbar/footer — `w-full` is
+          the true viewport width since app/layout.tsx puts no max-width
+          wrapper around page content (see the comment there for why this
+          replaced a `w-screen` breakout trick) — so the blurred surface
+          spans the viewport while its inner row still aligns to this
+          section's own max-w-4xl column. Sits right under the navbar
+          (`top-16` == the navbar's `h-16`). */}
+      <div className='sticky top-16 z-30 w-full border-b border-border bg-background/85 backdrop-blur-md'>
         <div className='mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8'>
           <div className='relative flex-1'>
             <label htmlFor='search' className='sr-only'>

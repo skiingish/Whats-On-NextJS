@@ -196,24 +196,26 @@ Each chunk is committed separately so progress survives an interrupted session.
 | 4 | Event card (`EventsCards`) | done |
 | 5 | Homepage: hero, search, filters, List/Map toggle (`EventsDisplay`, `page.tsx`) | done |
 | 6 | Modals: AddSpecial, Feedback, Report | done |
-| 7 | Map page, drawer, marker restyle **+ fix the resize regression below** | |
+| 7 | Map page, drawer, marker restyle + resize regression fixed | done |
 | 8 | Login, not-found, error, Footer extras | |
 | 9 | Mobile pass at 375/414px + dark-mode audit + contrast check | |
 | 10 | Regenerate visual baselines, full suite, final review | |
 
-## Known regression for chunk 7
+## Shell layout (settled in chunk 7 — read before adding a page)
 
-`tests/functional/map-sizing.spec.ts` → "still fills its container after the
-window resizes" **currently fails**: after `setViewportSize`, the Mapbox canvas
-measures 732px inside a 1052px container. It passed before the redesign, so the
-new shell introduced it — most likely the `max-w-[72rem]` wrapper in
-`app/layout.tsx`, the `w-screen` full-bleed technique used by the navbar,
-sticky filter bar and footer, or the `overflow-x-hidden` those require.
+`app/layout.tsx` does NOT wrap children in a max-width container. `<main>` is
+full width, so full-bleed elements (navbar, sticky filter bar, footer) need
+only `w-full`.
 
-This is the same class of bug the owner originally reported as "missing tiles
-on the right and bottom", so it must not ship. Chunk 7 owns fixing it. The
-other two map-sizing tests pass, so the container-reveal path is fine — it is
-specifically resize that regressed.
+**Each page owns its own** `max-w-[72rem] mx-auto px-4 sm:px-6 lg:px-8`
+wrapper around its non-full-bleed content.
+
+This replaced an earlier `left-1/2 w-screen -translate-x-1/2` breakout, which
+caused a real bug: `100vw` includes the scrollbar gutter while the visible
+width does not, and the mismatch perturbed the shell's computed width during a
+live window resize — leaving the Mapbox canvas 320px narrower than its
+container. That is the same class of fault as the owner's original "missing
+tiles on the right" report, so do not reintroduce `w-screen` breakouts.
 
 ## Rules for agents
 

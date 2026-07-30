@@ -40,11 +40,12 @@ const AuthStatus = ({ user }: { user: User | null }) => {
 
 const Navbar: FC<NavbarProps> = async ({ user }) => {
   return (
-    // Full-bleed sticky bar: broken out of the page shell's max-width
-    // container (see app/layout.tsx) via the 100vw trick, so the blurred
-    // background spans the whole viewport while its own inner row still
-    // aligns to the same 72rem content width.
-    <nav className='sticky top-0 left-1/2 z-40 w-screen -translate-x-1/2 border-b border-border bg-background/80 backdrop-blur-md'>
+    // Full-bleed sticky bar: app/layout.tsx puts no max-width wrapper around
+    // page content, so `w-full` here already spans the true viewport width
+    // (see the comment in app/layout.tsx for why this replaced a
+    // `w-screen`/scrollbar-sensitive breakout trick). The inner row still
+    // aligns to the shared 72rem content width via its own max-width.
+    <nav className='sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md'>
       <div className='mx-auto flex h-16 w-full max-w-[72rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8'>
         <Link href='/' className='text-section text-foreground no-underline'>
           Specials Spotter
