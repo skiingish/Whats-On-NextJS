@@ -45,9 +45,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body>
+      {/* overflow-x-hidden is a safety net for the full-bleed nav/footer
+          bars below, which break out of the max-width container with a
+          100vw-based trick (see components/Navbar.tsx, components/Footer.tsx)
+          — this absorbs the sub-scrollbar-width rounding some browsers
+          introduce, per the spec's "no horizontal scroll at any width" rule. */}
+      <body className='overflow-x-hidden'>
         <main className='min-h-screen bg-background flex flex-col items-center'>
-          {children}
+          {/* Page shell: content max-width and responsive gutters live here
+              once, per the redesign spec, instead of being re-declared by
+              every page. */}
+          <div className='w-full max-w-[72rem] mx-auto flex flex-col items-center px-4 sm:px-6 lg:px-8'>
+            {children}
+          </div>
           <Analytics />
           <SpeedInsights />
           <Toaster />

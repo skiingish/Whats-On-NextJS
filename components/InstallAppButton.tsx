@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import { Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface IBeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -64,11 +65,13 @@ export default function InstallAppButton() {
   }
 
   return (
-    <button
-      className='whitespace-no-wrap py-2 px-4 rounded-full text-foreground border-foreground border-2 bg-primary hover:bg-primary-hover flex items-center'
+    <Button
+      variant='secondary'
+      size='sm'
+      className='h-11 whitespace-nowrap'
       onClick={promptToInstall}
     >
-      <Download size={16} className='mr-1' /> Install App
-    </button>
+      <Download className='h-4 w-4' /> Install App
+    </Button>
   );
 }
