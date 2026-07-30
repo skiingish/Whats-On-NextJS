@@ -37,6 +37,8 @@ interface ComboboxProps {
   className?: string;
   loading?: boolean;
   loadingMessage?: string;
+  /** Applied to the trigger button so a `<label htmlFor>` can target it. */
+  id?: string;
 }
 
 export function Combobox({
@@ -51,6 +53,7 @@ export function Combobox({
   className = 'w-full',
   loading = false,
   loadingMessage = 'Fetching options…',
+  id,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState('');
@@ -59,6 +62,7 @@ export function Combobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
           variant='outline'
           role='combobox'
           aria-expanded={open}

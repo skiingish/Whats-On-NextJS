@@ -1,7 +1,5 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies, headers } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import AddEventDisplay from '@/components/AddEventDisplay';
-import { PawPrint } from 'lucide-react';
 import Image from 'next/image';
 
 import localFont from 'next/font/local';
@@ -20,7 +18,6 @@ import skistore from '../public/assets/skistore_1280.jpg';
 import Footer from '@/components/Footer';
 import EventsSection from '@/components/EventsSection';
 import Navbar from '@/components/Navbar';
-import RainingBurgers from '@/components/RainingAnimatation';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,50 +32,52 @@ const pictures = [
   skistore,
 ];
 
-const getSubdomainFromUrl = (url: string | null) => {
-  if (!url) return '';
-  const u = 'https://jasper.specials-spotter.com/';
-  const subdomain = u.split('://')[1].split('.')[0];
-  console.log(subdomain);
-  return subdomain;
-};
-
-// Capitalize the first letter of a string.
-const capitalize = (s: string) => {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-};
+// Picks the hero image deterministically, seeded by the day of the year, so
+// it still rotates day to day but two renders on the same day — including
+// the two back-to-back requests Playwright's light/dark projects make in
+// the same run — produce the exact same pick. `Math.random()` here used to
+// violate react-hooks/purity (D31) and was also the root cause of the
+// visual-test flakiness that `tests/visual/screens.spec.ts` works around:
+// the source images have different aspect ratios (verified: most are
+// ~1.5:1, but poutine is 1.25:1 and bingo is ~1.47:1), so a different pick
+// shifted the rendered height of everything below the hero. Determinism
+// fixes the within-run flakiness; the images' differing aspect ratios mean
+// the height can still legitimately differ from one day to the next, so
+// `pinHeroImage`'s height pin in the visual suite is still needed (see the
+// comment there).
+function pickHeroImage(): (typeof pictures)[number] {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor(
+    (now.getTime() - startOfYear.getTime()) / 86_400_000
+  );
+  return pictures[dayOfYear % pictures.length];
+}
 
 export default async function Index() {
-  const headersList = headers();
-  const url = headersList.get('referer');
-  const subdomain = getSubdomainFromUrl(url);
-
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Randomly select a picture from the array.
-  let randomPicture = pictures[Math.floor(Math.random() * pictures.length)];
+  const heroPicture = pickHeroImage();
 
   return (
-    <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background dark:bg-dark-background'>
-      {/* <RainingBurgers /> */}
+    <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background'>
       <Navbar user={user} />
 
       <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
         <div className='flex flex-col items-center mx-2 lg:mb-8'>
           <p
-            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl !leading-tight mx-auto max-w-xl text-center my-2 dark:text-dark-text-foreground`}
+            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl leading-tight! mx-auto max-w-xl text-center my-2`}
           >
-            {/* <PawPrint size={48} className=' pr-1.5' /> {capitalize(subdomain)}{' '} */}
             Specials Spotter!
           </p>
         </div>
         <Image
           className='hidden lg:block opacity-80 w-full lg:max-h-96 object-cover'
-          src={randomPicture}
+          src={heroPicture}
           alt='Picture logo'
           placeholder='blur'
         />
@@ -86,7 +85,7 @@ export default async function Index() {
 
       <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 text-foreground'>
         <EventsSection user={user} />
-        <AddEventDisplay userStatus={user?.aud} />
+        <AddEventDisplay userLoggedIn={!!user} />
       </div>
       <div className='w-full'>
         <Footer />

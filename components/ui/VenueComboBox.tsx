@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { Combobox } from './combobox';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { makeNewVenueValue } from '@/lib/venue-selection';
 
 interface Venue {
   id: string;
@@ -15,16 +16,23 @@ interface VenueComboBoxProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  /** Admins create venues immediately; visitors only propose a name. */
+  canCreateVenue?: boolean;
+  /** Forwarded to the underlying Combobox's trigger button. */
+  id?: string;
 }
 
 export function VenueComboBox({
   value,
   onChange,
   className,
+  canCreateVenue = false,
+  id,
 }: VenueComboBoxProps) {
   const [venues, setVenues] = useState<Venue[]>([]);
+  const [proposedVenue, setProposedVenue] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   useEffect(() => {
     async function fetchVenues() {
@@ -47,14 +55,33 @@ export function VenueComboBox({
     fetchVenues();
   }, [supabase]);
 
-  const options = venues.map((venue) => ({
-    value: venue.id,
-    label: venue.name,
-  }));
+  const options = [
+    ...venues.map((venue) => ({
+      value: venue.id,
+      label: venue.name,
+    })),
+    ...(proposedVenue
+      ? [
+          {
+            value: makeNewVenueValue(proposedVenue),
+            label: `${proposedVenue} (new)`,
+          },
+        ]
+      : []),
+  ];
 
   const handleAddVenue = async (venueName: string) => {
     venueName = venueName.trim();
-    console.log('Adding venue:', venueName);
+    if (!venueName) return;
+
+    // Visitors can't write to `venues` — RLS blocks it. Carry the name on the
+    // submission and let the admin create the venue when they approve it.
+    if (!canCreateVenue) {
+      setProposedVenue(venueName);
+      onChange(makeNewVenueValue(venueName));
+      toast.success(`"${venueName}" will be added once your event is approved`);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -76,6 +103,7 @@ export function VenueComboBox({
 
   return (
     <Combobox
+      id={id}
       options={options}
       value={value}
       onChange={onChange}
@@ -84,7 +112,7 @@ export function VenueComboBox({
       emptyMessage='No venues found.'
       className={className}
       handleAddItem={handleAddVenue}
-      addItemLabel='Add New Venue:'
+      addItemLabel={canCreateVenue ? 'Add New Venue:' : 'Suggest New Venue:'}
       loading={loading}
       loadingMessage='Fetching venues...'
     />

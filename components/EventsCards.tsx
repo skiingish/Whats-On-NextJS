@@ -2,13 +2,14 @@ import DeleteItemButton from './DeleteItemButton';
 import ReportEventModal from './ReportEventModal';
 import { dayformatter } from '@/utils/dataformatter';
 import { addFavourite, removeFavourite } from '@/utils/favouritesHandler';
-import { FC, use, useState, useEffect } from 'react';
+import { FC, use, useState } from 'react';
 export const dynamic = 'force-dynamic';
 import { CalendarDays, Clock, Flag, AlertCircle, Star } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 
 interface EventsDisplayProps {
   events: Events[] | null;
-  user: any;
+  user: User | null;
   refreshFavourites: () => void;
 }
 
@@ -20,11 +21,14 @@ const EventsCards: FC<EventsDisplayProps> = ({
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reportedEvent, reportEvent] = useState<Events | null>(null);
 
-  useEffect(() => {
-    if (reportedEvent && !showReportModal) {
-      setShowReportModal(true);
-    }
-  }, [reportedEvent]);
+  // Opening the modal is a direct consequence of the user's click, not a
+  // reaction to reportedEvent changing behind the scenes — so it's set here
+  // rather than synced afterwards via an effect (which also needed
+  // showReportModal itself as a dependency it didn't declare).
+  const handleReportClick = (event: Events) => {
+    reportEvent(event);
+    setShowReportModal(true);
+  };
 
   return (
     <>
@@ -38,7 +42,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
           events?.map((event) => {
             return (
               <div
-                className='flex flex-wrap py-2 my-4 rounded-2xl text-foreground border-2 border-foreground bg-background-secondary dark:bg-dark-foreground dark:text-dark-text-foreground'
+                className='flex flex-wrap py-2 my-4 rounded-2xl text-foreground border-2 border-foreground bg-background-secondary'
                 key={event.id}
               >
                 {event.venue && (
@@ -51,7 +55,15 @@ const EventsCards: FC<EventsDisplayProps> = ({
                 <div className='px-4 flex'>
                   {event.is_favorite ? (
                     <button
-                      className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                      // The visible label below is `invisible` until hover,
+                      // and visibility:hidden removes it from the
+                      // accessibility tree — so without this the button had
+                      // no accessible name at all and announced as just
+                      // "button". aria-label also gives the visual-regression
+                      // suite a stable, data-independent handle on an event
+                      // card.
+                      aria-label='Remove favourite'
+                      className='text-foreground content-center rounded-lg hover:bg-muted'
                       onClick={() => {
                         removeFavourite(event);
                         refreshFavourites();
@@ -64,7 +76,8 @@ const EventsCards: FC<EventsDisplayProps> = ({
                     </button>
                   ) : (
                     <button
-                      className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                      aria-label='Add favourite'
+                      className='text-foreground content-center rounded-lg hover:bg-muted'
                       onClick={() => {
                         addFavourite(event);
                         refreshFavourites();
@@ -77,9 +90,10 @@ const EventsCards: FC<EventsDisplayProps> = ({
                     </button>
                   )}
                   <button
-                    className='text-foreground content-center rounded-lg hover:bg-slate-500'
+                    aria-label='Report'
+                    className='text-foreground content-center rounded-lg hover:bg-muted'
                     onClick={() => {
-                      reportEvent(event);
+                      handleReportClick(event);
                     }}
                   >
                     <AlertCircle className='p-1' size={32} />
@@ -107,12 +121,11 @@ const EventsCards: FC<EventsDisplayProps> = ({
                   <Clock className='pr-1.5' /> {event.event_time}
                 </p>
                 {user ? (
+                  // Edit button removed (D22): there is no edit flow built
+                  // yet, and admin inline editing is planned for Phase 5 of
+                  // the admin plan. A dead button here would only look
+                  // broken to a logged-in user.
                   <div className='flex' style={{ minWidth: '100%' }}>
-                    <div className='px-6 py-2 whitespace-no-wrap'>
-                      <button className=' bg-yellow-600 hover:bg-yellow-400 rounded px-4 py-2 text-white mb-2'>
-                        Edit
-                      </button>
-                    </div>
                     <div className='px-6 py-2 whitespace-no-wrap'>
                       <DeleteItemButton id={event.id} />
                     </div>

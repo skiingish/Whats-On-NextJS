@@ -1,5 +1,6 @@
 'use client';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import EventsCards from './EventsCards';
 import { getFavourites } from '@/utils/favouritesHandler';
 import VenueMap from './VenueMap';
@@ -8,24 +9,32 @@ export const dynamic = 'force-dynamic';
 interface EventsDisplayProps {
   events: Events[] | null | undefined;
   venues: Array<Venue> | null;
-  user: any;
+  user: User | null;
 }
 
 const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
-  let today = new Date().toLocaleString('en-us', { weekday: 'long' });
-
   const [activeList, setActiveList] = useState<string>('all');
   const [showList, setShowList] = useState<boolean>(true);
 
-  const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
+  // Bumped (not toggled) whenever a favourite changes, purely so the memo
+  // below has a dependency that changes on every call and re-reads
+  // localStorage — addFavourite/removeFavourite mutate it outside of React
+  // state, so there's nothing else to depend on. A previous version used a
+  // boolean flipped true->false by an effect for this same purpose, which
+  // is exactly the setState-in-effect pattern react-hooks/set-state-in-effect
+  // flags (D31): the effect existed solely to synchronize two pieces of
+  // React state with each other, with no external system involved.
+  const [favouritesVersion, setFavouritesVersion] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [searchDay, setSearchDay] = useState<string>(today);
+  const [searchDay, setSearchDay] = useState<string>(() =>
+    new Date().toLocaleString('en-us', { weekday: 'long' })
+  );
   const [animateSelector, setAnimateSelector] = useState<boolean>(true);
 
   const refreshFavourites = () => {
     console.log('refreshing favourites');
-    setRefreshingEvents(true);
+    setFavouritesVersion((version) => version + 1);
   };
 
   useEffect(() => {
@@ -45,80 +54,74 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
       setSearchDay('');
     } else if (e.target.value === 'today') {
       // If the value is today, then we want to show all events that are on today.
-      today = new Date().toLocaleString('en-us', { weekday: 'long' });
-      setSearchDay(today);
+      setSearchDay(new Date().toLocaleString('en-us', { weekday: 'long' }));
     } else {
       // Otherwise, we want to show all events that are on that day.
       setSearchDay(e.target.value);
     }
   };
 
-  // Get the favourites from local storage.
-  const favourites: Events[] = getFavourites();
+  // Attach is_favorite without mutating the incoming `events` prop — the
+  // original code wrote onto the prop objects directly, which meant a
+  // re-render with the same prop reference (e.g. from a parent re-fetch)
+  // could see favourites "stick" from a previous render, and made `events`
+  // unsafe to reuse elsewhere. Mapping to new objects avoids both.
+  const eventsWithFavourites = useMemo(() => {
+    const favourites: Events[] = getFavourites();
+    return events?.map((event) => ({
+      ...event,
+      is_favorite: favourites.some((favorite) => favorite.id === event.id),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events, favouritesVersion]);
 
-  // If active list not equal to all, then we want to filter the events by the user's favourites from local storage.
-  if (activeList !== 'all') {
-    // Filter the events by the user's favourites from local storage using the ids from the favourites array, so if the event changed on the db it will display correctly, or if it's deleted it wont show.
-    const favoriteEvents: Events[] | undefined = events?.filter((event) => {
-      const isFavorite = favourites.some(
-        (favorite) => favorite.id === event.id
-      );
-      if (isFavorite) {
-        event.is_favorite = true; // Set isfav to true if matched
-      }
-      return isFavorite;
-    });
-    events = favoriteEvents;
-  } else {
-    events?.forEach((event) => {
-      const isFavorite = favourites.some(
-        (favorite) => favorite.id === event.id
-      );
-      event.is_favorite = isFavorite;
-    });
-  }
-
-  if (refreshingEvents) {
-    setRefreshingEvents(false);
-  }
+  // If active list not equal to all, then we want to filter the events by the user's favourites.
+  const activeListEvents = useMemo(() => {
+    if (activeList === 'all') return eventsWithFavourites;
+    return eventsWithFavourites?.filter((event) => event.is_favorite);
+  }, [eventsWithFavourites, activeList]);
 
   // Order events by least number of days the special is on and then by newest first.
-  events?.sort((a, b) => {
-    const daysA = a.when.split(' ').length;
-    const daysB = b.when.split(' ').length;
+  const sortedEvents = useMemo(() => {
+    if (!activeListEvents) return activeListEvents;
+    return [...activeListEvents].sort((a, b) => {
+      const daysA = a.when.split(' ').length;
+      const daysB = b.when.split(' ').length;
 
-    if (daysA !== daysB) {
-      return daysA - daysB; // Order by least number of days the special is on
-    } else {
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ); // Order by newest added
-    }
-  });
+      if (daysA !== daysB) {
+        return daysA - daysB; // Order by least number of days the special is on
+      } else {
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ); // Order by newest added
+      }
+    });
+  }, [activeListEvents]);
 
-  let filteredEventsByDay = events?.filter((event) => {
-    let result = event.when
-      .toLowerCase()
-      .includes(searchDay.toLocaleLowerCase());
-    return result;
-  });
+  const filteredEventsByDay = useMemo(() => {
+    return sortedEvents?.filter((event) => {
+      return event.when.toLowerCase().includes(searchDay.toLocaleLowerCase());
+    });
+  }, [sortedEvents, searchDay]);
 
   // Search for different items, including day of the week, title, and the place.
-  let filteredSearchedEvents = filteredEventsByDay?.filter((event) => {
-    let result =
-      event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
-      event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
-      (typeof event.venue === 'string'
-        ? event.venue.toLowerCase()
-        : event.venue.name.toLowerCase()
-      ).includes(searchTerm.toLocaleLowerCase());
-    return result;
-  });
+  const filteredSearchedEvents = useMemo(() => {
+    return filteredEventsByDay?.filter((event) => {
+      return (
+        event.desc.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
+        event.when.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
+        (typeof event.venue === 'string'
+          ? event.venue.toLowerCase()
+          : event.venue.name.toLowerCase()
+        ).includes(searchTerm.toLocaleLowerCase())
+      );
+    });
+  }, [filteredEventsByDay, searchTerm]);
 
   return (
     <>
       <div className='w-full'>
-        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground dark:text-dark-text-foreground px-8 -mb-3'>
+        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground px-8 -mb-3'>
           <label className='text-lg font-bold tracking-wider ml-1'>
             Whats On
           </label>
@@ -127,8 +130,8 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             id='dayselector'
             className={
               animateSelector
-                ? 'animate-bounce rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
-                : 'rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-foreground border-2 mb-6 bg-background-secondary dark:bg-dark-foreground'
+                ? 'animate-bounce rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
+                : 'rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
             }
             style={{
               appearance: 'none',
@@ -156,14 +159,14 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
         <div
           className={`${
             showList && 'sticky'
-          } ... top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 dark:bg-dark-background text-foreground dark:text-dark-text-foreground z-10 border-b-2 border-foreground px-8`}
+          } ... top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 bg-background text-foreground z-10 border-b-2 border-foreground px-8`}
         >
           <label className='flex text-lg font-bold tracking-wider ml-1'>
             Search
           </label>
 
           <input
-            className='rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground dark:text-dark-text-foreground border-2 border-foreground mb-6 bg-background-secondary dark:bg-dark-foreground'
+            className='rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-background-secondary'
             type='text'
             onChange={changeSpecialsSearch}
             id='search'
@@ -171,16 +174,16 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             placeholder='Pizza... Whistle Stop... Bingo...'
             value={searchTerm}
           />
-          <div className='w-full h-12 relative -mb-[2px]'>
+          <div className='w-full h-12 relative mb-[-2px]'>
             <button
               onClick={() => !showList && setShowList(true)}
               className={`absolute ${
                 showList
-                  ? 'w-[55%] z-10 h-[100%] bg-white dark:bg-dark-foreground'
-                  : 'w-[50%] h-[90%] bg-stone-300 dark:bg-dark-background'
-              } transition-all bottom-0 left-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-black justify-center items-center inline-flex`}
+                  ? 'w-[55%] z-10 h-full bg-background-secondary'
+                  : 'w-[50%] h-[90%] bg-muted'
+              } transition-all bottom-0 left-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-foreground justify-center items-center inline-flex`}
             >
-              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+              <p className='text-foreground text-[21.40px] font-bold leading-normal tracking-wide'>
                 List
               </p>
             </button>
@@ -188,11 +191,11 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
               onClick={() => showList && setShowList(false)}
               className={`absolute ${
                 !showList
-                  ? 'left-[45%] w-[55%] h-[100%] bg-white z-10 dark:bg-dark-foreground'
-                  : 'w-[50%] h-[90%] left-[50%] bg-stone-300 dark:bg-dark-background'
-              } transition-all bottom-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-black justify-center items-center inline-flex`}
+                  ? 'left-[45%] w-[55%] h-full bg-background-secondary z-10'
+                  : 'w-[50%] h-[90%] left-[50%] bg-muted'
+              } transition-all bottom-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-foreground justify-center items-center inline-flex`}
             >
-              <p className='text-black dark:text-white text-[21.40px] font-bold leading-normal tracking-wide'>
+              <p className='text-foreground text-[21.40px] font-bold leading-normal tracking-wide'>
                 Map
               </p>
             </button>
@@ -204,7 +207,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             filteredSearchedEvents?.length === 0 ? 'block px-8' : 'hidden'
           }`}
         >
-          <p className='text-foreground text-center text-2xl mb-4 mt-4 dark:text-dark-text-foreground'>
+          <p className='text-foreground text-center text-2xl mb-4 mt-4'>
             No Events Found
           </p>
         </div>

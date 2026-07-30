@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createClient();
 
     const name = formData.get('name');
     const email = formData.get('email');
@@ -26,9 +25,14 @@ export async function POST(request: Request) {
       .insert([{ name, email, message }]);
 
     if (error) {
+      // Log the real Postgres error server-side only; the client gets a
+      // generic message so constraint names/hints never leak (D3).
       console.error(error);
 
-      return NextResponse.json({ error }, { status: 500 });
+      return NextResponse.json(
+        { message: 'Could not submit feedback, server error!' },
+        { status: 500 }
+      );
     }
 
     //return NextResponse.json({ message: 'Event Added!' }, { status: 200 });

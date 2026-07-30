@@ -1,20 +1,23 @@
 'use client';
-import {
-  GoogleMap,
-  LoadScript,
-  MarkerF,
-  InfoWindowF,
-} from '@react-google-maps/api';
-import { use, useEffect, useMemo, useState } from 'react';
-import { dayformatter } from '@/utils/dataformatter';
+import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import type { User } from '@supabase/supabase-js';
 import EventDrawer from './EventDrawer';
 import EventsCards from './EventsCards';
+import { VenueMarker } from './ui/mapmarker';
 
 interface VenueMapProps {
   venues: Array<Venue> | null;
   filteredEvents?: Events[] | undefined;
-  user: any;
+  user: User | null;
 }
+
+// Melbourne, used when there is nothing to centre on yet.
+const FALLBACK_CENTRE = {
+  latitude: -37.84795481174561,
+  longitude: 144.97700103811715,
+};
 
 export default function VenueMap({
   venues,
@@ -22,124 +25,149 @@ export default function VenueMap({
   user,
 }: VenueMapProps) {
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
   const [refreshingEvents, setRefreshingEvents] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (selectedVenue) {
-      setDrawerOpen(true);
-    }
-  }, [selectedVenue]);
+  // react-map-gl touches `window` on first render, so it can only mount once
+  // we're definitely on the client. useSyncExternalStore's server snapshot
+  // is always `false` and its client snapshot is always `true` — there is
+  // nothing to subscribe to, so `subscribe` never fires — which reports
+  // "mounted" without the setState-in-effect round trip a
+  // useState+useEffect guard would need.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const [darkMode, setDarkMode] = useState(false);
 
+  // Tailwind's default dark mode is media-based, so follow the same signal.
   useEffect(() => {
-    if (selectedVenue && !drawerOpen) {
-      setSelectedVenue(null);
-    }
-  }, [drawerOpen]);
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const sync = () => setDarkMode(query.matches);
+
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
+
+  // The drawer's open state is derived from selectedVenue rather than kept
+  // in its own piece of state synced via effects — the previous version had
+  // two effects (one opening the drawer when a venue was selected, one
+  // clearing the venue when the drawer closed) cascading off each other.
+  const drawerOpen = selectedVenue !== null;
+
+  const handleDrawerOpenChange = (open: boolean) => {
+    if (!open) setSelectedVenue(null);
+  };
 
   const refreshFavourites = () => {
-    console.log('refreshing favourites');
     setRefreshingEvents(true);
   };
 
   const handleMarkerClick = (venue: Venue) => {
-    // If we have filtered events, then we want to filter the events by the venue's events.
-    if (filteredEvents) {
-      venue.events = venue.events?.filter((event) =>
-        filteredEvents.some((filteredEvent) => filteredEvent.id === event.id)
+    // Narrow to the filtered events, but only when a filter is actually
+    // active — an empty array is truthy, and testing it directly used to strip
+    // every event on /map, where no filter is passed at all.
+    const events =
+      filteredEvents && filteredEvents.length > 0
+        ? venue.events?.filter((event) =>
+            filteredEvents.some((filteredEvent) => filteredEvent.id === event.id)
+          )
+        : venue.events;
+
+    // Copy rather than assigning back onto the prop: mutating it discarded the
+    // venue's other events for good, so re-filtering compounded each click.
+    setSelectedVenue({ ...venue, events });
+  };
+
+  const visibleVenues = useMemo(() => {
+    if (!venues) return [];
+    if (!filteredEvents || filteredEvents.length === 0) return venues;
+
+    return venues.filter((venue) =>
+      filteredEvents.some((event) => event.venue_id === venue.id)
+    );
+  }, [venues, filteredEvents]);
+
+  // Fit the viewport to the venues rather than centring on their average at a
+  // fixed zoom. Averaging put the centre in roughly the right place but said
+  // nothing about how far apart the pins were, so a hardcoded zoom of 13 (a
+  // few km across) left most of them off-screen as soon as the data spread
+  // past one suburb.
+  const initialViewState = useMemo(() => {
+    // parseFloat('') and parseFloat(null) are both NaN, and the old `|| '0'`
+    // default turned a missing coordinate into a pin off West Africa — which
+    // would then stretch the bounds across the planet. Drop those rows here.
+    const points = visibleVenues
+      .map((venue) => ({
+        latitude: parseFloat(venue.latitude ?? ''),
+        longitude: parseFloat(venue.longitude ?? ''),
+      }))
+      .filter(
+        (point) => Number.isFinite(point.latitude) && Number.isFinite(point.longitude)
       );
+
+    if (points.length === 0) {
+      return { ...FALLBACK_CENTRE, zoom: 13 };
     }
 
-    // setDrawerOpen(true);
-    setSelectedVenue(venue);
-  };
+    // A single venue has no extent to fit, so bounds would collapse to a point
+    // and Mapbox would zoom to its maximum. Centre on it instead.
+    if (points.length === 1) {
+      return { ...points[0], zoom: 14 };
+    }
+
+    const latitudes = points.map((point) => point.latitude);
+    const longitudes = points.map((point) => point.longitude);
+
+    return {
+      bounds: [
+        [Math.min(...longitudes), Math.min(...latitudes)],
+        [Math.max(...longitudes), Math.max(...latitudes)],
+      ] as [[number, number], [number, number]],
+      // Padding keeps edge pins clear of the frame and of the NavigationControl
+      // in the top-right; maxZoom stops a tight cluster from slamming to
+      // street level.
+      fitBoundsOptions: { padding: 64, maxZoom: 15 },
+    };
+    // Deliberately only the initial view — remounting on every filter change
+    // would yank the map out from under someone who has panned away.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!venues) return <p>No Venues</p>;
 
-  if (filteredEvents) {
-    venues = venues.filter((venue) =>
-      filteredEvents.some((event) => event.venue_id === venue.id)
-    );
-  }
-
-  // useEffect(() => {
-  //   if (selectedVenue) {
-  //     setDrawerOpen(true);
-  //   }
-  // }, [selectedVenue]);
-
-  // Calculate center of all venues, or default to Melbourne
-  const center = useMemo(() => {
-    if (!venues || venues.length === 0) {
-      return { lat: -37.84795481174561, lng: 144.97700103811715 }; // Newcastle coordinates
-    }
-
-    return {
-      lat:
-        venues.reduce(
-          (sum, venue) => sum + parseFloat(venue.latitude || '0'),
-          0
-        ) / venues.length,
-      lng:
-        venues.reduce(
-          (sum, venue) => sum + parseFloat(venue.longitude || '0'),
-          0
-        ) / venues.length,
-    };
-  }, [filteredEvents]);
-
-  const customMarker = (venue: Venue, selectedVenue: Venue | null) => {
-    const matches = selectedVenue && selectedVenue.id === venue.id;
-
-    return {
-      path: 'M24 0C10.7 0 0 10.7 0 24s10.7 24 24 24 24-10.7 24-24S37.3 0 24 0zm-9 6v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V6M19 6v20M33 19V6a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7',
-      fillColor: matches ? '#8f56fc' : '#000000',
-      fillOpacity: 0.5,
-      strokeWeight: 2,
-      strokeColor: '#FFFFFF',
-      scale: 0.7,
-      anchor: { x: 24, y: 24 } as google.maps.Point, // Center the icon
-    };
-  };
-
   return (
     <div className='h-[70vh] w-full rounded-2xl border-2 border-foreground overflow-hidden'>
-      <LoadScript
-        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
-      >
-        <GoogleMap
-          mapContainerStyle={{ width: '100%', height: '100%' }}
-          center={center}
-          zoom={13}
-          clickableIcons={false}
-          options={{ fullscreenControl: false }}
+      {mounted && (
+        <Map
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+          initialViewState={initialViewState}
+          style={{ width: '100%', height: '100%' }}
+          mapStyle={
+            darkMode
+              ? 'mapbox://styles/mapbox/dark-v11'
+              : 'mapbox://styles/mapbox/light-v11'
+          }
+          attributionControl={false}
         >
-          {venues.map((venue) => (
-            <MarkerF
+          <NavigationControl position='top-right' showCompass={false} />
+
+          {visibleVenues.map((venue) => (
+            <Marker
               key={venue.id}
-              position={{
-                lat: parseFloat(venue.latitude || '0'),
-                lng: parseFloat(venue.longitude || '0'),
-              }}
+              latitude={parseFloat(venue.latitude || '0')}
+              longitude={parseFloat(venue.longitude || '0')}
+              anchor='center'
               onClick={() => handleMarkerClick(venue)}
-              icon={customMarker(venue, selectedVenue)}
-            />
+            >
+              <VenueMarker selected={selectedVenue?.id === venue.id} />
+            </Marker>
           ))}
+        </Map>
+      )}
 
-          {/* {selectedVenue && (
-            <InfoWindowF
-              position={{
-                lat: parseFloat(selectedVenue.latitude || '0'),
-                lng: parseFloat(selectedVenue.longitude || '0'),
-              }}
-              onCloseClick={() => handleMarkerClick(selectedVenue)}
-            ></InfoWindowF>
-          )} */}
-        </GoogleMap>
-      </LoadScript>
-
-      <EventDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+      <EventDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
         {selectedVenue ? (
           <div className=''>
             <h1 className='text-xl text-center mb-4'>{selectedVenue.name}</h1>

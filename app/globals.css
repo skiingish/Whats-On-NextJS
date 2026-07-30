@@ -1,103 +1,149 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/*
+ * Token architecture (tech-debt D9 / admin-moderation-plan Phase 0)
+ * ------------------------------------------------------------------
+ * One set of shadcn-shaped tokens carries the brand palette, replacing the
+ * three overlapping systems that used to live here: the brand tokens, an
+ * almost-unused stock shadcn gray scale, and raw Tailwind palette classes
+ * sprinkled through components. Every token below has a real light value
+ * in :root and a real dark value in the prefers-color-scheme override, so
+ * `bg-background text-foreground border` (and friends) look right in both
+ * themes with no `dark:` utility needed at the call site.
+ *
+ * `--primary` is the one deliberate exception: the purple brand button
+ * doesn't change between themes, so its foreground stays a fixed
+ * near-black in both the light and dark blocks rather than tracking
+ * `--foreground`.
+ *
+ * Dark mode is driven by `prefers-color-scheme` alone — deliberately, not by
+ * omission. shadcn's convention is a `.dark` class plus
+ * `@custom-variant dark (&:is(.dark *))`, toggled by something like
+ * next-themes, which lets a user override their OS. That was considered and
+ * declined: nothing in this app ever toggled a class, so a media query is an
+ * honest description of the behaviour, and it avoids a dependency and the
+ * hydration dance that a toggle requires. Adding one later means introducing
+ * the custom variant, swapping these `@media` blocks for `:root.dark`, and
+ * switching the visual suite's dark project from `colorScheme` to setting
+ * the class.
+ */
+@theme {
+  --color-background: hsl(var(--background));
+  --color-background-secondary: hsl(var(--background-secondary));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-hover: hsl(var(--primary-hover));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-hover: hsl(var(--secondary-hover));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-sm: calc(var(--radius) - 0.5rem);
+}
 
 @layer base {
   :root {
+    /* Brand */
     --background: 34 47% 89%;
-    --dark-background:0, 0%, 15%;
-    --btn-background: 261 98% 80%;
-    --btn-background-hover: 261 96% 66%;
-    --btn-secondary-background: 34 47% 89%;
-    --btn-secondary-background-hover: 33 69% 80%;
-    --foreground: 200 50% 3%;
-    --dark-foreground: 0 1% 28%;
-    --text-foreground: 200 50% 3%;
-    --dark-text-foreground: 0 0% 100%;
     --background-secondary: 0 0% 100%;
-    --highlight: 28 100% 50%;
-    --card:0 0% 100%;
-    --card-foreground:224 71.4% 4.1%;
-    --popover:0 0% 100%;
-    --popover-foreground:224 71.4% 4.1%;
-    --primary:220.9 39.3% 11%;
-    --primary-foreground:210 20% 98%;
-    --secondary:220 14.3% 95.9%;
-    --secondary-foreground:220.9 39.3% 11%;
-    --muted:220 14.3% 95.9%;
-    --muted-foreground:220 8.9% 46.1%;
-    --accent:220 14.3% 95.9%;
-    --accent-foreground:220.9 39.3% 11%;
-    --destructive:0 84.2% 60.2%;
-    --destructive-foreground:210 20% 98%;
-    --border:220 13% 91%;
-    --input:220 13% 91%;
-    --ring:224 71.4% 4.1%;
-    --chart-1:12 76% 61%;
-    --chart-2:173 58% 39%;
-    --chart-3:197 37% 24%;
-    --chart-4:43 74% 66%;
-    --chart-5:27 87% 67%;
-    --radius:0.5rem;
+    --foreground: 200 50% 3%;
+
+    --popover: var(--background-secondary);
+    --popover-foreground: var(--foreground);
+
+    --primary: 261 98% 80%;
+    --primary-hover: 261 96% 66%;
+    --primary-foreground: 200 50% 3%;
+
+    --secondary: 34 47% 89%;
+    --secondary-hover: 33 69% 80%;
+    --secondary-foreground: 200 50% 3%;
+
+    --muted: 30 10% 85%;
+    --muted-foreground: 200 15% 35%;
+
+    --accent: 28 100% 50%;
+    --accent-foreground: 200 50% 3%;
+
+    --destructive: 0 73% 41%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: var(--foreground);
+    --input: var(--foreground);
+    --ring: var(--foreground);
+
+    /* The two structural constants that make up the neo-brutalist look. */
+    --radius: 1rem;
+    --border-width: 2px;
   }
-  .dark {
-    --background:224 71.4% 4.1%;
-    --foreground:210 20% 98%;
-    --card:224 71.4% 4.1%;
-    --card-foreground:210 20% 98%;
-    --popover:224 71.4% 4.1%;
-    --popover-foreground:210 20% 98%;
-    --primary:210 20% 98%;
-    --primary-foreground:220.9 39.3% 11%;
-    --secondary:215 27.9% 16.9%;
-    --secondary-foreground:210 20% 98%;
-    --muted:215 27.9% 16.9%;
-    --muted-foreground:217.9 10.6% 64.9%;
-    --accent:215 27.9% 16.9%;
-    --accent-foreground:210 20% 98%;
-    --destructive:0 62.8% 30.6%;
-    --destructive-foreground:210 20% 98%;
-    --border:215 27.9% 16.9%;
-    --input:215 27.9% 16.9%;
-    --ring:216 12.2% 83.9%;
-    --chart-1:220 70% 50%;
-    --chart-2:160 60% 45%;
-    --chart-3:30 80% 55%;
-    --chart-4:280 65% 60%;
-    --chart-5:340 75% 55%;
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 0 0% 15%;
+      --background-secondary: 0 1% 28%;
+      --foreground: 0 0% 100%;
+
+      /* --primary and --primary-foreground are deliberately absent here:
+         the purple surface doesn't darken, so its fixed near-black
+         foreground from :root carries over unchanged. */
+
+      --secondary: 0 1% 28%;
+      --secondary-foreground: 0 0% 100%;
+
+      --muted: 0 0% 40%;
+      --muted-foreground: 0 0% 75%;
+
+      --accent-foreground: 0 0% 100%;
+    }
   }
-}
 
-@layer base {
-  * {
-    @apply border-foreground/20;
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
   }
-}
 
-.animate-in {
-  animation: animateIn 0.3s ease 0.15s both;
-}
-
-
-
-@keyframes animateIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-
-@layer base {
-  * {
-    @apply border-border;
-  }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation: animateIn 0.3s ease 0.15s both;
+  }
+
+  @keyframes animateIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

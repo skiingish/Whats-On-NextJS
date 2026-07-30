@@ -1,7 +1,7 @@
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'sonner';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   generator: 'Next.js',
   manifest: '/manifest.json',
   keywords: ['nextjs', 'nextjs13', 'next13', 'pwa', 'next-pwa'],
-  themeColor: [{ media: '(prefers-color-scheme: dark)', color: '#fff' }],
   authors: [
     { name: 'Sean Corcoran' },
     {
@@ -25,12 +24,18 @@ export const metadata: Metadata = {
       url: 'https://www.seanbuildsthings.com',
     },
   ],
-  viewport:
-    'minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover',
   icons: [
     { rel: 'apple-touch-icon', url: 'icons/icon-128x128.png' },
     { rel: 'icon', url: 'icons/icon-128x128.png' },
   ],
+};
+
+export const viewport: Viewport = {
+  themeColor: [{ media: '(prefers-color-scheme: dark)', color: '#fff' }],
+  minimumScale: 1,
+  initialScale: 1,
+  width: 'device-width',
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
