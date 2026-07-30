@@ -56,6 +56,7 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
 
   --color-destructive: hsl(var(--destructive));
+  --color-destructive-hover: hsl(var(--destructive-hover));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
 
   --color-border: hsl(var(--border));
@@ -100,6 +101,7 @@
     --accent-foreground: 0 0% 100%;
 
     --destructive: 2 72% 48%;
+    --destructive-hover: 2 72% 41%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 265 12% 87%;
@@ -138,6 +140,9 @@
 
       --accent: 24 85% 58%;
       --accent-foreground: 265 30% 10%;
+
+      --destructive: 2 68% 55%;
+      --destructive-hover: 2 68% 62%;
 
       --border: 265 12% 20%;
       --input: 265 12% 24%;

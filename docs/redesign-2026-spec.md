@@ -190,8 +190,8 @@ Each chunk is committed separately so progress survives an interrupted session.
 
 | # | Chunk | Status |
 |---|---|---|
-| 1 | Tokens, type scale, base layer in `globals.css` | |
-| 2 | UI primitives: button, dialog, drawer, popover, combobox, command | |
+| 1 | Tokens, type scale, base layer in `globals.css` | done |
+| 2 | UI primitives: button, dialog, drawer, popover, combobox, command | done |
 | 3 | Navbar, Footer, app shell + layout | |
 | 4 | Event card (`EventsCards`) | |
 | 5 | Homepage: hero, search, filters, List/Map toggle (`EventsDisplay`, `page.tsx`) | |
