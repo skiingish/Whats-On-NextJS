@@ -96,9 +96,15 @@
     --muted: 36 24% 88%;
     --muted-foreground: 265 8% 42%;
 
-    /* Warm orange, used sparingly — prices and highlights only. */
+    /* Warm orange, used sparingly — prices and highlights only.
+       The chunk 9 audit correctly caught that white on this orange was only
+       2.78:1. There were two ways out: darken the orange to 40% and keep white
+       (4.62:1), or keep the orange and darken the text. Darkening the orange
+       muddied the one colour whose entire job is to catch the eye on a price
+       tag, so the foreground moves instead: near-black on the original 55%
+       orange measures 6.56:1 — better contrast AND the brighter orange. */
     --accent: 24 90% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 265 30% 10%;
 
     --destructive: 2 72% 48%;
     --destructive-hover: 2 72% 41%;
@@ -141,8 +147,12 @@
       --accent: 24 85% 58%;
       --accent-foreground: 265 30% 10%;
 
-      --destructive: 2 68% 55%;
-      --destructive-hover: 2 68% 62%;
+      /* 53%, not 55% — white destructive-foreground text (inherited from
+         :root, unchanged in dark) only reached 4.33:1 at 55%, under the
+         4.5:1 minimum (chunk 9 audit). 53% is the smallest step that clears
+         it; hover keeps the same +7 lightness offset as before. */
+      --destructive: 2 68% 53%;
+      --destructive-hover: 2 68% 60%;
 
       --border: 265 12% 20%;
       --input: 265 12% 24%;

@@ -131,9 +131,17 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
           wrapper around page content (see the comment there for why this
           replaced a `w-screen` breakout trick) — so the blurred surface
           spans the viewport while its inner row still aligns to this
-          section's own max-w-4xl column. Sits right under the navbar
-          (`top-16` == the navbar's `h-16`). */}
-      <div className='sticky top-16 z-30 w-full border-b border-border bg-background/85 backdrop-blur-md'>
+          section's own max-w-4xl column. Sits right under the navbar: the
+          navbar's row is `h-16` (64px) but the `<nav>` element itself also
+          carries a 1px bottom border, making its true rendered height 65px —
+          `top-16` alone left a 1px gap/overlap between the two sticky bars
+          on scroll (chunk 9 audit), so the offset adds the shared
+          `--border-width` token rather than a bare `top-16`. */}
+      <div
+        className='sticky z-30 w-full border-b border-border bg-background/85 backdrop-blur-md'
+        style={{ top: 'calc(4rem + var(--border-width))' }}
+      >
+
         <div className='mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8'>
           <div className='relative flex-1'>
             <label htmlFor='search' className='sr-only'>
@@ -187,18 +195,23 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
             </div>
 
             {/* Segmented control, not two unrelated buttons: one rounded
-                container, the active segment filled with primary. */}
+                container, the active segment filled with primary.
+                The container has no fixed height — it sizes to its
+                children's own h-11 (44px) plus its p-1 padding. It used to
+                be h-11 itself with the buttons unsized, which left the
+                buttons only as tall as their text line-height (~36px),
+                under the 44px tap-target minimum (chunk 9 audit). */}
             <div
               role='tablist'
               aria-label='View'
-              className='flex h-11 shrink-0 gap-1 rounded-sm bg-muted p-1'
+              className='flex shrink-0 gap-1 rounded-sm bg-muted p-1'
             >
               <button
                 role='tab'
                 aria-selected={showList}
                 onClick={() => setShowList(true)}
                 className={cn(
-                  'min-w-[4.5rem] rounded-sm px-3 text-sm font-semibold tracking-wide transition-colors',
+                  'h-11 min-w-[4.5rem] rounded-sm px-3 text-sm font-semibold tracking-wide transition-colors',
                   showList
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'
@@ -211,7 +224,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
                 aria-selected={!showList}
                 onClick={() => setShowList(false)}
                 className={cn(
-                  'min-w-[4.5rem] rounded-sm px-3 text-sm font-semibold tracking-wide transition-colors',
+                  'h-11 min-w-[4.5rem] rounded-sm px-3 text-sm font-semibold tracking-wide transition-colors',
                   !showList
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'

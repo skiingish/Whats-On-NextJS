@@ -250,13 +250,32 @@ export default function VenueMap({
     );
   }, []);
 
-  if (!venues) return <p>No Venues</p>;
+  // Styled the same as EventsCards' own empty state (chunk 9 audit: this
+  // previously rendered a bare, unstyled <p>, the "mostly blank" empty state
+  // the spec calls out).
+  if (!venues) {
+    return (
+      <div className='flex h-[70vh] w-full items-center justify-center rounded-xl border border-border bg-background-secondary shadow-sm'>
+        <p className='text-meta text-muted-foreground'>
+          No venues to show right now — check back soon.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
       ref={containerRef}
-      className='h-[70vh] w-full overflow-hidden rounded-xl border border-border shadow-sm'
+      className='relative h-[70vh] w-full overflow-hidden rounded-xl border border-border shadow-sm'
     >
+      {mounted && visibleVenues.length === 0 && (
+        <div className='pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4'>
+          <p className='text-meta rounded-full border border-border bg-background-secondary px-4 py-2 text-muted-foreground shadow-sm'>
+            No specials match that search
+          </p>
+        </div>
+      )}
+
       {mounted && (
         <Map
           ref={mapRef}
@@ -291,7 +310,9 @@ export default function VenueMap({
       <EventDrawer open={drawerOpen} onOpenChange={handleDrawerOpenChange}>
         {selectedVenue ? (
           <div className=''>
-            <h1 className='text-xl text-center mb-4'>{selectedVenue.name}</h1>
+            <h1 className='text-section mb-4 text-center text-foreground'>
+              {selectedVenue.name}
+            </h1>
             <EventsCards
               user={user}
               events={selectedVenue.events || []}
@@ -299,9 +320,9 @@ export default function VenueMap({
             />
           </div>
         ) : (
-          <>
-            <p>No venue selected</p>
-          </>
+          <p className='text-meta text-center text-muted-foreground'>
+            No venue selected
+          </p>
         )}
       </EventDrawer>
     </div>

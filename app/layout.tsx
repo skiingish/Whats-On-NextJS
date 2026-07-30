@@ -31,7 +31,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [{ media: '(prefers-color-scheme: dark)', color: '#fff' }],
+  // Browser chrome (status bar/tab strip) colour, matched to the actual
+  // --background token in each theme so it doesn't clash with the page
+  // beneath it. The dark entry was '#fff' (white) before this pass — the
+  // exact opposite of the near-black dark background it was meant to sit
+  // beside (chunk 9 audit) — and there was no light entry at all.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f6f1e9' },
+    { media: '(prefers-color-scheme: dark)', color: '#141018' },
+  ],
   minimumScale: 1,
   initialScale: 1,
   width: 'device-width',
