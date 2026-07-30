@@ -197,7 +197,7 @@ Each chunk is committed separately so progress survives an interrupted session.
 | 5 | Homepage: hero, search, filters, List/Map toggle (`EventsDisplay`, `page.tsx`) | done |
 | 6 | Modals: AddSpecial, Feedback, Report | done |
 | 7 | Map page, drawer, marker restyle + resize regression fixed | done |
-| 8 | Login, not-found, error, Footer extras | |
+| 8 | Login, not-found, error, Footer extras | done |
 | 9 | Mobile pass at 375/414px + dark-mode audit + contrast check | |
 | 10 | Regenerate visual baselines, full suite, final review | |
 
