@@ -1,14 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Visual-regression harness (task #1 of the dependency-upgrade project).
+ * Visual-regression harness.
  *
- * This suite captures baseline screenshots of the app BEFORE any dependency
- * upgrades so later tasks (Next 13->16, React 18->19, etc.) can diff against
- * something trustworthy. See tests/visual/README.md for the full story,
- * especially the "data problem" (the app needs seeded venues/events, and
- * seeding requires a service-role key or the Supabase MCP tools — neither of
- * which a CI runner has today).
+ * Captures baseline screenshots so dependency upgrades and refactors can be
+ * diffed against something trustworthy. See tests/visual/README.md.
+ *
+ * Two servers are started per run, in order: a fixture server standing in for
+ * Supabase, then a dev server pointed at it. That combination is what makes
+ * these baselines stable — the suite renders committed fixture rows, never the
+ * shared database, so adding a venue in production cannot change a screenshot.
+ * It also means the suite needs no database credentials at all.
  *
  * A dedicated port (3100) is used deliberately: 3000 is the app's normal dev
  * port and 3001 may be occupied by an orphaned session, so letting
@@ -17,6 +19,11 @@ import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 3100;
 const baseURL = `http://localhost:${PORT}`;
+
+// Not 54321 — that is the real local Supabase stack's port, and colliding
+// with it would make "did I test against fixtures or against my local
+// database?" ambiguous.
+const MOCK_SUPABASE_PORT = 54331;
 
 export default defineConfig({
   testDir: './tests/visual',
@@ -67,17 +74,41 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    // `next dev` rather than a production build: Next 13.4 has no persistent
-    // dev-mode overlay/indicator, so dev mode is actually the more
-    // visually-stable option here — and much faster to start than
-    // `next build && next start` for every run. (next-pwa has been removed;
-    // it was already inert, see next.config.js.)
-    command: `npx next dev -p ${PORT}`,
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  webServer: [
+    {
+      // Serves the committed fixture dataset in place of Supabase. Started
+      // first so the dev server's very first render already has it. See
+      // tests/visual/fixtures/mock-supabase.mjs for why this is a real HTTP
+      // server rather than Playwright request interception.
+      command: `node tests/visual/fixtures/mock-supabase.mjs`,
+      url: `http://127.0.0.1:${MOCK_SUPABASE_PORT}/rest/v1/venues`,
+      // Never reuse: a stale fixture server from an earlier run could be
+      // serving a different dataset, which would be a baffling diff.
+      reuseExistingServer: false,
+      timeout: 30_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
+      // `next dev` rather than a production build: dev mode has no persistent
+      // overlay/indicator to interfere, and is much faster to start than
+      // `next build && next start` for every run.
+      command: `npx next dev -p ${PORT}`,
+      url: baseURL,
+      // Also never reuse. A dev server left over from `npm run dev` is
+      // pointed at the real Supabase project, so reusing it would silently
+      // screenshot production data and overwrite the baselines with it.
+      reuseExistingServer: false,
+      timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: {
+        // Redirects every Supabase query — server-side and browser-side — at
+        // the fixture server above. `@next/env` does not overwrite variables
+        // already present in process.env, so these win over .env.local.
+        NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${MOCK_SUPABASE_PORT}`,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: 'fixture-anon-key',
+      },
+    },
+  ],
 });

@@ -1,25 +1,25 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
+import { venues, SENTINEL_VENUE_NAME } from './fixtures/dataset.mjs';
 
 /**
  * Visual-regression baselines.
  *
- * These used to depend on three `PWTEST `-prefixed fixture venues seeded into
- * an otherwise-empty database. That assumption no longer holds: the database
- * now carries real venue and event data permanently, so the fixtures were
- * deleted and the page is never empty. Nothing needs seeding before a run.
+ * These render against committed fixture data, not the shared database. A
+ * fixture server stands in for Supabase and the dev server is pointed at it
+ * (see playwright.config.ts and tests/visual/fixtures/mock-supabase.mjs), so
+ * a baseline changes only when someone edits `fixtures/dataset.mjs` — adding a
+ * venue in production cannot move a pixel, and the suite needs no database
+ * credentials.
  *
- * The consequence, stated plainly because it will bite otherwise: **these
- * baselines are pinned to the live dataset.** Adding, editing or removing a
- * venue or special legitimately changes what these screenshots capture, and
- * the suite will fail until `npm run test:visual:update` is re-run. That is a
- * property of testing against a shared live database, not a flake — see
- * tests/visual/README.md for why there is no isolated test database yet.
+ * That restores something the previous live-data version had to give up:
+ * because the dataset is fixed and known, the assertions below can be exact
+ * again (a specific venue name, a specific marker count). Under live data
+ * those would have been a liability; here they are the point.
  *
- * To keep the diff meaningful despite that, the *waits* below deliberately do
- * not encode how much data exists (no hardcoded marker count, no fixture
- * venue name). They wait for "the data has rendered" and let the screenshot
- * itself be the assertion. So a data change alters the baseline images but
- * never breaks the test logic.
+ * Every test asserts the sentinel fixture venue is on screen before capturing.
+ * That is a deliberate tripwire: if the env override ever stops taking effect
+ * and the app talks to the real Supabase project, the suite fails immediately
+ * instead of quietly overwriting the baselines with production data.
  *
  * Each test runs twice — once under the `light` project, once under `dark`
  * (see playwright.config.ts) — because VenueMap.tsx swaps the Mapbox style
@@ -171,37 +171,25 @@ async function waitForNoMotion(
 }
 
 /**
- * Waits until every venue marker has rendered.
+ * Waits until exactly the fixture venues have rendered as markers.
  *
- * Deliberately does not assert an exact count. The old version pinned this to
- * the three seeded fixtures, which meant the number of rows in a shared
- * database was baked into the test logic — adding a venue broke the wait
- * itself, not just the baseline image. Instead: require at least one marker
- * (so an empty map is still a failure rather than a silent pass against blank
- * chrome), then wait for the count to stop changing so the screenshot can't
- * fire mid-render.
+ * The count comes from the dataset rather than a literal, so editing
+ * `fixtures/dataset.mjs` keeps this correct automatically. Asserting an exact
+ * count is safe now that the data is repo-controlled, and it is worth having:
+ * it catches a marker failing to render, which a screenshot alone would only
+ * catch if you happened to notice the missing pin.
  */
 async function waitForMarkers(page: Page): Promise<void> {
-  const markers = page.locator('.mapboxgl-marker');
-  await expect(markers.first()).toBeVisible();
-
-  let last = -1;
-  for (let i = 0; i < 20; i++) {
-    const count = await markers.count();
-    if (count === last && count > 0) return;
-    last = count;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
+  await expect(page.locator('.mapboxgl-marker')).toHaveCount(venues.length);
 }
 
 /**
- * Every event card renders a "Report" button, so this is a data-independent
- * signal that the events list has actually populated — as opposed to waiting
- * on a specific venue's name, which ties the test to whichever rows happen to
- * be in the database.
+ * Tripwire asserting the fixture server is the one answering. If the env
+ * override regressed and the app were talking to the real project, this name
+ * would not appear and the test fails before any screenshot is written.
  */
-function anyEventCard(page: Page): Locator {
-  return page.getByRole('button', { name: 'Report' }).first();
+function fixtureSentinel(page: Page): Locator {
+  return page.getByText(SENTINEL_VENUE_NAME, { exact: false }).first();
 }
 
 test.describe('home', () => {
@@ -212,7 +200,7 @@ test.describe('home', () => {
     // for the network to go quiet. (The Navbar's "Login" link lives inside a
     // closed-by-default Popover, so it isn't a usable signal for the
     // logged-out landing state without opening the menu first.)
-    await expect(anyEventCard(page)).toBeVisible();
+    await expect(fixtureSentinel(page)).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Something Missing?' })
     ).toBeVisible();
@@ -226,7 +214,7 @@ test.describe('home', () => {
 
   test('add event modal open', async ({ page }) => {
     await page.goto('/');
-    await expect(anyEventCard(page)).toBeVisible();
+    await expect(fixtureSentinel(page)).toBeVisible();
 
     await pinHeroImage(page);
 

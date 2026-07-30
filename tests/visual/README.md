@@ -42,60 +42,63 @@ process. Viewport is pinned at 1280x900, `deviceScaleFactor: 1`, and every
 Only Chromium is installed (`npx playwright install chromium`) — that's the
 one browser this harness needs.
 
-## The data situation — read this before your first run
+## Where the data comes from
 
-**No seeding is needed any more. The baselines are pinned to live data
-instead, and that has its own cost.**
+**Committed fixtures, served by a fake Supabase. Nothing to seed, no
+credentials, and production data cannot affect a baseline.**
 
-This used to require three `PWTEST `-prefixed fixture venues seeded into an
-otherwise-empty database, because with no venues `/map` has no markers and the
-homepage's event list is blank. That is no longer the case: the database now
-holds real venue and event data permanently, so every screen has content
-without any setup. The fixture rows were deleted.
+`npm run test:visual` starts two servers:
 
-The tradeoff, stated plainly: **the baselines now capture whatever is in the
-shared database.** Adding a venue, editing a price or removing a special
-legitimately changes these images, and the suite will fail until
-`npm run test:visual:update` is re-run and the new PNGs committed. A failure
-here means "the rendered output changed", which now includes "the data
-changed" — it is not necessarily a code regression. Check what moved before
-assuming the worst.
+1. `tests/visual/fixtures/mock-supabase.mjs` on port 54331 — a ~100-line HTTP
+   server that answers the three requests this app makes and returns the rows
+   in `tests/visual/fixtures/dataset.mjs`.
+2. `next dev -p 3100` with `NEXT_PUBLIC_SUPABASE_URL` pointed at that server.
 
-To limit the blast radius, the *test logic* is deliberately data-independent:
-no hardcoded marker count, no fixture venue name. The waits only assert that
-data has rendered (at least one marker; at least one event card, located via
-the Report button's `aria-label`), and let the screenshot be the assertion. So
-a data change updates the images but never breaks the tests themselves.
+So a screenshot changes only when someone edits `dataset.mjs`. Adding a venue
+in production moves nothing.
 
-### If you want isolation back
+### Why a fake server rather than intercepting requests
 
-The right fix is a database the suite controls — a local `supabase start`
-stack, or a dedicated preview project — pointed at via
-`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` for the run.
-`tests/visual/fixtures/seed.sql`, `cleanup.sql` and
-`seed-with-service-role.mjs` are kept for exactly that: they still describe a
-known-good three-venue dataset. They are no longer part of the normal
-workflow, and seeding them into the shared database now would *add* to the
-real data rather than replace it.
+The pages under test are Server Components — they query Supabase from Node
+during the render, not from the browser. Playwright's `page.route` never sees
+those requests, so browser-level mocking cannot work here. What *is*
+interceptable is the URL the app dials: `lib/supabase/server.ts` reads
+`NEXT_PUBLIC_SUPABASE_URL` at runtime, so overriding that env var for the dev
+server redirects every query — server-side and browser-side — with **no
+application code changed**. The real `@supabase/ssr` client, the real wire
+format and the real render path all still run; only the data source is swapped.
 
-Two properties of that fixture set are worth preserving in any replacement,
-because both were learned the hard way:
+`@next/env` does not overwrite variables already in `process.env`, which is
+why the value set in `playwright.config.ts` wins over `.env.local`.
 
-- **Every fixture event's `when` lists all seven days** (renders as "Everyday"
-  per `utils/dataformatter.ts`). `EventsDisplay.tsx` defaults its day filter to
-  *today's* weekday, so an event scoped to a single day vanishes from the
-  homepage list on other days — making "a real regression" and "a Wednesday
-  happened" indistinguishable causes of a failed diff. (The current real data
-  does *not* have this property, which is one more reason the images move.)
-- **Every fixture event gets an explicit, distinct `created_at`.** Not
-  cosmetic: `EventsSection.tsx`'s query has no `.order()` and
-  `EventsDisplay.tsx` falls back to `created_at` descending as a tiebreaker. A
-  single multi-row `INSERT` evaluates `now()` once for the whole statement, so
-  all three fixture events shared one timestamp, and Postgres does not
-  guarantee row order for an unordered `select` — the homepage list's order
-  silently flipped between two otherwise-identical runs. Still worth fixing
-  upstream: the app has no explicit `ORDER BY` backing a sort its UI depends
-  on.
+### Why not `supabase start`
+
+A local stack would be higher fidelity — real Postgres, real RLS, real
+migrations. It is also a Docker dependency, tens of seconds of startup per run,
+and another prerequisite before anyone can run the suite. None of that fidelity
+changes the pixels; the app only needs deterministic rows. Use it if you ever
+need to test RLS behaviour itself: `supabase start`, apply migrations, seed
+`fixtures/seed.sql`, and point the same two env vars at `http://127.0.0.1:54321`.
+
+### Editing the dataset
+
+Change `dataset.mjs`, re-run `npm run test:visual:update`, commit the new PNGs.
+Three properties in that file are load-bearing and documented inline: every
+event lists all seven days (the homepage filters to *today*), every event has a
+distinct `created_at` (the list sorts on it, and ties reorder nondeterministically
+— a real flake that cost a debugging session), and the coordinates are spread
+enough to exercise the map's bounds fitting without pushing a pin off-frame.
+
+Worth fixing upstream regardless: `EventsSection.tsx` orders explicitly now,
+but the app generally has no `ORDER BY` backing sorts its UI depends on.
+
+### The tripwire
+
+Every test asserts the sentinel venue name (`Fixture Arms`) is on screen before
+capturing. If the env override ever silently stops working, the suite fails
+immediately rather than quietly overwriting the baselines with production data.
+Both `webServer` entries also set `reuseExistingServer: false` — reusing a dev
+server left over from `npm run dev` would point at the real project.
 
 ## Mapbox: hidden, not masked, not tolerance-based
 
@@ -142,21 +145,20 @@ picks one of 8 pictures at random on every server render
 across runs independent of any dependency upgrade. Masking it keeps that
 noise out of the diff without touching app code.
 
-## CI gap, summarized
+## CI
 
-The original blocker — needing a `SUPABASE_SERVICE_ROLE_KEY` to seed, which
-does not exist in this repo — **is gone**, since nothing needs seeding. A CI
-runner now needs only the two `NEXT_PUBLIC_` Supabase values the app already
-uses, plus `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`.
+Both original blockers are gone. There is nothing to seed, so no
+`SUPABASE_SERVICE_ROLE_KEY` is needed; and the suite no longer touches the
+shared database, so adding a venue cannot turn CI red. A runner needs only
+`NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` — the Supabase values are supplied by the
+config and point at the fixture server.
 
-What still argues against turning it on in CI:
+One thing still has to be handled before enabling it: **screenshots are
+OS-dependent.** The committed baselines are `-win32` suffixed (see
+`snapshotPathTemplate`). A Linux runner produces `-linux` files and would fail
+on filename alone — font rendering differs too. Either generate and commit
+Linux baselines alongside the Windows ones, or run the suite in a container
+matching the CI platform so one set serves both.
 
-1. **Baselines track live data.** Every venue added would turn CI red until
-   someone regenerates the PNGs — noisy while this project is actively
-   collecting venues.
-2. **Screenshots are OS-dependent.** The committed baselines are `-win32`
-   suffixed. A Linux runner generates different files and would fail on
-   filename alone; it needs its own baselines, generated on that platform.
-
-So `.github/workflows/ci.yml` still runs typecheck/lint/unit only. Point the
-suite at an isolated database (see above) before wiring it up.
+Until someone does that, `.github/workflows/ci.yml` runs typecheck/lint/unit
+only.
