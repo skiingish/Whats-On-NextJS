@@ -2,9 +2,9 @@ import DeleteItemButton from './DeleteItemButton';
 import ReportEventModal from './ReportEventModal';
 import { dayformatter } from '@/utils/dataformatter';
 import { addFavourite, removeFavourite } from '@/utils/favouritesHandler';
-import { FC, use, useState } from 'react';
+import { FC, useState } from 'react';
 export const dynamic = 'force-dynamic';
-import { CalendarDays, Clock, Flag, AlertCircle, Star } from 'lucide-react';
+import { CalendarDays, Clock, AlertCircle, Star, ExternalLink } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 interface EventsDisplayProps {
@@ -37,105 +37,107 @@ const EventsCards: FC<EventsDisplayProps> = ({
         setOpen={setShowReportModal}
         event={reportedEvent}
       />
-      <div className=''>
+      <div className='flex flex-col gap-4'>
         {events && events?.length > 0 ? (
           events?.map((event) => {
             return (
               <div
-                className='flex flex-wrap py-2 my-4 rounded-2xl text-foreground border-2 border-foreground bg-background-secondary'
+                className='relative rounded-lg border border-border bg-background-secondary p-4 shadow-sm transition-shadow sm:p-5 hover:shadow-md'
                 key={event.id}
               >
-                {event.venue && (
-                  <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
-                    {typeof event.venue === 'string'
-                      ? event.venue
-                      : event.venue.name}
-                  </p>
-                )}
-                <div className='px-4 flex'>
-                  {event.is_favorite ? (
-                    <button
-                      // The visible label below is `invisible` until hover,
-                      // and visibility:hidden removes it from the
-                      // accessibility tree — so without this the button had
-                      // no accessible name at all and announced as just
-                      // "button". aria-label also gives the visual-regression
-                      // suite a stable, data-independent handle on an event
-                      // card.
-                      aria-label='Remove favourite'
-                      className='text-foreground content-center rounded-lg hover:bg-muted'
-                      onClick={() => {
-                        removeFavourite(event);
-                        refreshFavourites();
-                      }}
-                    >
-                      <Star className='p-1' fill='#8f56fc' size={32} />
-                      <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                        Favourite
-                      </span>
-                    </button>
-                  ) : (
-                    <button
-                      aria-label='Add favourite'
-                      className='text-foreground content-center rounded-lg hover:bg-muted'
-                      onClick={() => {
-                        addFavourite(event);
-                        refreshFavourites();
-                      }}
-                    >
-                      <Star className='p-1' size={32} />
-                      <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                        Favourite
-                      </span>
-                    </button>
+                <div className='flex items-start justify-between gap-3'>
+                  {event.venue && (
+                    <h3 className='text-card-title min-w-0 break-words text-foreground'>
+                      {typeof event.venue === 'string'
+                        ? event.venue
+                        : event.venue.name}
+                    </h3>
                   )}
-                  <button
-                    aria-label='Report'
-                    className='text-foreground content-center rounded-lg hover:bg-muted'
-                    onClick={() => {
-                      handleReportClick(event);
-                    }}
-                  >
-                    <AlertCircle className='p-1' size={32} />
-                    <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                      Report
-                    </span>
-                  </button>
+                  <div className='flex shrink-0 items-center gap-1'>
+                    {event.is_favorite ? (
+                      <button
+                        aria-label='Remove favourite'
+                        className='flex h-11 w-11 items-center justify-center rounded-lg text-primary transition-colors hover:bg-muted'
+                        onClick={() => {
+                          removeFavourite(event);
+                          refreshFavourites();
+                        }}
+                      >
+                        <Star fill='currentColor' size={20} />
+                      </button>
+                    ) : (
+                      <button
+                        aria-label='Add favourite'
+                        className='flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-primary'
+                        onClick={() => {
+                          addFavourite(event);
+                          refreshFavourites();
+                        }}
+                      >
+                        <Star size={20} />
+                      </button>
+                    )}
+                    <button
+                      aria-label='Report'
+                      className='flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-destructive'
+                      onClick={() => {
+                        handleReportClick(event);
+                      }}
+                    >
+                      <AlertCircle size={20} />
+                    </button>
+                  </div>
                 </div>
 
-                <p className='px-6 py-2 whitespace-no-wrap min-w-full'>
+                <p className='mt-2 break-words text-foreground'>
                   {event.desc}
                 </p>
-                <div>
-                  {event.special_price !== null ? (
-                    <p className='px-6 py-2 text-md font-bold whitespace-no-wrap'>
-                      {event.special_price}
-                    </p>
-                  ) : null}
+
+                {event.special_price !== null && (
+                  <span className='text-price mt-3 inline-flex items-center rounded-full bg-accent px-3 py-1 text-accent-foreground'>
+                    {event.special_price}
+                  </span>
+                )}
+
+                <div className='text-meta mt-3 flex flex-col gap-1 text-muted-foreground'>
+                  <span className='flex items-center gap-1.5'>
+                    <CalendarDays size={16} />
+                    {dayformatter(event.when)}
+                  </span>
+                  <span className='flex items-center gap-1.5'>
+                    <Clock size={16} />
+                    {event.event_time}
+                  </span>
                 </div>
-                <p className='flex px-6 py-2 whitespace-no-wrap'>
-                  <CalendarDays className=' pr-1.5' />
-                  {dayformatter(event.when)}
-                </p>
-                <p className='flex px-6 py-2 whitespace-no-wrap'>
-                  <Clock className='pr-1.5' /> {event.event_time}
-                </p>
+
+                {event.link && (
+                  <a
+                    href={event.link}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-meta mt-3 inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary'
+                  >
+                    View source
+                    <ExternalLink size={14} />
+                  </a>
+                )}
+
                 {user ? (
                   // Edit button removed (D22): there is no edit flow built
                   // yet, and admin inline editing is planned for Phase 5 of
                   // the admin plan. A dead button here would only look
                   // broken to a logged-in user.
-                  <div className='flex' style={{ minWidth: '100%' }}>
-                    <div className='px-6 py-2 whitespace-no-wrap'>
-                      <DeleteItemButton id={event.id} />
-                    </div>
+                  <div className='mt-4'>
+                    <DeleteItemButton id={event.id} />
                   </div>
                 ) : null}
               </div>
             );
           })
         ) : (
-          <></>
+          <p className='text-meta py-8 text-center text-muted-foreground'>
+            No specials to show right now — check back soon.
+          </p>
         )}
       </div>
     </>
