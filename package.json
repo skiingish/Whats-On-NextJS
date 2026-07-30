@@ -61,6 +61,7 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^16.4.0",
+    "msw": "^2.15.0",
     "vitest": "^4.1.10"
   },
   "//overrides": "next 16.2.12 pins postcss 8.4.31 and sharp 0.34.5 transitively, both of which carry high-severity advisories (postcss: XSS via unescaped </style>, arbitrary file read via sourceMappingURL; sharp: inherited libvips CVEs). Neither is reachable by bumping next itself — `npm audit fix --force` 'resolves' them by downgrading next to 9.3.3, which is obviously not an option. `$postcss` pins the transitive copy to the direct dependency above so the two can't drift. Drop these once next ships them itself.",
