@@ -221,6 +221,35 @@ export default function VenueMap({
     mapRef.current?.resize();
   }, []);
 
+  /**
+   * Surface Mapbox's own failures.
+   *
+   * react-map-gl installs a default `error` handler that only console.errors,
+   * and mapbox-gl reports tile fetch failures (429 rate limits, 401/403 token
+   * problems, network errors) through that event rather than by throwing. With
+   * nothing listening, a map that renders one tile and then silently gives up
+   * looks identical to a map that is merely slow — which is precisely the
+   * ambiguity that made the "missing tiles" report hard to pin down.
+   *
+   * Logging the status and URL makes the difference visible in the console.
+   */
+  const handleMapError = useCallback((event: { error?: unknown }) => {
+    // mapbox-gl's ErrorLike carries `status` and `url` on tile/resource
+    // failures, but its published type only guarantees `message` — hence the
+    // narrowing rather than a cast.
+    const error = (event.error ?? {}) as {
+      message?: string;
+      status?: number;
+      url?: string;
+    };
+    console.error(
+      `[VenueMap] mapbox error${error.status ? ` (HTTP ${error.status})` : ''}: ${
+        error.message ?? 'unknown'
+      }`,
+      error.url ? `\n  url: ${error.url}` : ''
+    );
+  }, []);
+
   if (!venues) return <p>No Venues</p>;
 
   return (
@@ -232,6 +261,7 @@ export default function VenueMap({
         <Map
           ref={mapRef}
           onLoad={handleMapLoad}
+          onError={handleMapError}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
           initialViewState={initialViewState}
           style={{ width: '100%', height: '100%' }}
