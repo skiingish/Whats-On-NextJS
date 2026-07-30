@@ -1,9 +1,16 @@
 import { z } from 'zod';
-import { FC, Fragment, useRef, useState, FormEvent } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { FC, useState, FormEvent } from 'react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from './ui/dialog';
 
 const feedbackSchema = z.object({
   name: z.string().optional().nullable(),
@@ -16,9 +23,12 @@ interface FeedbackFormProps {
   setOpen: any;
 }
 
-const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
-  const cancelButtonRef = useRef(null);
+// Shared visual language for text-style inputs across this form (matches the
+// search/filter inputs on the homepage — see EventsDisplay.tsx).
+const fieldClasses =
+  'w-full rounded-sm border border-input bg-background-secondary px-3 text-foreground placeholder:text-muted-foreground';
 
+const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -58,122 +68,87 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
   };
 
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog
-        as='div'
-        className='relative z-10'
-        initialFocus={cancelButtonRef}
-        onClose={setOpen}
-      >
-        <Transition.Child
-          as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
-        >
-          <div className='fixed inset-0 bg-black/75 transition-opacity' />
-        </Transition.Child>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
+          <DialogHeader>
+            <DialogTitle className="text-section">Hi There 👋</DialogTitle>
+            <DialogDescription>
+              Something not right, or an idea to make the site better?
+              We&apos;d love to hear it.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className='fixed inset-0 z-10 w-screen overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
-              as={Fragment}
-              enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
-              leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+          <div className="flex flex-col gap-1.5">
+            <label
+              className="text-sm font-semibold text-foreground"
+              htmlFor="name"
             >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-xl border-4 border-foreground bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
-                <form onSubmit={handleFormSubmit}>
-                  <div className='bg-background px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
-                    <div className='sm:flex sm:items-start'>
-                      {/* <div className='mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10'></div> */}
-                      <div className='mt-2 text-center sm:ml-4 sm:mt-0 sm:text-left'>
-                        <Dialog.Title
-                          as='h3'
-                          className='text-base font-semibold leading-6 text-foreground'
-                        >
-                          Hi There 👋
-                        </Dialog.Title>
-                        <div className='mt-6'>
-                          <div className='flex flex-col w-full justify-center'>
-                            <label
-                              className='text-sm font-semibold tracking-wide text-foreground'
-                              htmlFor='name'
-                            >
-                              Whats Your Name? (Optional)
-                            </label>
-                            <input
-                              name='name'
-                              id='name'
-                              className='w-full my-3 px-2 py-3.5 font-semibold border-foreground rounded-xl text-foreground border-2 bg-background-secondary'
-                              placeholder='Frankie Loves Pizzas...'
-                            ></input>
-                            <label
-                              className='text-sm font-semibold tracking-wide text-foreground'
-                              htmlFor='email'
-                            >
-                              Where Shall I Email A Reply? (Optional)
-                            </label>
-                            <input
-                              name='email'
-                              id='email'
-                              className='w-full my-3 px-2 py-3.5 font-semibold border-foreground rounded-xl text-foreground border-2 bg-background-secondary'
-                              type='email'
-                              placeholder='frankie@pizzalovers.com...'
-                            ></input>
-                            <label
-                              className='text-sm font-semibold tracking-wide text-foreground'
-                              htmlFor='message'
-                            >
-                              Whats Your Message?
-                            </label>
-                            <textarea
-                              name='message'
-                              id='message'
-                              placeholder='I love pizza! Please create me an account (P.S. I own a venue)...'
-                              className='w-full h-32 mt-2 px-4 py-2 border-2 border-foreground rounded-xl text-foreground bg-background-secondary mb-1'
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='bg-background px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
-                    {loading ? (
-                      <Loader2 className='animate-spin h-8 w-8 text-foreground' />
-                    ) : (
-                      <>
-                        <Button
-                          type='submit'
-                          className='inline-flex w-full justify-center px-3 py-2 text-sm sm:ml-3 sm:w-auto'
-                        >
-                          Submit
-                        </Button>
-                        <Button
-                          type='button'
-                          variant={'secondary'}
-                          className='mt-3 inline-flex w-full justify-center text-sm font-semibold border-foreground sm:mt-0 sm:w-auto'
-                          onClick={() => setOpen(false)}
-                          ref={cancelButtonRef}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
+              What&apos;s Your Name?
+            </label>
+            <p className="text-meta text-muted-foreground">Optional.</p>
+            <input
+              name="name"
+              id="name"
+              className={`${fieldClasses} h-11`}
+              placeholder="Frankie Loves Pizzas..."
+            />
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              className="text-sm font-semibold text-foreground"
+              htmlFor="email"
+            >
+              Where Shall We Email A Reply?
+            </label>
+            <p className="text-meta text-muted-foreground">Optional.</p>
+            <input
+              name="email"
+              id="email"
+              type="email"
+              className={`${fieldClasses} h-11`}
+              placeholder="frankie@pizzalovers.com..."
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              className="text-sm font-semibold text-foreground"
+              htmlFor="message"
+            >
+              What&apos;s Your Message? <span className="text-destructive">*</span>
+            </label>
+            <textarea
+              name="message"
+              id="message"
+              placeholder="I love pizza! Please create me an account (P.S. I own a venue)..."
+              className={`${fieldClasses} h-32 py-2`}
+            />
+          </div>
+
+          <DialogFooter>
+            {loading ? (
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-foreground" />
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full sm:w-auto"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="w-full sm:w-auto">
+                  Submit
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

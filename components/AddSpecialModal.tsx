@@ -1,11 +1,19 @@
 import { z } from 'zod';
-import { FC, Fragment, useRef, useState, FormEvent, useEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { FC, useState, FormEvent } from 'react';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { VenueComboBox } from './ui/VenueComboBox';
 import { isNewVenue, newVenueName } from '@/lib/venue-selection';
 import { Button } from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from './ui/dialog';
+import { cn } from '@/lib/utils';
 
 // Fields match what's actually collected from this form (see handleFormSubmit
 // below) — venue selection is a combobox validated separately, since it's
@@ -39,15 +47,29 @@ const DAYS = [
   'Sunday',
 ] as const;
 
+// Shared visual language for text-style inputs across this form (matches the
+// search/filter inputs on the homepage — see EventsDisplay.tsx).
+const fieldClasses =
+  'h-11 w-full rounded-sm border border-input bg-background-secondary px-3 text-foreground placeholder:text-muted-foreground';
+
 const AddSpecialModal: FC<AddSpecialModalProps> = ({
   event,
   open,
   setOpen,
   userLoggedIn,
 }) => {
-  const cancelButtonRef = useRef(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedVenue, setSelectedVenue] = useState('');
+  // Purely presentational state driving the day chips below — the actual
+  // submitted value is still the "days" checkbox-shaped hidden inputs
+  // rendered per selected day, so form submission is unchanged.
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+
+  const toggleDay = (day: string) => {
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,6 +116,7 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
 
       setLoading(false);
       setSelectedVenue('');
+      setSelectedDays([]);
       setOpen(false);
 
       if (userLoggedIn) {
@@ -109,140 +132,127 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
   };
 
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog
-        as='div'
-        className='relative z-10'
-        initialFocus={cancelButtonRef}
-        onClose={setOpen}
-      >
-        <Transition.Child
-          as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
-        >
-          <div className='fixed inset-0 bg-black/75 transition-opacity' />
-        </Transition.Child>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
+          <DialogHeader>
+            <DialogTitle className="text-section">
+              {userLoggedIn ? 'Add Event' : 'Add New Event For Review'}
+            </DialogTitle>
+            <DialogDescription>
+              {userLoggedIn
+                ? 'Add a new special — it goes live immediately.'
+                : "Tell us about a special that isn't listed yet. An admin will review it before it appears."}
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className='fixed inset-0 z-10 w-screen overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
-              as={Fragment}
-              enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
-              leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-            >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-2xl border-4 border-foreground bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
-                <form
-                  onSubmit={handleFormSubmit}
-                  className='flex flex-col gap-1 max-w-4xl px-4 py-3 lg:py-8 text-foreground bg-background'
-                >
-                  <Dialog.Title
-                    as='h2'
-                    className='text-lg font-semibold leading-6 text-foreground mb-2'
-                  >
-                    {userLoggedIn ? 'Add Event' : 'Add New Event For Review'}
-                  </Dialog.Title>
-                  <label className='text-md font-semibold' htmlFor='venue'>
-                    Where
-                  </label>
-                  <VenueComboBox
-                    id='venue'
-                    value={selectedVenue}
-                    onChange={setSelectedVenue}
-                    canCreateVenue={!!userLoggedIn}
-                    className='rounded-2xl px-4 py-5 border-2 border-foreground bg-background-secondary mb-6'
-                  />
-                  <label className='text-md font-semibold' htmlFor='desc'>
-                    What
-                  </label>
-                  <input
-                    className='rounded-2xl px-4 py-2 border-2 border-foreground bg-background-secondary mb-6'
-                    id='desc'
-                    name='desc'
-                    required
-                    placeholder='Cheap Tuesdays...'
-                  />
-                  <label
-                    className='text-md font-semibold'
-                    htmlFor='special_price'
-                  >
-                    Special $ Details (Optional)
-                  </label>
-                  <input
-                    className='rounded-2xl px-4 py-2 border-2 border-foreground bg-background-secondary mb-6'
-                    id='special_price'
-                    name='special_price'
-                    placeholder='$5 Cheese Pizzas...'
-                  />
-                  <label className='text-md font-semibold' htmlFor='event_time'>
-                    Time
-                  </label>
-                  <input
-                    className='rounded-2xl px-4 py-2 border-2 border-foreground bg-background-secondary mb-6'
-                    id='event_time'
-                    name='event_time'
-                    required
-                    placeholder='All day...'
-                  />
-
-                  <label className='text-md font-semibold'>
-                    When (Select All That Apply)
-                  </label>
-                  <div className='flex-1 flex max-w-lg flex-row flex-wrap justify-center gap-6 py-4 text-foreground'>
-                    {DAYS.map((day) => (
-                      <label
-                        key={day}
-                        className='relative inline-flex items-center cursor-pointer'
-                      >
-                        <input
-                          type='checkbox'
-                          name='days'
-                          value={day}
-                          className='sr-only peer'
-                        />
-                        <div className="w-11 h-6 bg-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-primary/40 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background-secondary after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent" />
-                        <span className='ml-3 text-sm font-medium'>{day}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <div className='bg-inherit px-0 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
-                    {loading ? (
-                      <Loader2 className='animate-spin h-8 w-8 text-foreground' />
-                    ) : (
-                      <>
-                        <Button
-                          type='submit'
-                          className='inline-flex w-full justify-center px-3 py-2 text-sm sm:ml-3 sm:w-auto'
-                        >
-                          Submit
-                        </Button>
-                        <Button
-                          type='button'
-                          variant={'secondary'}
-                          className='mt-3 inline-flex w-full justify-center text-sm font-semibold border-foreground sm:mt-0 sm:w-auto'
-                          onClick={() => setOpen(false)}
-                          ref={cancelButtonRef}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-foreground" htmlFor="venue">
+              Where <span className="text-destructive">*</span>
+            </label>
+            <VenueComboBox
+              id="venue"
+              value={selectedVenue}
+              onChange={setSelectedVenue}
+              canCreateVenue={!!userLoggedIn}
+            />
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-foreground" htmlFor="desc">
+              What <span className="text-destructive">*</span>
+            </label>
+            <input
+              className={fieldClasses}
+              id="desc"
+              name="desc"
+              required
+              placeholder="Cheap Tuesdays..."
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              className="text-sm font-semibold text-foreground"
+              htmlFor="special_price"
+            >
+              Special $ Details
+            </label>
+            <p className="text-meta text-muted-foreground">Optional.</p>
+            <input
+              className={fieldClasses}
+              id="special_price"
+              name="special_price"
+              placeholder="$5 Cheese Pizzas..."
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-foreground" htmlFor="event_time">
+              Time <span className="text-destructive">*</span>
+            </label>
+            <input
+              className={fieldClasses}
+              id="event_time"
+              name="event_time"
+              required
+              placeholder="All day..."
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-semibold text-foreground">
+              When <span className="text-destructive">*</span>
+            </span>
+            <p className="text-meta text-muted-foreground">Select all that apply.</p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {DAYS.map((day) => {
+                const selected = selectedDays.includes(day);
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleDay(day)}
+                    className={cn(
+                      'min-h-11 min-w-11 rounded-full border px-4 text-sm font-semibold tracking-wide transition-colors',
+                      selected
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-input bg-background-secondary text-foreground hover:bg-muted'
+                    )}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedDays.map((day) => (
+              <input key={day} type="hidden" name="days" value={day} />
+            ))}
+          </div>
+
+          <DialogFooter>
+            {loading ? (
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-foreground" />
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full sm:w-auto"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="w-full sm:w-auto">
+                  Submit
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
