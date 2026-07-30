@@ -266,7 +266,11 @@ export default function VenueMap({
   return (
     <div
       ref={containerRef}
-      className='relative h-[70vh] w-full overflow-hidden rounded-xl border border-border shadow-sm'
+      // bg-muted rather than nothing: until Mapbox paints its first tiles the
+      // container shows through, and an unset background renders light in dark
+      // mode — a white flash on every load of the one screen that is mostly
+      // map. The token tracks the theme, so the pre-tile state matches.
+      className='relative h-[70vh] w-full overflow-hidden rounded-xl border border-border bg-muted shadow-sm'
     >
       {mounted && visibleVenues.length === 0 && (
         <div className='pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4'>

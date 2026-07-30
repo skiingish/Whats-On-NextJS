@@ -199,7 +199,7 @@ Each chunk is committed separately so progress survives an interrupted session.
 | 7 | Map page, drawer, marker restyle + resize regression fixed | done |
 | 8 | Login, not-found, error, Footer extras | done |
 | 9 | Mobile pass at 375/414px + dark-mode audit + contrast check | done |
-| 10 | Regenerate visual baselines, full suite, final review | |
+| 10 | Regenerate visual baselines, full suite, final review | done |
 
 ## Shell layout (settled in chunk 7 — read before adding a page)
 
