@@ -1,10 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import AddEventDisplay from '@/components/AddEventDisplay';
 import Image from 'next/image';
-
 import localFont from 'next/font/local';
-
-const AgbalumoRegular = localFont({ src: './Agbalumo-Regular.ttf' });
 
 import hamburger from '../public/assets/hamburger_1280.jpg';
 import pizza from '../public/assets/pizza_1280.jpg';
@@ -18,6 +15,11 @@ import skistore from '../public/assets/skistore_1280.jpg';
 import Footer from '@/components/Footer';
 import EventsSection from '@/components/EventsSection';
 import Navbar from '@/components/Navbar';
+
+// The brand display face. Kept deliberately through the 2026 redesign: the
+// palette is not the only thing carrying the brand, and the title is the one
+// place a distinctive face earns its download.
+const AgbalumoRegular = localFont({ src: './Agbalumo-Regular.ttf' });
 
 export const dynamic = 'force-dynamic';
 
@@ -67,26 +69,34 @@ export default async function Index() {
     <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background'>
       <Navbar user={user} />
 
-      <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
-        <div className='flex flex-col items-center mx-2 lg:mb-8'>
-          <p
-            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl leading-tight! mx-auto max-w-xl text-center my-2`}
+      <div className='w-full flex flex-col gap-8 py-8 lg:gap-12 lg:py-12'>
+        <div className='animate-in flex flex-col items-center gap-6 opacity-0'>
+          <h1
+            className={`text-display text-center text-foreground ${AgbalumoRegular.className}`}
           >
             Specials Spotter!
-          </p>
+          </h1>
+          {/* Next/Image's static import carries intrinsic width/height, so
+              the box is reserved before the image loads — no layout shift
+              regardless of which day's picture renders. The `w-full
+              lg:max-h-96 object-cover` classes are load-bearing: the visual
+              suite pins this element to a 24rem height by selector
+              (`img[alt="Picture logo"]`), see tests/visual/screens.spec.ts. */}
+          <Image
+            className='hidden w-full rounded-xl border border-border object-cover lg:block lg:max-h-96'
+            src={heroPicture}
+            alt='Picture logo'
+            placeholder='blur'
+            priority
+          />
         </div>
-        <Image
-          className='hidden lg:block opacity-80 w-full lg:max-h-96 object-cover'
-          src={heroPicture}
-          alt='Picture logo'
-          placeholder='blur'
-        />
+
+        <div className='w-full max-w-4xl mx-auto flex flex-col gap-8 lg:gap-12'>
+          <EventsSection user={user} />
+          <AddEventDisplay userLoggedIn={!!user} />
+        </div>
       </div>
 
-      <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 text-foreground'>
-        <EventsSection user={user} />
-        <AddEventDisplay userLoggedIn={!!user} />
-      </div>
       <div className='w-full'>
         <Footer />
       </div>

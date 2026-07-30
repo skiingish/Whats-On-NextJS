@@ -194,7 +194,7 @@ Each chunk is committed separately so progress survives an interrupted session.
 | 2 | UI primitives: button, dialog, drawer, popover, combobox, command | done |
 | 3 | Navbar, Footer, app shell + layout | done |
 | 4 | Event card (`EventsCards`) | done |
-| 5 | Homepage: hero, search, filters, List/Map toggle (`EventsDisplay`, `page.tsx`) | |
+| 5 | Homepage: hero, search, filters, List/Map toggle (`EventsDisplay`, `page.tsx`) | done |
 | 6 | Modals: AddSpecial, Feedback, Report | |
 | 7 | Map page, drawer, marker restyle | |
 | 8 | Login, not-found, error, Footer extras | |
