@@ -256,7 +256,7 @@ export default function VenueMap({
   if (!venues) {
     return (
       <div className='flex h-[70vh] w-full items-center justify-center rounded-xl border border-border bg-background-secondary shadow-sm'>
-        <p className='text-meta text-muted-foreground'>
+        <p className='text-note text-muted-foreground'>
           No venues to show right now — check back soon.
         </p>
       </div>
@@ -274,7 +274,7 @@ export default function VenueMap({
     >
       {mounted && visibleVenues.length === 0 && (
         <div className='pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4'>
-          <p className='text-meta rounded-full border border-border bg-background-secondary px-4 py-2 text-muted-foreground shadow-sm'>
+          <p className='text-note rounded-full border border-border bg-background-secondary px-4 py-2 text-muted-foreground shadow-sm'>
             No specials match that search
           </p>
         </div>
@@ -324,7 +324,7 @@ export default function VenueMap({
             />
           </div>
         ) : (
-          <p className='text-meta text-center text-muted-foreground'>
+          <p className='text-note text-center text-muted-foreground'>
             No venue selected
           </p>
         )}

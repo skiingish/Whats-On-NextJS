@@ -158,7 +158,7 @@ const EventsCards: FC<EventsDisplayProps> = ({
             );
           })
         ) : (
-          <p className='text-meta py-8 text-center text-muted-foreground'>
+          <p className='text-note py-8 text-center text-muted-foreground'>
             No specials to show right now — check back soon.
           </p>
         )}

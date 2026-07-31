@@ -178,7 +178,7 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
             >
               Special $ Details
             </label>
-            <p className="text-meta text-muted-foreground">Optional.</p>
+            <p className="text-note text-muted-foreground">Optional.</p>
             <input
               className={fieldClasses}
               id="special_price"
@@ -204,7 +204,7 @@ const AddSpecialModal: FC<AddSpecialModalProps> = ({
             <span className="text-sm font-semibold text-foreground">
               When <span className="text-destructive">*</span>
             </span>
-            <p className="text-meta text-muted-foreground">Select all that apply.</p>
+            <p className="text-note text-muted-foreground">Select all that apply.</p>
             <div className="flex flex-wrap gap-2 pt-1">
               {DAYS.map((day) => {
                 const selected = selectedDays.includes(day);

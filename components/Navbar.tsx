@@ -32,7 +32,7 @@ const AuthStatus = ({ user }: { user: User | null }) => {
 
   return (
     <div className='flex items-center gap-4'>
-      <p className='text-meta text-muted-foreground'>Hey, {user.email}</p>
+      <p className='text-note text-muted-foreground'>Hey, {user.email}</p>
       <LogoutButton />
     </div>
   );

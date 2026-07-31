@@ -19,7 +19,7 @@ const AddEventDisplay: FC<AddEventDisplayProps> = ({ userLoggedIn }) => {
         userLoggedIn={userLoggedIn}
       />
       {!userLoggedIn && (
-        <p className='text-meta text-muted-foreground'>
+        <p className='text-note text-muted-foreground'>
           Know a special that isn&apos;t listed yet?
         </p>
       )}

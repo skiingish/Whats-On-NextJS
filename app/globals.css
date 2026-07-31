@@ -282,6 +282,23 @@
     letter-spacing: -0.01em;
   }
 
+  /*
+   * Two small-text roles, deliberately separate. Collapsing them is what made
+   * the type feel scattered: mono was setting whole sentences in uppercase —
+   * page subtitles, empty states, "Hey, {email}" — which is unreadable and
+   * makes three faces look like no system at all.
+   *
+   * .text-meta  — Courier. ONLY short data tokens: a day, a time, a label, a
+   *               source link. Never a sentence.
+   * .text-note  — Archivo. All small supporting prose: help text, empty
+   *               states, subtitles, hints.
+   */
+  .text-note {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
   /* Dockets and receipts. Uppercase, tracked out, small. */
   .text-meta {
     font-family: var(--font-mono);

@@ -39,7 +39,17 @@ Three faces, each doing a specific job. No system stack.
 |---|---|---|
 | **Fraunces** (variable, high `wonk` + `soft` axes) | Display, venue names, prices | A serif with deliberate irregularity in its curves. Reads as hand-cut signage rather than a font, which is exactly the chalkboard register. |
 | **Archivo** | Body, controls | A grotesque with real width and warmth. Holds up small on a phone without going anonymous like Inter. |
-| **Courier Prime** | Day, time, source links, metadata | Typewriter. Dockets, receipts, laminated bistro menus. Cheap in the right way. |
+| **Courier Prime** | Day, time, source links, the hero kicker | Typewriter. Dockets, receipts, laminated bistro menus. Cheap in the right way. |
+
+**Each face has exactly one job, and mono has the narrowest.** `.text-meta`
+(Courier, uppercase, tracked) is for **short data tokens only** — a day, a
+time, a label, a source link. Never a sentence. All small supporting prose —
+help text, empty states, page subtitles, hints — uses `.text-note` (Archivo).
+
+Collapsing those two is what made the first cut of this direction look
+scattered: mono was setting whole sentences in uppercase, including page
+subtitles and "Hey, {email}", which is both unreadable and makes three faces
+read as no system at all.
 
 Agbalumo is retired: it was doing the "characterful display" job that Fraunces
 now does properly, and two display faces fight.

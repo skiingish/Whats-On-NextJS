@@ -242,7 +242,7 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
           <p className='text-card-title text-foreground'>
             No specials match that search
           </p>
-          <p className='text-meta max-w-sm text-muted-foreground'>
+          <p className='text-note max-w-sm text-muted-foreground'>
             Try a different day or search term — or if you know a special
             we&apos;re missing, let us know below.
           </p>

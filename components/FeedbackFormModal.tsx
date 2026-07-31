@@ -86,7 +86,7 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
             >
               What&apos;s Your Name?
             </label>
-            <p className="text-meta text-muted-foreground">Optional.</p>
+            <p className="text-note text-muted-foreground">Optional.</p>
             <input
               name="name"
               id="name"
@@ -102,7 +102,7 @@ const FeedBackFormModal: FC<FeedbackFormProps> = ({ open, setOpen }) => {
             >
               Where Shall We Email A Reply?
             </label>
-            <p className="text-meta text-muted-foreground">Optional.</p>
+            <p className="text-note text-muted-foreground">Optional.</p>
             <input
               name="email"
               id="email"
