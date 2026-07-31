@@ -2,35 +2,23 @@
 @import 'tw-animate-css';
 
 /*
- * Token architecture — 2026 redesign
- * ------------------------------------------------------------------
- * See docs/redesign-2026-spec.md for the direction and the reasoning.
+ * "THE BOARD" — see docs/redesign-board-spec.md
+ * ---------------------------------------------------------------------------
+ * Specials live on a chalkboard. Every pub in the hills writes its parma night
+ * on a slate A-frame out the front, so the app is that object, and it flips
+ * with the light:
  *
- * One set of shadcn-shaped tokens carries the brand palette. Every token has
- * a real light value in :root and a real dark value in the
- * prefers-color-scheme override, so `bg-background text-foreground border`
- * (and friends) look right in both themes with no `dark:` utility at the call
- * site. That property is load-bearing: components must not use `dark:`.
+ *   dark  = the chalkboard   (slate, chalk lettering, neon glow)
+ *   light = the menu card    (butcher paper, charcoal ink, stamped purple)
  *
- * What changed from the previous neo-brutalist system, and why:
+ * Both are real objects from the same pub, which is what stops the two themes
+ * reading as a palette and its inversion. The brief's cream and purple survive
+ * doing actual jobs: cream is the chalk and the paper, purple is the neon and
+ * the ink.
  *
- * - `--border` was `var(--foreground)`, i.e. a 2px near-black outline on every
- *   surface. Separation now comes from a surface ramp
- *   (background -> background-secondary -> surface-raised) plus a hairline
- *   border, which reads calmer and — the actual motivation — stops eating
- *   horizontal space on a 375px phone.
- * - `--primary` was `261 98% 80%`, a pale lilac that cannot carry white text
- *   and only ever worked with near-black on top. It is now deep enough
- *   (`261 84% 62%`) to pass 4.5:1 against white, so primary buttons can look
- *   like primary buttons.
- * - Neutrals are faintly purple-tinted rather than pure grey, so they sit with
- *   the brand instead of beside it.
- *
- * Dark mode is driven by `prefers-color-scheme` alone — deliberately. Nothing
- * in this app toggles a class, so a media query honestly describes the
- * behaviour. Adding a manual toggle later means introducing shadcn's custom
- * variant, swapping these `@media` blocks for `:root.dark`, and switching the
- * visual suite's dark project from `colorScheme` to setting the class.
+ * Dark mode is still driven by prefers-color-scheme alone, and components must
+ * still never use `dark:` utilities — every token below has a real value in
+ * both blocks.
  */
 @theme {
   --color-background: hsl(var(--background));
@@ -63,209 +51,313 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
-  /* A scale rather than one value: bigger surfaces take a bigger curve. */
-  --radius-sm: 0.625rem;
-  --radius-md: 0.875rem;
-  --radius-lg: var(--radius);
-  --radius-xl: 1.75rem;
+  /* Chalk and paper don't have a radius system. Corners are nearly square —
+     a slate has a hard edge — with just enough softening to not look sharp. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 
   --shadow-sm: var(--elevation-sm);
   --shadow-md: var(--elevation-md);
   --shadow-lg: var(--elevation-lg);
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-courier-prime), ui-monospace, monospace;
 }
 
 @layer base {
+  /* ---------------------------------------------------------------------
+     LIGHT — the menu card. Butcher paper, charcoal ink, stamped purple.
+     --------------------------------------------------------------------- */
   :root {
-    /* Brand — warm cream, purple accent. See spec for contrast rationale. */
-    --background: 36 44% 94%;
-    --background-secondary: 40 60% 99%;
-    --surface-raised: 0 0% 100%;
-    --foreground: 265 25% 11%;
+    --background: 38 40% 90%;
+    --background-secondary: 40 52% 95%;
+    --surface-raised: 42 56% 97%;
+    --foreground: 210 22% 13%;
 
     --popover: var(--surface-raised);
     --popover-foreground: var(--foreground);
 
-    --primary: 261 84% 62%;
-    --primary-hover: 261 84% 55%;
-    --primary-foreground: 0 0% 100%;
+    /* Stamped ink: deep enough to carry white and to read as pigment on
+       paper rather than as a screen colour. */
+    --primary: 265 62% 42%;
+    --primary-hover: 265 62% 34%;
+    --primary-foreground: 42 56% 97%;
 
-    --secondary: 36 30% 90%;
-    --secondary-hover: 36 30% 85%;
-    --secondary-foreground: 265 25% 11%;
+    --secondary: 38 30% 84%;
+    --secondary-hover: 38 30% 78%;
+    --secondary-foreground: 210 22% 13%;
 
-    --muted: 36 24% 88%;
-    --muted-foreground: 265 8% 42%;
+    --muted: 38 26% 85%;
+    --muted-foreground: 210 12% 36%;
 
-    /* Warm orange, used sparingly — prices and highlights only.
-       The chunk 9 audit correctly caught that white on this orange was only
-       2.78:1. There were two ways out: darken the orange to 40% and keep white
-       (4.62:1), or keep the orange and darken the text. Darkening the orange
-       muddied the one colour whose entire job is to catch the eye on a price
-       tag, so the foreground moves instead: near-black on the original 55%
-       orange measures 6.56:1 — better contrast AND the brighter orange. */
-    --accent: 24 90% 55%;
-    --accent-foreground: 265 30% 10%;
+    /* The price stamp. Red-orange docket ink. */
+    --accent: 14 78% 44%;
+    --accent-foreground: 42 56% 97%;
 
-    --destructive: 2 72% 48%;
-    --destructive-hover: 2 72% 41%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 2 70% 42%;
+    --destructive-hover: 2 70% 35%;
+    --destructive-foreground: 42 56% 97%;
 
-    --border: 265 12% 87%;
-    --input: 265 12% 82%;
-    --ring: 261 84% 62%;
+    --border: 210 16% 24%;
+    --input: 210 14% 30%;
+    --ring: 265 62% 42%;
 
-    --radius: 1.25rem;
-    --border-width: 1px;
+    /* Ink on paper doesn't glow. Neutralised here, lit up in dark. */
+    --glow: 0 0 0 transparent;
+    --glow-soft: 0 0 0 transparent;
 
-    --elevation-sm: 0 1px 2px hsl(265 25% 11% / 0.04);
-    --elevation-md: 0 4px 16px -4px hsl(265 25% 11% / 0.08);
-    --elevation-lg: 0 12px 32px -8px hsl(265 25% 11% / 0.12);
+    /* Paper fibre: coarser and more visible than chalk dust. */
+    --grain-opacity: 0.055;
+    --vignette: transparent;
+
+    --elevation-sm: 0 1px 0 hsl(210 22% 13% / 0.1);
+    --elevation-md: 0 2px 0 hsl(210 22% 13% / 0.12),
+      0 6px 18px -10px hsl(210 22% 13% / 0.4);
+    --elevation-lg: 0 3px 0 hsl(210 22% 13% / 0.14),
+      0 18px 40px -18px hsl(210 22% 13% / 0.5);
   }
 
+  /* ---------------------------------------------------------------------
+     DARK — the chalkboard. Slate, warm chalk, neon.
+     --------------------------------------------------------------------- */
   @media (prefers-color-scheme: dark) {
     :root {
-      /* Warm near-black rather than neutral grey, so the cream-side warmth
-         carries through instead of the app reading as two unrelated themes. */
-      --background: 265 20% 8%;
-      --background-secondary: 265 17% 12%;
-      --surface-raised: 265 15% 16%;
-      --foreground: 40 30% 96%;
+      /* Slate carries a faint cool cast; a pure neutral black reads as OLED
+         UI, not as a physical board. */
+      --background: 205 14% 9%;
+      --background-secondary: 205 13% 13%;
+      --surface-raised: 205 12% 16%;
+      /* Warm chalk, never pure white — white on slate looks like a stylesheet
+         failed to load. */
+      --foreground: 40 34% 91%;
 
-      /* Purple lifts in dark so it stays legible against a dark surface, and
-         its foreground flips to near-black to keep 4.5:1 on the lighter fill. */
-      --primary: 261 90% 72%;
-      --primary-hover: 261 90% 78%;
-      --primary-foreground: 265 30% 10%;
+      --popover: var(--surface-raised);
+      --popover-foreground: var(--foreground);
 
-      --secondary: 265 15% 18%;
-      --secondary-hover: 265 15% 23%;
-      --secondary-foreground: 40 30% 96%;
+      /* Neon purple. Lifted and saturated so the glow has something to bloom
+         from. */
+      --primary: 268 96% 72%;
+      --primary-hover: 268 96% 79%;
+      --primary-foreground: 205 20% 10%;
 
-      --muted: 265 12% 20%;
-      --muted-foreground: 265 8% 65%;
+      --secondary: 205 12% 19%;
+      --secondary-hover: 205 12% 24%;
+      --secondary-foreground: 40 34% 91%;
 
-      --accent: 24 85% 58%;
-      --accent-foreground: 265 30% 10%;
+      --muted: 205 12% 20%;
+      --muted-foreground: 40 12% 66%;
 
-      /* 53%, not 55% — white destructive-foreground text (inherited from
-         :root, unchanged in dark) only reached 4.33:1 at 55%, under the
-         4.5:1 minimum (chunk 9 audit). 53% is the smallest step that clears
-         it; hover keeps the same +7 lightness offset as before. */
-      --destructive: 2 68% 53%;
-      --destructive-hover: 2 68% 60%;
+      /* Amber neon for the price — the warm sign over the bar. */
+      --accent: 36 96% 62%;
+      --accent-foreground: 205 20% 10%;
 
-      --border: 265 12% 20%;
-      --input: 265 12% 24%;
-      --ring: 261 90% 72%;
+      --destructive: 2 74% 62%;
+      --destructive-hover: 2 74% 69%;
+      --destructive-foreground: 205 20% 10%;
 
-      /* Shadows barely register on dark surfaces — separation comes from the
-         surface ramp instead, so these are dialled right back rather than
-         left at light-mode strength doing nothing but muddying edges. */
-      --elevation-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
-      --elevation-md: 0 4px 16px -4px hsl(0 0% 0% / 0.35);
-      --elevation-lg: 0 12px 32px -8px hsl(0 0% 0% / 0.45);
+      /* Chalk rules are the chalk colour at low opacity, not a grey line. */
+      --border: 40 20% 74%;
+      --input: 40 16% 60%;
+      --ring: 268 96% 72%;
+
+      --glow: 0 0 18px hsl(268 96% 72% / 0.55), 0 0 46px hsl(268 96% 72% / 0.28);
+      --glow-soft: 0 0 12px hsl(36 96% 62% / 0.42);
+
+      /* Chalk dust: finer and subtler than paper fibre. */
+      --grain-opacity: 0.085;
+      --vignette: hsl(205 30% 3% / 0.55);
+
+      --elevation-sm: 0 1px 0 hsl(0 0% 0% / 0.4);
+      --elevation-md: 0 2px 0 hsl(0 0% 0% / 0.45),
+        0 10px 26px -12px hsl(0 0% 0% / 0.7);
+      --elevation-lg: 0 3px 0 hsl(0 0% 0% / 0.5),
+        0 22px 50px -20px hsl(0 0% 0% / 0.8);
     }
   }
 
+  /* Borders default to the chalk/ink colour but always at partial opacity —
+     a crisp full-strength 1px box is the single most "generic web app" thing
+     a surface can do. */
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: hsl(var(--border));
+    border-color: hsl(var(--border) / 0.28);
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Headings carry the redesign's voice: tight tracking, confident weight.
-     Sizes are set per-component so each screen can tune its own hierarchy;
-     these only establish the shared characteristics. */
+  /*
+   * The grain. One fixed overlay, an inline SVG feTurbulence — no image
+   * request, no layout cost, and it sits above every surface so the whole
+   * board shares one texture rather than each card carrying its own.
+   *
+   * The vignette underneath gives the dark board a lit centre, which is what
+   * stops a large flat dark page reading as a void.
+   */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 120% 80% at 50% 30%,
+      transparent 30%,
+      var(--vignette) 100%
+    );
+  }
+
   h1,
   h2,
   h3 {
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1, 'opsz' 60;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
   }
 
-  /* A visible, consistent focus ring on everything interactive. The old
-     system had no focus styling beyond the browser default, which the heavy
-     borders effectively hid. */
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
+    outline-offset: 3px;
     border-radius: var(--radius-sm);
   }
 }
 
 @layer utilities {
-  /* Type scale (see spec). Exposed as utilities so components share one
-     definition rather than each re-deriving sizes from Tailwind's scale. */
+  /* ---- Type scale -------------------------------------------------------
+     Display sizes lean hard. On a board, the writing is big. */
   .text-display {
-    font-size: 2.25rem;
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 144;
+    font-weight: 700;
+    font-size: clamp(2.75rem, 12vw, 6rem);
+    line-height: 0.92;
     letter-spacing: -0.03em;
-    line-height: 1.05;
-  }
-
-  @media (min-width: 640px) {
-    .text-display {
-      font-size: 3.5rem;
-    }
   }
 
   .text-title {
-    font-size: 1.75rem;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 50, 'WONK' 1, 'opsz' 100;
     font-weight: 700;
+    font-size: clamp(1.875rem, 6vw, 2.75rem);
+    line-height: 1;
     letter-spacing: -0.02em;
-    line-height: 1.15;
-  }
-
-  @media (min-width: 640px) {
-    .text-title {
-      font-size: 2.25rem;
-    }
   }
 
   .text-section {
-    font-size: 1.25rem;
-    font-weight: 650;
-    letter-spacing: -0.015em;
-  }
-
-  @media (min-width: 640px) {
-    .text-section {
-      font-size: 1.5rem;
-    }
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1, 'opsz' 48;
+    font-weight: 600;
+    font-size: 1.375rem;
+    letter-spacing: -0.01em;
   }
 
   .text-card-title {
-    font-size: 1.125rem;
-    font-weight: 650;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1, 'opsz' 36;
+    font-weight: 600;
+    font-size: 1.375rem;
+    line-height: 1.1;
     letter-spacing: -0.01em;
-    line-height: 1.25;
   }
 
+  /* Dockets and receipts. Uppercase, tracked out, small. */
   .text-meta {
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .text-price {
-    font-size: 1.125rem;
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 48;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    line-height: 1;
   }
 
-  .animate-in {
-    animation: animateIn 0.3s ease 0.15s both;
+  /* ---- The board's material language ------------------------------------ */
+
+  .rule-chalk {
+    border-color: hsl(var(--border) / 0.3);
   }
 
-  @keyframes animateIn {
+  /*
+   * The price. The thing people open the app for, so it is the one element
+   * allowed to shout: display type, accent ground, and knocked a degree off
+   * true because nothing handwritten is straight. In dark it picks up the
+   * amber neon bloom; in light --glow-soft is transparent, so the same markup
+   * is simply a stamped ink block.
+   */
+  .price-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.3rem 0.85rem 0.35rem;
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+    border-radius: 0.4rem 0.9rem 0.45rem 1rem;
+    transform: rotate(-1.2deg);
+    box-shadow: var(--glow-soft);
+  }
+
+  /* Neon: only ever lit in dark, because --glow is transparent in light. */
+  .neon {
+    box-shadow: var(--glow);
+  }
+
+  .neon-text {
+    text-shadow: var(--glow);
+  }
+
+  /* Cards sit very slightly off-square. Alternating direction stops a column
+     of them looking like one uniformly skewed block. */
+  .card-board {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.25s ease;
+    transform: rotate(-0.35deg);
+  }
+
+  .card-board:nth-child(even) {
+    transform: rotate(0.4deg);
+  }
+
+  .card-board:hover {
+    transform: rotate(0deg) translateY(-2px);
+  }
+
+  /* ---- Motion -----------------------------------------------------------
+     One orchestrated arrival: the board gets written on. Staggering is
+     applied inline via animation-delay by the component. */
+  .chalk-in {
+    animation: chalkIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes chalkIn {
     from {
       opacity: 0;
       transform: translateY(10px);
@@ -276,8 +368,10 @@
     }
   }
 
-  /* Anyone who has asked the OS for less motion gets none of it. Applied
-     broadly rather than per-component so a future component cannot forget. */
+  .animate-in {
+    animation: chalkIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     ::before,
@@ -288,9 +382,17 @@
       scroll-behavior: auto !important;
     }
 
+    .chalk-in,
     .animate-in {
       animation: none;
       opacity: 1;
+    }
+
+    /* The tilt is decoration; anyone asking for less motion gets it straight. */
+    .card-board,
+    .card-board:nth-child(even),
+    .price-tag {
+      transform: none;
     }
   }
 }

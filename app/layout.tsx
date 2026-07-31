@@ -3,6 +3,43 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'sonner';
+import { Archivo, Courier_Prime, Fraunces } from 'next/font/google';
+
+/*
+ * Three faces, each with a job (docs/redesign-board-spec.md):
+ *
+ * Fraunces  — display, venue names, prices. A variable serif with SOFT and
+ *             WONK axes, i.e. deliberate irregularity in its curves. It reads
+ *             as hand-cut signage rather than as a font, which is the whole
+ *             chalkboard register. Loading the variable axes is what makes it
+ *             worth having; without them it is just another serif.
+ * Archivo   — body and controls. A grotesque with actual width and warmth,
+ *             which holds up small on a phone without going anonymous.
+ * Courier   — day, time, source links. Typewriter: dockets, receipts,
+ *             laminated bistro menus.
+ *
+ * All three are `display: 'swap'` so a slow connection gets text immediately
+ * rather than a blank board.
+ */
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  display: 'swap',
+  axes: ['SOFT', 'WONK', 'opsz'],
+  variable: '--font-fraunces',
+});
+
+const archivo = Archivo({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-archivo',
+});
+
+const courierPrime = Courier_Prime({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '700'],
+  variable: '--font-courier-prime',
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -37,8 +74,8 @@ export const viewport: Viewport = {
   // exact opposite of the near-black dark background it was meant to sit
   // beside (chunk 9 audit) — and there was no light entry at all.
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f6f1e9' },
-    { media: '(prefers-color-scheme: dark)', color: '#141018' },
+    { media: '(prefers-color-scheme: light)', color: '#efe6d6' },
+    { media: '(prefers-color-scheme: dark)', color: '#141a1d' },
   ],
   minimumScale: 1,
   initialScale: 1,
@@ -52,7 +89,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
+    <html
+      lang='en'
+      className={`${fraunces.variable} ${archivo.variable} ${courierPrime.variable}`}
+    >
       {/* overflow-x-hidden is a belt-and-braces safety net for the mobile-
           first "no horizontal scroll at any width" rule. It is NOT load-
           bearing for layout width the way it once was: the shell used to

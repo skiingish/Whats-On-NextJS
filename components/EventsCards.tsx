@@ -39,10 +39,16 @@ const EventsCards: FC<EventsDisplayProps> = ({
       />
       <div className='flex flex-col gap-4'>
         {events && events?.length > 0 ? (
-          events?.map((event) => {
+          events?.map((event, index) => {
             return (
               <div
-                className='relative rounded-lg border border-border bg-background-secondary p-4 shadow-sm transition-shadow sm:p-5 hover:shadow-md'
+                // card-board applies the sub-degree tilt (alternating by
+                // nth-child so a column doesn't read as one skewed block) and
+                // straightens on hover. chalk-in staggers the arrival: the
+                // board being written on, 70ms apart, capped at 8 so a long
+                // list doesn't leave the last card waiting a second and a half.
+                className='card-board chalk-in relative rounded-lg border bg-background-secondary p-4 shadow-sm sm:p-5 hover:shadow-md'
+                style={{ animationDelay: `${Math.min(index, 8) * 70}ms` }}
                 key={event.id}
               >
                 <div className='flex items-start justify-between gap-3'>
@@ -89,38 +95,55 @@ const EventsCards: FC<EventsDisplayProps> = ({
                   </div>
                 </div>
 
-                <p className='mt-2 break-words text-foreground'>
-                  {event.desc}
-                </p>
+                {/*
+                  The menu line: description on the left, price hard right,
+                  joined by a dotted leader. That leader is the single most
+                  recognisable typographic move in printed menus, and it does
+                  real work here — it ties the dish to its price across a gap
+                  instead of leaving them as two unrelated blocks, and it fills
+                  the space that made the previous stacked version feel empty.
+                */}
+                <div className='mt-2 flex items-end gap-2'>
+                  <p className='min-w-0 break-words text-foreground'>
+                    {event.desc}
+                  </p>
 
-                {event.special_price !== null && (
-                  <span className='text-price mt-3 inline-flex items-center rounded-full bg-accent px-3 py-1 text-accent-foreground'>
-                    {event.special_price}
-                  </span>
-                )}
-
-                <div className='text-meta mt-3 flex flex-col gap-1 text-muted-foreground'>
-                  <span className='flex items-center gap-1.5'>
-                    <CalendarDays size={16} />
-                    {dayformatter(event.when)}
-                  </span>
-                  <span className='flex items-center gap-1.5'>
-                    <Clock size={16} />
-                    {event.event_time}
-                  </span>
+                  {event.special_price !== null && (
+                    <>
+                      <span
+                        aria-hidden='true'
+                        className='mb-1.5 min-w-6 flex-1 border-b border-dotted border-border/50'
+                      />
+                      <span className='text-price price-tag shrink-0'>
+                        {event.special_price}
+                      </span>
+                    </>
+                  )}
                 </div>
 
-                {event.link && (
-                  <a
-                    href={event.link}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-meta mt-3 inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary'
-                  >
-                    View source
-                    <ExternalLink size={14} />
-                  </a>
-                )}
+                {/* Docket footer: mono, uppercase, above a chalk rule. */}
+                <div className='rule-chalk mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3'>
+                  <span className='text-meta flex items-center gap-1.5 text-muted-foreground'>
+                    <CalendarDays size={14} />
+                    {dayformatter(event.when)}
+                  </span>
+                  <span className='text-meta flex items-center gap-1.5 text-muted-foreground'>
+                    <Clock size={14} />
+                    {event.event_time}
+                  </span>
+
+                  {event.link && (
+                    <a
+                      href={event.link}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-meta ml-auto inline-flex items-center gap-1 text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-primary'
+                    >
+                      Source
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
 
                 {user ? (
                   // Edit button removed (D22): there is no edit flow built
