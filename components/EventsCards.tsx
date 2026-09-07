@@ -13,6 +13,26 @@ interface EventsDisplayProps {
   refreshFavourites: () => void;
 }
 
+function eventDestination(event: Events) {
+  if (event.link) {
+    return { href: event.link, label: 'View this special' };
+  }
+
+  if (typeof event.venue !== 'string' && event.venue.website) {
+    return { href: event.venue.website, label: 'Visit venue website' };
+  }
+
+  return null;
+}
+
+function destinationHost(href: string) {
+  try {
+    return new URL(href).hostname.replace(/^www\./, '');
+  } catch {
+    return 'Venue website';
+  }
+}
+
 const EventsCards: FC<EventsDisplayProps> = ({
   events,
   user,
@@ -40,6 +60,8 @@ const EventsCards: FC<EventsDisplayProps> = ({
       <div className='flex flex-col gap-4'>
         {events && events?.length > 0 ? (
           events?.map((event, index) => {
+            const destination = eventDestination(event);
+
             return (
               <div
                 // card-board applies the sub-degree tilt (alternating by
@@ -132,18 +154,29 @@ const EventsCards: FC<EventsDisplayProps> = ({
                     {event.event_time}
                   </span>
 
-                  {event.link && (
-                    <a
-                      href={event.link}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-meta ml-auto inline-flex items-center gap-1 text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-primary'
-                    >
-                      Source
-                      <ExternalLink size={12} />
-                    </a>
-                  )}
                 </div>
+
+                {destination && (
+                  <a
+                    href={destination.href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-label={`${destination.label} at ${destinationHost(destination.href)} (opens in a new tab)`}
+                    className='group mt-4 flex min-h-12 items-center justify-between gap-4 border-y border-dashed border-border/70 bg-primary/10 px-3 py-2 text-primary transition-[background-color,color,transform] hover:bg-primary hover:text-primary-foreground focus-visible:bg-primary focus-visible:text-primary-foreground'
+                  >
+                    <span className='min-w-0'>
+                      <span className='block font-display text-base font-bold leading-tight'>
+                        {destination.label}
+                      </span>
+                      <span className='text-note block truncate opacity-75'>
+                        {destinationHost(destination.href)}
+                      </span>
+                    </span>
+                    <span className='flex size-9 shrink-0 items-center justify-center rounded-full border border-current transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5'>
+                      <ExternalLink aria-hidden='true' size={16} />
+                    </span>
+                  </a>
+                )}
 
                 {user ? (
                   // Edit button removed (D22): there is no edit flow built
