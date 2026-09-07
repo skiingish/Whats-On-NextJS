@@ -9,14 +9,10 @@ export default function Messages() {
   return (
     <>
       {error && (
-        <p className="mt-4 p-4 bg-foreground text-background text-center">
-          {error}
-        </p>
+        <p className="text-sm text-destructive text-center">{error}</p>
       )}
       {message && (
-        <p className="mt-4 p-4 bg-foreground text-background text-center">
-          {message}
-        </p>
+        <p className="text-sm text-muted-foreground text-center">{message}</p>
       )}
     </>
   )

@@ -270,6 +270,15 @@ test.describe('map', () => {
     await expect(
       page.locator('[data-vaul-drawer] h1')
     ).toBeVisible();
+    const specialLink = page.getByRole('link', {
+      name: /View this special at example\.invalid \(opens in a new tab\)/,
+    });
+    await expect(specialLink).toBeVisible();
+    await expect(specialLink).toHaveAttribute(
+      'href',
+      /^https:\/\/example\.invalid\/.+\/(?:whats-on|specials)$/
+    );
+    await expect(specialLink).toHaveAttribute('target', '_blank');
     // vaul's DrawerClose wraps our Button in its own <button>, so the
     // accessible name "Close" matches two nested elements — take the outer
     // one to sidestep the strict-mode ambiguity.

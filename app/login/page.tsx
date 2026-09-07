@@ -5,62 +5,67 @@ import Messages from './messages';
 
 export default function Login() {
   return (
-    <div className='flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2'>
-      <Link
-        href='/'
-        className='absolute left-8 top-8 py-2 px-4 rounded-full border-2 border-foreground no-underline text-foreground bg-primary hover:bg-primary-hover flex items-center group text-sm'
-      >
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          width='24'
-          height='24'
-          viewBox='0 0 24 24'
-          fill='none'
-          stroke='currentColor'
-          strokeWidth='2'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          className='mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1'
+    <div className="flex-1 w-full flex items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md flex flex-col gap-4">
+        <Link
+          href="/"
+          className="self-start text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
         >
-          <polyline points='15 18 9 12 15 6' />
-        </svg>{' '}
-        Back
-      </Link>
+          &larr; Back
+        </Link>
 
-      <form
-        className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground'
-        action='/auth/sign-in'
-        method='post'
-      >
-        <label className='text-md font-semibold tracking-wide' htmlFor='email'>
-          Email
-        </label>
-        <input
-          className='rounded-xl px-4 py-2 border-2 border-foreground bg-background-secondary mb-6'
-          id='email'
-          name='email'
-          placeholder='you@example.com'
-          required
-        />
-        <label
-          className='text-md font-semibold tracking-wide'
-          htmlFor='password'
-        >
-          Password
-        </label>
-        <input
-          className='rounded-xl px-4 py-2 border-2 border-foreground bg-background-secondary mb-6'
-          id='password'
-          type='password'
-          name='password'
-          placeholder='••••••••'
-          required
-        />
-        <button className='bg-primary hover:bg-primary-hover px-4 py-2 font-semibold tracking-wide text-foreground border-foreground border-2 rounded-full mb-2'>
-          Sign In
-        </button>
-        <Messages />
-      </form>
+        <div className="rounded-lg border border-border bg-background-secondary shadow-md p-6 sm:p-8 flex flex-col gap-5">
+          <h1 className="text-section text-foreground">Log in</h1>
+
+          <form
+            className="flex flex-col gap-4"
+            action="/auth/sign-in"
+            method="post"
+          >
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="text-sm font-semibold text-foreground"
+                htmlFor="email"
+              >
+                Email
+              </label>
+              <input
+                className="h-11 w-full rounded-sm border border-input bg-background-secondary px-3 text-foreground placeholder:text-muted-foreground"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="text-sm font-semibold text-foreground"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <input
+                className="h-11 w-full rounded-sm border border-input bg-background-secondary px-3 text-foreground placeholder:text-muted-foreground"
+                id="password"
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <button
+              className="h-11 mt-1 rounded-md bg-primary text-primary-foreground font-semibold tracking-wide hover:bg-primary-hover transition-colors"
+              type="submit"
+            >
+              Sign In
+            </button>
+
+            <Messages />
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

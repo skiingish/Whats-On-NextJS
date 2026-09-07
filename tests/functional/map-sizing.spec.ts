@@ -69,7 +69,9 @@ test.describe('map sizing', () => {
     await page.goto('/');
 
     // The map starts mounted but hidden — this is the case that regressed.
-    await page.getByRole('button', { name: 'Map', exact: true }).click();
+    // The List/Map pair is a segmented control with tab semantics as of the
+    // 2026 redesign, so it is a tab rather than a plain button.
+    await page.getByRole('tab', { name: 'Map', exact: true }).click();
 
     await expect(page.locator('.mapboxgl-canvas')).toBeVisible();
     await expectCanvasFillsContainer(page);

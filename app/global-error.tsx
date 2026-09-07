@@ -12,6 +12,13 @@ import { useEffect } from 'react';
  * of things that might be implicated, so this stays self-contained plain
  * markup with inline styles rather than trusting globals.css or any
  * component in components/ui to still work.
+ *
+ * The colour values below are the same HSL triplets as the light/dark
+ * tokens in globals.css (--background, --foreground, --background-secondary,
+ * --border, --primary, --primary-hover, --primary-foreground,
+ * --muted-foreground) — duplicated here as literal CSS custom properties,
+ * switched by a plain `@media (prefers-color-scheme: dark)` block, since
+ * this file can't rely on the Tailwind/@theme pipeline being intact.
  */
 export default function GlobalError({
   error,
@@ -25,33 +32,62 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang='en'>
-      <body
-        style={{
-          margin: 0,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem',
-          backgroundColor: 'hsl(34 47% 89%)',
-          color: 'hsl(200 50% 3%)',
-          fontFamily: 'system-ui, sans-serif',
-        }}
-      >
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '28rem',
-            borderRadius: '1rem',
-            border: '2px solid hsl(200 50% 3%)',
-            padding: '2rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-          }}
-        >
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>
+    <html lang="en">
+      <body className="ge-root">
+        <style>{`
+          .ge-root {
+            --ge-bg: hsl(36 44% 94%);
+            --ge-fg: hsl(265 25% 11%);
+            --ge-card: hsl(40 60% 99%);
+            --ge-border: hsl(265 12% 87%);
+            --ge-primary: hsl(261 84% 62%);
+            --ge-primary-hover: hsl(261 84% 55%);
+            --ge-primary-fg: hsl(0 0% 100%);
+            --ge-muted-fg: hsl(265 8% 42%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: var(--ge-bg);
+            color: var(--ge-fg);
+            font-family: system-ui, sans-serif;
+          }
+          @media (prefers-color-scheme: dark) {
+            .ge-root {
+              --ge-bg: hsl(265 20% 8%);
+              --ge-fg: hsl(40 30% 96%);
+              --ge-card: hsl(265 15% 16%);
+              --ge-border: hsl(265 12% 20%);
+              --ge-primary: hsl(261 90% 72%);
+              --ge-primary-hover: hsl(261 90% 78%);
+              --ge-primary-fg: hsl(265 30% 10%);
+              --ge-muted-fg: hsl(265 8% 65%);
+            }
+          }
+          .ge-card {
+            width: 100%;
+            max-width: 28rem;
+            border-radius: 1.25rem;
+            border: 1px solid var(--ge-border);
+            background-color: var(--ge-card);
+            box-shadow: 0 12px 32px -8px hsl(265 25% 11% / 0.12);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+          }
+          .ge-btn-primary:hover {
+            background-color: var(--ge-primary-hover);
+          }
+          .ge-btn-secondary:hover {
+            background-color: var(--ge-border);
+          }
+        `}</style>
+
+        <div className="ge-card">
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>
             The whole page failed to load
           </h1>
           <p style={{ margin: 0 }}>
@@ -60,7 +96,7 @@ export default function GlobalError({
             on our end and has already been logged.
           </p>
           {error.digest && (
-            <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.6 }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ge-muted-fg)' }}>
               Reference code: <code>{error.digest}</code> — include this if
               you report the problem.
             </p>
@@ -68,29 +104,36 @@ export default function GlobalError({
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', paddingTop: '0.5rem' }}>
             <button
               onClick={reset}
+              className="ge-btn-primary"
               style={{
-                borderRadius: '1rem',
-                border: '2px solid hsl(200 50% 3%)',
-                backgroundColor: 'hsl(200 50% 3%)',
-                color: 'hsl(34 47% 89%)',
+                height: '2.75rem',
+                minWidth: '2.75rem',
+                borderRadius: '0.875rem',
+                border: 'none',
+                backgroundColor: 'var(--ge-primary)',
+                color: 'var(--ge-primary-fg)',
                 fontWeight: 600,
-                letterSpacing: '0.025em',
-                padding: '0.5rem 1rem',
+                letterSpacing: '0.01em',
+                padding: '0 1rem',
                 cursor: 'pointer',
               }}
             >
               Try again
             </button>
             <a
-              href='/'
+              href="/"
+              className="ge-btn-secondary"
               style={{
-                borderRadius: '1rem',
-                border: '2px solid hsl(200 50% 3%)',
+                height: '2.75rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                borderRadius: '0.875rem',
+                border: `1px solid var(--ge-border)`,
                 backgroundColor: 'transparent',
-                color: 'hsl(200 50% 3%)',
+                color: 'var(--ge-fg)',
                 fontWeight: 600,
-                letterSpacing: '0.025em',
-                padding: '0.5rem 1rem',
+                letterSpacing: '0.01em',
+                padding: '0 1rem',
                 textDecoration: 'none',
               }}
             >

@@ -2,15 +2,35 @@ import DeleteItemButton from './DeleteItemButton';
 import ReportEventModal from './ReportEventModal';
 import { dayformatter } from '@/utils/dataformatter';
 import { addFavourite, removeFavourite } from '@/utils/favouritesHandler';
-import { FC, use, useState } from 'react';
+import { FC, useState } from 'react';
 export const dynamic = 'force-dynamic';
-import { CalendarDays, Clock, Flag, AlertCircle, Star } from 'lucide-react';
+import { CalendarDays, Clock, AlertCircle, Star, ExternalLink } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 interface EventsDisplayProps {
   events: Events[] | null;
   user: User | null;
   refreshFavourites: () => void;
+}
+
+function eventDestination(event: Events) {
+  if (event.link) {
+    return { href: event.link, label: 'View this special' };
+  }
+
+  if (typeof event.venue !== 'string' && event.venue.website) {
+    return { href: event.venue.website, label: 'Visit venue website' };
+  }
+
+  return null;
+}
+
+function destinationHost(href: string) {
+  try {
+    return new URL(href).hostname.replace(/^www\./, '');
+  } catch {
+    return 'Venue website';
+  }
 }
 
 const EventsCards: FC<EventsDisplayProps> = ({
@@ -37,105 +57,143 @@ const EventsCards: FC<EventsDisplayProps> = ({
         setOpen={setShowReportModal}
         event={reportedEvent}
       />
-      <div className=''>
+      <div className='flex flex-col gap-4'>
         {events && events?.length > 0 ? (
-          events?.map((event) => {
+          events?.map((event, index) => {
+            const destination = eventDestination(event);
+
             return (
               <div
-                className='flex flex-wrap py-2 my-4 rounded-2xl text-foreground border-2 border-foreground bg-background-secondary'
+                // card-board applies the sub-degree tilt (alternating by
+                // nth-child so a column doesn't read as one skewed block) and
+                // straightens on hover. chalk-in staggers the arrival: the
+                // board being written on, 70ms apart, capped at 8 so a long
+                // list doesn't leave the last card waiting a second and a half.
+                className='card-board chalk-in relative rounded-lg border bg-background-secondary p-4 shadow-sm sm:p-5 hover:shadow-md'
+                style={{ animationDelay: `${Math.min(index, 8) * 70}ms` }}
                 key={event.id}
               >
-                {event.venue && (
-                  <p className=' text-xl tracking-wider font-bold px-6 py-4 whitespace-no-wrap'>
-                    {typeof event.venue === 'string'
-                      ? event.venue
-                      : event.venue.name}
-                  </p>
-                )}
-                <div className='px-4 flex'>
-                  {event.is_favorite ? (
-                    <button
-                      // The visible label below is `invisible` until hover,
-                      // and visibility:hidden removes it from the
-                      // accessibility tree — so without this the button had
-                      // no accessible name at all and announced as just
-                      // "button". aria-label also gives the visual-regression
-                      // suite a stable, data-independent handle on an event
-                      // card.
-                      aria-label='Remove favourite'
-                      className='text-foreground content-center rounded-lg hover:bg-muted'
-                      onClick={() => {
-                        removeFavourite(event);
-                        refreshFavourites();
-                      }}
-                    >
-                      <Star className='p-1' fill='#8f56fc' size={32} />
-                      <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                        Favourite
-                      </span>
-                    </button>
-                  ) : (
-                    <button
-                      aria-label='Add favourite'
-                      className='text-foreground content-center rounded-lg hover:bg-muted'
-                      onClick={() => {
-                        addFavourite(event);
-                        refreshFavourites();
-                      }}
-                    >
-                      <Star className='p-1' size={32} />
-                      <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                        Favourite
-                      </span>
-                    </button>
+                <div className='flex items-start justify-between gap-3'>
+                  {event.venue && (
+                    <h3 className='text-card-title min-w-0 break-words text-foreground'>
+                      {typeof event.venue === 'string'
+                        ? event.venue
+                        : event.venue.name}
+                    </h3>
                   )}
-                  <button
-                    aria-label='Report'
-                    className='text-foreground content-center rounded-lg hover:bg-muted'
-                    onClick={() => {
-                      handleReportClick(event);
-                    }}
-                  >
-                    <AlertCircle className='p-1' size={32} />
-                    <span className='invisible w-20 bg-black text-white content-center absolute rounded-lg z-10 bottom-full left-1/2 -ml-8 group-hover:visible'>
-                      Report
-                    </span>
-                  </button>
+                  <div className='flex shrink-0 items-center gap-1'>
+                    {event.is_favorite ? (
+                      <button
+                        aria-label='Remove favourite'
+                        className='flex h-11 w-11 items-center justify-center rounded-lg text-primary transition-colors hover:bg-muted'
+                        onClick={() => {
+                          removeFavourite(event);
+                          refreshFavourites();
+                        }}
+                      >
+                        <Star fill='currentColor' size={20} />
+                      </button>
+                    ) : (
+                      <button
+                        aria-label='Add favourite'
+                        className='flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-primary'
+                        onClick={() => {
+                          addFavourite(event);
+                          refreshFavourites();
+                        }}
+                      >
+                        <Star size={20} />
+                      </button>
+                    )}
+                    <button
+                      aria-label='Report'
+                      className='flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-destructive'
+                      onClick={() => {
+                        handleReportClick(event);
+                      }}
+                    >
+                      <AlertCircle size={20} />
+                    </button>
+                  </div>
                 </div>
 
-                <p className='px-6 py-2 whitespace-no-wrap min-w-full'>
-                  {event.desc}
-                </p>
-                <div>
-                  {event.special_price !== null ? (
-                    <p className='px-6 py-2 text-md font-bold whitespace-no-wrap'>
-                      {event.special_price}
-                    </p>
-                  ) : null}
+                {/*
+                  The menu line: description on the left, price hard right,
+                  joined by a dotted leader. That leader is the single most
+                  recognisable typographic move in printed menus, and it does
+                  real work here — it ties the dish to its price across a gap
+                  instead of leaving them as two unrelated blocks, and it fills
+                  the space that made the previous stacked version feel empty.
+                */}
+                <div className='mt-2 flex items-end gap-2'>
+                  <p className='min-w-0 break-words text-foreground'>
+                    {event.desc}
+                  </p>
+
+                  {event.special_price !== null && (
+                    <>
+                      <span
+                        aria-hidden='true'
+                        className='mb-1.5 min-w-6 flex-1 border-b border-dotted border-border/50'
+                      />
+                      <span className='text-price price-tag shrink-0'>
+                        {event.special_price}
+                      </span>
+                    </>
+                  )}
                 </div>
-                <p className='flex px-6 py-2 whitespace-no-wrap'>
-                  <CalendarDays className=' pr-1.5' />
-                  {dayformatter(event.when)}
-                </p>
-                <p className='flex px-6 py-2 whitespace-no-wrap'>
-                  <Clock className='pr-1.5' /> {event.event_time}
-                </p>
+
+                {/* Docket footer: mono, uppercase, above a chalk rule. */}
+                <div className='rule-chalk mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3'>
+                  <span className='text-meta flex items-center gap-1.5 text-muted-foreground'>
+                    <CalendarDays size={14} />
+                    {dayformatter(event.when)}
+                  </span>
+                  <span className='text-meta flex items-center gap-1.5 text-muted-foreground'>
+                    <Clock size={14} />
+                    {event.event_time}
+                  </span>
+
+                </div>
+
+                {destination && (
+                  <a
+                    href={destination.href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-label={`${destination.label} at ${destinationHost(destination.href)} (opens in a new tab)`}
+                    className='group mt-4 flex min-h-12 items-center justify-between gap-4 border-y border-dashed border-border/70 bg-primary/10 px-3 py-2 text-primary transition-[background-color,color,transform] hover:bg-primary hover:text-primary-foreground focus-visible:bg-primary focus-visible:text-primary-foreground'
+                  >
+                    <span className='min-w-0'>
+                      <span className='block font-display text-base font-bold leading-tight'>
+                        {destination.label}
+                      </span>
+                      <span className='text-note block truncate opacity-75'>
+                        {destinationHost(destination.href)}
+                      </span>
+                    </span>
+                    <span className='flex size-9 shrink-0 items-center justify-center rounded-full border border-current transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5'>
+                      <ExternalLink aria-hidden='true' size={16} />
+                    </span>
+                  </a>
+                )}
+
                 {user ? (
                   // Edit button removed (D22): there is no edit flow built
                   // yet, and admin inline editing is planned for Phase 5 of
                   // the admin plan. A dead button here would only look
                   // broken to a logged-in user.
-                  <div className='flex' style={{ minWidth: '100%' }}>
-                    <div className='px-6 py-2 whitespace-no-wrap'>
-                      <DeleteItemButton id={event.id} />
-                    </div>
+                  <div className='mt-4'>
+                    <DeleteItemButton id={event.id} />
                   </div>
                 ) : null}
               </div>
             );
           })
         ) : (
-          <></>
+          <p className='text-note py-8 text-center text-muted-foreground'>
+            No specials to show right now — check back soon.
+          </p>
         )}
       </div>
     </>

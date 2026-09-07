@@ -16,8 +16,13 @@ export default async function MapPage() {
     .not('longitude', 'is', null);
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <h1 className='text-2xl font-bold mb-4'>Venue Map</h1>
+    <div className='w-full max-w-[72rem] mx-auto flex flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='flex flex-col gap-1'>
+        <h1 className='text-title text-foreground'>Venue Map</h1>
+        <p className='text-note text-muted-foreground'>
+          Every venue with a live special, pinned — tap a marker to see what&apos;s on.
+        </p>
+      </div>
       <VenueMap user={user} venues={venues || []} />
     </div>
   );

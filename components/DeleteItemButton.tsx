@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 export default function DeleteItemButton({ id }: { id: number }) {
   const router = useRouter();
@@ -35,9 +36,9 @@ export default function DeleteItemButton({ id }: { id: number }) {
   return (
     <form onSubmit={handleDelete}>
       <input type='hidden' name='id' value={id} />
-      <button className='bg-destructive hover:bg-destructive/90 rounded px-4 py-2 text-destructive-foreground mb-2'>
+      <Button type='submit' variant='destructive' size='sm'>
         Delete
-      </button>
+      </Button>
     </form>
   );
 }

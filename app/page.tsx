@@ -2,10 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 import AddEventDisplay from '@/components/AddEventDisplay';
 import Image from 'next/image';
 
-import localFont from 'next/font/local';
-
-const AgbalumoRegular = localFont({ src: './Agbalumo-Regular.ttf' });
-
 import hamburger from '../public/assets/hamburger_1280.jpg';
 import pizza from '../public/assets/pizza_1280.jpg';
 import neon from '../public/assets/neon_1280.jpg';
@@ -67,29 +63,53 @@ export default async function Index() {
     <div className='overscroll-contain font-sans w-full flex flex-col items-center bg-background'>
       <Navbar user={user} />
 
-      <div className='animate-in flex flex-col gap-1 opacity-0 w-full py-1 lg:py-4 text-foreground'>
-        <div className='flex flex-col items-center mx-2 lg:mb-8'>
-          <p
-            className={`flex text-4xl ${AgbalumoRegular.className} lg:text-6xl leading-tight! mx-auto max-w-xl text-center my-2`}
-          >
-            Specials Spotter!
+      {/* Non-full-bleed page content: constrained to the shared 72rem shell
+          width with the standard gutters, now that app/layout.tsx no longer
+          applies that wrapper globally (see the comment there). */}
+      <div className='w-full max-w-[72rem] mx-auto flex flex-col gap-8 px-4 py-8 sm:px-6 lg:gap-12 lg:px-8 lg:py-12'>
+        <div className='animate-in flex flex-col items-center gap-6 opacity-0'>
+          {/* Docket kicker above the headline: mono, tracked out, with a rule
+              either side. It frames the title the way a board is framed by its
+              chalk border, and it tells you where you are before the title
+              tells you what this is. */}
+          <div className='text-meta flex w-full items-center gap-3 text-muted-foreground'>
+            <span className='rule-chalk h-px flex-1 border-t' />
+            <span>Dandenong Ranges</span>
+            <span className='rule-chalk h-px flex-1 border-t' />
+          </div>
+
+          <h1 className='text-display text-center text-foreground'>
+            What&rsquo;s on
+            <br />
+            <span className='neon-text text-primary'>tonight</span>
+          </h1>
+
+          <p className='max-w-md text-center text-muted-foreground'>
+            Parma nights, steak nights and happy hours across the hills —
+            written up like the board out the front.
           </p>
+          {/* Next/Image's static import carries intrinsic width/height, so
+              the box is reserved before the image loads — no layout shift
+              regardless of which day's picture renders. The `w-full
+              lg:max-h-96 object-cover` classes are load-bearing: the visual
+              suite pins this element to a 24rem height by selector
+              (`img[alt="Picture logo"]`), see tests/visual/screens.spec.ts. */}
+          <Image
+            className='hidden w-full rotate-[0.5deg] rounded-sm border-4 border-surface-raised object-cover shadow-lg lg:block lg:max-h-96'
+            src={heroPicture}
+            alt='Picture logo'
+            placeholder='blur'
+            priority
+          />
         </div>
-        <Image
-          className='hidden lg:block opacity-80 w-full lg:max-h-96 object-cover'
-          src={heroPicture}
-          alt='Picture logo'
-          placeholder='blur'
-        />
+
+        <div className='w-full max-w-4xl mx-auto flex flex-col gap-8 lg:gap-12'>
+          <EventsSection user={user} />
+          <AddEventDisplay userLoggedIn={!!user} />
+        </div>
       </div>
 
-      <div className='animate-in w-full gap-8 opacity-0 max-w-4xl py-8 lg:py-8 text-foreground'>
-        <EventsSection user={user} />
-        <AddEventDisplay userLoggedIn={!!user} />
-      </div>
-      <div className='w-full'>
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

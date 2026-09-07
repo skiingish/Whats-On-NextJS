@@ -1,10 +1,17 @@
 import { z } from 'zod';
-import { FC, Fragment, useRef, useState, FormEvent } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { FC, useState, FormEvent } from 'react';
 import { dayformatter } from '@/utils/dataformatter';
 import { CalendarDays, Clock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from './ui/dialog';
 
 const issueSchema = z.object({
   eventid: z.number(),
@@ -18,12 +25,16 @@ interface ReportEventModalProps {
   setOpen: any;
 }
 
+// Shared visual language for text-style inputs across this form (matches the
+// search/filter inputs on the homepage — see EventsDisplay.tsx).
+const fieldClasses =
+  'w-full rounded-sm border border-input bg-background-secondary px-3 text-foreground placeholder:text-muted-foreground';
+
 const ReportEventModal: FC<ReportEventModalProps> = ({
   event,
   open,
   setOpen,
 }) => {
-  const cancelButtonRef = useRef(null);
   const [issue, setIssue] = useState<string>('notvaild');
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -75,151 +86,104 @@ const ReportEventModal: FC<ReportEventModalProps> = ({
     }
   };
 
-  return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog
-        as='div'
-        className='relative z-10'
-        initialFocus={cancelButtonRef}
-        onClose={setOpen}
-      >
-        <Transition.Child
-          as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
-        >
-          <div className='fixed inset-0 bg-black/75 transition-opacity' />
-        </Transition.Child>
+  const venueName =
+    typeof event?.venue === 'string' ? event.venue : event?.venue?.name;
 
-        <div className='fixed inset-0 z-10 w-screen overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
-              as={Fragment}
-              enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
-              leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-            >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-xl border-4 border-foreground bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
-                <form onSubmit={handleFormSubmit}>
-                  <div className='bg-background px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
-                    <div className='sm:flex sm:items-start'>
-                      {/* <div className='mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10'></div> */}
-                      <div className='mt-2 text-center sm:ml-4 sm:mt-0 sm:text-left'>
-                        <Dialog.Title
-                          as='h3'
-                          className='text-base font-semibold leading-6 text-foreground'
-                        >
-                          Report Event -{' '}
-                          {typeof event?.venue === 'string'
-                            ? event.venue
-                            : event?.venue?.name}
-                        </Dialog.Title>
-                        <div
-                          className='flex flex-wrap py-2 my-3 border-2 border-foreground rounded-xl text-foreground bg-background-secondary'
-                          key={event?.id}
-                        >
-                          <p className=' text-md tracking-wider font-bold px-6 py-2 whitespace-no-wrap'>
-                            {typeof event?.venue === 'string'
-                              ? event.venue
-                              : event?.venue.name}
-                          </p>
-                          <p className='flex px-6 py-2 min-w-full'>
-                            {event?.desc}
-                          </p>
-                          <div>
-                            {event?.special_price !== null ? (
-                              <p className='px-6 py-2 text-md font-bold whitespace-no-wrap'>
-                                {event?.special_price}
-                              </p>
-                            ) : null}
-                          </div>
-                          <p className='flex px-6 py-2 whitespace-no-wrap'>
-                            <CalendarDays className=' pr-1.5' />
-                            {dayformatter(event?.when)}
-                          </p>
-                          <p className='flex px-6 py-2 whitespace-no-wrap'>
-                            <Clock className='pr-1.5' /> {event?.event_time}
-                          </p>
-                        </div>
-                        <div className='mt-6'>
-                          <div className='flex flex-col w-full justify-center'>
-                            <label
-                              className='text-sm font-semibold tracking-wide text-foreground'
-                              htmlFor='issueselector'
-                            >
-                              What would you like to report?
-                            </label>
-                            <select
-                              name='issueselector'
-                              id='issueselector'
-                              className='w-full my-3 px-2 py-3.5 font-semibold border-foreground rounded-xl text-foreground border-2 bg-background-secondary'
-                              value={issue}
-                              onChange={(e) => {
-                                setIssue(e.target.value);
-                              }}
-                            >
-                              <option value='notvaild'>Doesn&apos;t Exist</option>
-                              <option value='missinginfo'>
-                                Incorrect Info
-                              </option>
-                            </select>
-                          </div>
-                          {issue === 'missinginfo' ? (
-                            <>
-                              <label
-                                className='text-sm font-semibold tracking-wide text-foreground'
-                                htmlFor='missinginfotext'
-                              >
-                                Whats Missing?
-                              </label>
-                              <textarea
-                                name='missinginfotext'
-                                id='missinginfotext'
-                                className='w-full h-32 mt-2 px-4 py-2 border-2 border-foreground rounded-xl text-foreground bg-background-secondary mb-1'
-                              />
-                            </>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='bg-background px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
-                    {loading ? (
-                      <Loader2 className='animate-spin h-8 w-8 text-foreground' />
-                    ) : (
-                      <>
-                        <Button
-                          type='submit'
-                          className='inline-flex w-full justify-center px-3 py-2 text-sm sm:ml-3 sm:w-auto'
-                        >
-                          Submit
-                        </Button>
-                        <Button
-                          type='button'
-                          variant={'secondary'}
-                          className='mt-3 inline-flex w-full justify-center text-sm font-semibold border-foreground sm:mt-0 sm:w-auto'
-                          onClick={() => setOpen(false)}
-                          ref={cancelButtonRef}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <form onSubmit={handleFormSubmit} className="flex flex-col gap-5">
+          <DialogHeader>
+            <DialogTitle className="text-section">
+              Report Event {venueName ? `— ${venueName}` : ''}
+            </DialogTitle>
+            <DialogDescription>
+              Let us know what&apos;s wrong with this listing and we&apos;ll take
+              a look.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div
+            className="flex flex-wrap gap-x-6 gap-y-2 rounded-sm border border-border bg-background-secondary px-4 py-3"
+            key={event?.id}
+          >
+            {venueName && (
+              <p className="text-card-title w-full text-foreground">
+                {venueName}
+              </p>
+            )}
+            <p className="w-full text-foreground">{event?.desc}</p>
+            {event?.special_price !== null ? (
+              <p className="text-price text-accent">{event?.special_price}</p>
+            ) : null}
+            <p className="flex items-center gap-1.5 text-meta text-muted-foreground">
+              <CalendarDays className="h-4 w-4" />
+              {dayformatter(event?.when)}
+            </p>
+            <p className="flex items-center gap-1.5 text-meta text-muted-foreground">
+              <Clock className="h-4 w-4" /> {event?.event_time}
+            </p>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              className="text-sm font-semibold text-foreground"
+              htmlFor="issueselector"
+            >
+              What would you like to report?
+            </label>
+            <select
+              name="issueselector"
+              id="issueselector"
+              className={`${fieldClasses} h-11`}
+              value={issue}
+              onChange={(e) => {
+                setIssue(e.target.value);
+              }}
+            >
+              <option value="notvaild">Doesn&apos;t Exist</option>
+              <option value="missinginfo">Incorrect Info</option>
+            </select>
+          </div>
+
+          {issue === 'missinginfo' ? (
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="text-sm font-semibold text-foreground"
+                htmlFor="missinginfotext"
+              >
+                What&apos;s Missing?
+              </label>
+              <textarea
+                name="missinginfotext"
+                id="missinginfotext"
+                className={`${fieldClasses} h-32 py-2`}
+              />
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            {loading ? (
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-foreground" />
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full sm:w-auto"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="w-full sm:w-auto">
+                  Submit
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -15,47 +15,69 @@ const LoginButton = () => {
   return (
     <Link
       href='/login'
-      className='py-2 px-4 flex no-underline text-foreground tracking-wider border-foreground max-h-10'
+      className='flex max-h-10 items-center gap-2 py-2 text-foreground no-underline tracking-wide hover:text-primary'
     >
-      <p>Login</p>
-      <LogInIcon className='h-6 w-6 ml-2' />
+      Login
+      <LogInIcon className='h-5 w-5' />
     </Link>
+  );
+};
+
+// Shared between the desktop inline nav and the mobile popover menu, so the
+// two surfaces can never drift out of sync.
+const AuthStatus = ({ user }: { user: User | null }) => {
+  if (!user) {
+    return <LoginButton />;
+  }
+
+  return (
+    <div className='flex items-center gap-4'>
+      <p className='text-note text-muted-foreground'>Hey, {user.email}</p>
+      <LogoutButton />
+    </div>
   );
 };
 
 const Navbar: FC<NavbarProps> = async ({ user }) => {
   return (
-    <nav className='w-full flex justify-center border-b border-b-foreground/10 h-16'>
-      <div className='w-full flex justify-between items-center p-3'>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant='ghost'
-              size='icon'
-              className='text-foreground border-0'
-            >
-              <Menu className='h-6 w-6' />
-              <span className='sr-only'>Open menu</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            className='w-[20rem] bg-popover text-popover-foreground border-foreground rounded-2xl'
-            align='end'
-          >
-            <div className='grid gap-4'>
-              {!user && <LoginButton />}
-              {user && (
-                <>
-                  <p className='text-foreground tracking-wider'>
-                    Hey, {user.email}{' '}
-                  </p>
-                  <LogoutButton />
-                </>
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
-        <InstallAppButton />
+    // Full-bleed sticky bar: app/layout.tsx puts no max-width wrapper around
+    // page content, so `w-full` here already spans the true viewport width
+    // (see the comment in app/layout.tsx for why this replaced a
+    // `w-screen`/scrollbar-sensitive breakout trick). The inner row still
+    // aligns to the shared 72rem content width via its own max-width.
+    <nav className='sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md'>
+      <div className='mx-auto flex h-16 w-full max-w-[72rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8'>
+        <Link href='/' className='text-section text-foreground no-underline'>
+          Specials Spotter
+        </Link>
+
+        {/* Desktop: links surfaced inline instead of hidden in the menu. */}
+        <div className='hidden sm:flex sm:items-center sm:gap-6'>
+          <AuthStatus user={user} />
+        </div>
+
+        <div className='flex items-center gap-2'>
+          <InstallAppButton />
+
+          {/* Mobile only: the same links tucked behind a menu popover. */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                aria-label='Open menu'
+                className='sm:hidden'
+              >
+                <Menu className='h-6 w-6' />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align='end'>
+              <div className='grid gap-4'>
+                <AuthStatus user={user} />
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
     </nav>
   );

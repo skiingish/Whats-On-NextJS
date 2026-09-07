@@ -52,17 +52,17 @@ test.describe('add event modal (anonymous)', () => {
     await page.getByPlaceholder('Search venues...').fill(venueName);
     await page.getByText(`Suggest New Venue: ${venueName}`).click();
 
-    await page.getByLabel('What', { exact: true }).fill(desc);
-    await page.getByLabel('Time', { exact: true }).fill('9pm - late');
-    // The day checkboxes are visually hidden (`sr-only peer`, toggled via
-    // their wrapping <label>) so the day-toggle look can be built with CSS
-    // rather than a native checkbox — force the click past the
-    // near-zero-size actionability check rather than fight it; the
-    // resulting checked state is identical to a real user clicking the
-    // label.
-    await page
-      .getByRole('checkbox', { name: 'Monday' })
-      .check({ force: true });
+    // Matched loosely: the label carries a required marker ("What *"), and the
+    // redesign may retune that copy again. The `name` attribute is the real
+    // contract with the route handler and is asserted by the submission itself.
+    await page.locator('#desc').fill(desc);
+    await page.locator('#event_time').fill('9pm - late');
+    // Days are toggle buttons carrying aria-pressed as of the 2026 redesign,
+    // not the previous sr-only checkboxes. Selecting one renders a hidden
+    // input named `days`, so what reaches the route handler is unchanged.
+    const monday = page.getByRole('button', { name: 'Monday', exact: true });
+    await monday.click();
+    await expect(monday).toHaveAttribute('aria-pressed', 'true');
 
     await page.getByRole('button', { name: 'Submit' }).click();
 
@@ -130,7 +130,7 @@ test.describe('feedback', () => {
       page.getByRole('heading', { name: 'Hi There', exact: false })
     ).toBeVisible();
 
-    await page.getByLabel(/Whats Your Message/).fill(tag);
+    await page.locator('#message').fill(tag);
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.getByText('Thanks for your feedback!')).toBeVisible();
@@ -158,13 +158,13 @@ test.describe('report an issue', () => {
     await reportButton.click();
 
     await expect(
-      page.getByRole('heading', { name: /^Report Event -/ })
+      page.getByRole('heading', { name: /^Report Event/ })
     ).toBeVisible();
 
     await page
-      .getByLabel('What would you like to report?')
+      .locator('#issueselector')
       .selectOption({ label: 'Incorrect Info' });
-    await page.getByLabel(/Whats Missing/).fill(tag);
+    await page.locator('#missinginfotext').fill(tag);
     await page.getByRole('button', { name: 'Submit' }).click();
 
     await expect(page.getByText('Thanks for your feedback!')).toBeVisible();

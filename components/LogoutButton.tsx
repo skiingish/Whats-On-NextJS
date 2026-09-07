@@ -1,12 +1,17 @@
 import { LogOutIcon } from 'lucide-react';
+import { Button } from './ui/button';
 
 export default function LogoutButton() {
   return (
     <form action='/auth/sign-out' method='post'>
-      <button className='py-2 flex no-underline text-foreground tracking-wider border-foreground max-h-10'>
+      <Button
+        type='submit'
+        variant='ghost'
+        className='gap-2 tracking-wide text-foreground hover:text-primary'
+      >
         Logout
-        <LogOutIcon className='h-6 w-6 ml-2' />
-      </button>
+        <LogOutIcon className='h-5 w-5' />
+      </Button>
     </form>
   );
 }

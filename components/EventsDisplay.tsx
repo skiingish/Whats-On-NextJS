@@ -1,9 +1,11 @@
 'use client';
 import { FC, useEffect, useMemo, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
+import { ChevronDown, Search } from 'lucide-react';
 import EventsCards from './EventsCards';
 import { getFavourites } from '@/utils/favouritesHandler';
 import VenueMap from './VenueMap';
+import { cn } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 interface EventsDisplayProps {
@@ -119,119 +121,153 @@ const EventsDisplay: FC<EventsDisplayProps> = ({ events, venues, user }) => {
   }, [filteredEventsByDay, searchTerm]);
 
   return (
-    <>
-      <div className='w-full'>
-        <div className='flex-1 flex flex-col w-full justify-center gap-2 text-foreground px-8 -mb-3'>
-          <label className='text-lg font-bold tracking-wider ml-1'>
-            Whats On
-          </label>
-          <select
-            name='daysoftheweek'
-            id='dayselector'
-            className={
-              animateSelector
-                ? 'animate-bounce rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
-                : 'rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-foreground border-2 mb-6 bg-background-secondary'
-            }
-            style={{
-              appearance: 'none',
-              backgroundImage:
-                'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
-              backgroundPosition: 'right 0.8rem center',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: '1.2em',
-            }}
-            onChange={(e) => {
-              handleOptionChange(e);
-            }}
-          >
-            <option value='today'>Today</option>
-            <option value='blank'>Show All</option>
-            <option value='monday'>Monday</option>
-            <option value='tuesday'>Tuesday</option>
-            <option value='wednesday'>Wednesday</option>
-            <option value='thursday'>Thursday</option>
-            <option value='friday'>Friday</option>
-            <option value='saturday'>Saturday</option>
-            <option value='sunday'>Sunday</option>
-          </select>
-        </div>
-        <div
-          className={`${
-            showList && 'sticky'
-          } ... top-0 pt-4 flex-1 flex flex-col w-full justify-center gap-2 bg-background text-foreground z-10 border-b-2 border-foreground px-8`}
-        >
-          <label className='flex text-lg font-bold tracking-wider ml-1'>
-            Search
-          </label>
+    <div className='w-full'>
+      <h2 className='text-section mb-4 text-foreground'>What&apos;s On</h2>
 
-          <input
-            className='rounded-2xl px-4 py-2 tracking-wider font-bold text-foreground border-2 border-foreground mb-6 bg-background-secondary'
-            type='text'
-            onChange={changeSpecialsSearch}
-            id='search'
-            name='search'
-            placeholder='Pizza... Whistle Stop... Bingo...'
-            value={searchTerm}
-          />
-          <div className='w-full h-12 relative mb-[-2px]'>
-            <button
-              onClick={() => !showList && setShowList(true)}
-              className={`absolute ${
-                showList
-                  ? 'w-[55%] z-10 h-full bg-background-secondary'
-                  : 'w-[50%] h-[90%] bg-muted'
-              } transition-all bottom-0 left-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-foreground justify-center items-center inline-flex`}
-            >
-              <p className='text-foreground text-[21.40px] font-bold leading-normal tracking-wide'>
-                List
-              </p>
-            </button>
-            <button
-              onClick={() => showList && setShowList(false)}
-              className={`absolute ${
-                !showList
-                  ? 'left-[45%] w-[55%] h-full bg-background-secondary z-10'
-                  : 'w-[50%] h-[90%] left-[50%] bg-muted'
-              } transition-all bottom-0 rounded-tl-[16px] rounded-tr-[16px] border-2 border-foreground justify-center items-center inline-flex`}
-            >
-              <p className='text-foreground text-[21.40px] font-bold leading-normal tracking-wide'>
-                Map
-              </p>
-            </button>
-          </div>
-        </div>
+      {/* Single sticky control bar: search, day filter and the List/Map
+          toggle, reachable one-handed while scrolling a long list (spec
+          mobile rule 3). Full-bleed like the navbar/footer — `w-full` is
+          the true viewport width since app/layout.tsx puts no max-width
+          wrapper around page content (see the comment there for why this
+          replaced a `w-screen` breakout trick) — so the blurred surface
+          spans the viewport while its inner row still aligns to this
+          section's own max-w-4xl column. Sits right under the navbar: the
+          navbar's row is `h-16` (64px) but the `<nav>` element itself also
+          carries a 1px bottom border, making its true rendered height 65px —
+          `top-16` alone left a 1px gap/overlap between the two sticky bars
+          on scroll (chunk 9 audit), so the offset adds the shared
+          `--border-width` token rather than a bare `top-16`. */}
+      <div
+        className='sticky z-30 w-full border-b border-border bg-background/85 backdrop-blur-md'
+        style={{ top: 'calc(4rem + var(--border-width))' }}
+      >
 
-        <div
-          className={`${
-            filteredSearchedEvents?.length === 0 ? 'block px-8' : 'hidden'
-          }`}
-        >
-          <p className='text-foreground text-center text-2xl mb-4 mt-4'>
-            No Events Found
-          </p>
-        </div>
-
-        <div>
-          <div className={`${showList ? 'block' : 'hidden'} px-8`}>
-            <EventsCards
-              events={filteredSearchedEvents || []}
-              user={user}
-              refreshFavourites={refreshFavourites}
+        <div className='mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6 lg:px-8'>
+          <div className='relative flex-1'>
+            <label htmlFor='search' className='sr-only'>
+              Search specials
+            </label>
+            <Search
+              aria-hidden='true'
+              className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground'
+            />
+            <input
+              className='h-11 w-full rounded-sm border border-input bg-background-secondary pl-9 pr-4 text-foreground placeholder:text-muted-foreground'
+              type='text'
+              onChange={changeSpecialsSearch}
+              id='search'
+              name='search'
+              placeholder='Pizza... Whistle Stop... Bingo...'
+              value={searchTerm}
             />
           </div>
-          <div className='py-4'>
-            <div className={`${showList ? 'hidden' : 'block'} px-2 pb-6`}>
-              <VenueMap
-                venues={venues}
-                filteredEvents={filteredSearchedEvents}
-                user={user}
+
+          <div className='flex shrink-0 items-center gap-3'>
+            <div className='relative'>
+              <label htmlFor='dayselector' className='sr-only'>
+                Filter by day
+              </label>
+              <select
+                name='daysoftheweek'
+                id='dayselector'
+                className={cn(
+                  'h-11 shrink-0 appearance-none rounded-sm border border-input bg-background-secondary py-2 pl-3 pr-9 text-sm font-semibold tracking-wide text-foreground',
+                  animateSelector && 'animate-bounce'
+                )}
+                onChange={(e) => {
+                  handleOptionChange(e);
+                }}
+              >
+                <option value='today'>Today</option>
+                <option value='blank'>Show All</option>
+                <option value='monday'>Monday</option>
+                <option value='tuesday'>Tuesday</option>
+                <option value='wednesday'>Wednesday</option>
+                <option value='thursday'>Thursday</option>
+                <option value='friday'>Friday</option>
+                <option value='saturday'>Saturday</option>
+                <option value='sunday'>Sunday</option>
+              </select>
+              <ChevronDown
+                aria-hidden='true'
+                className='pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground'
               />
+            </div>
+
+            {/* Segmented control, not two unrelated buttons: one rounded
+                container, the active segment filled with primary.
+                The container has no fixed height — it sizes to its
+                children's own h-11 (44px) plus its p-1 padding. It used to
+                be h-11 itself with the buttons unsized, which left the
+                buttons only as tall as their text line-height (~36px),
+                under the 44px tap-target minimum (chunk 9 audit). */}
+            <div
+              role='tablist'
+              aria-label='View'
+              className='flex shrink-0 gap-1 rounded-sm bg-muted p-1'
+            >
+              <button
+                role='tab'
+                aria-selected={showList}
+                onClick={() => setShowList(true)}
+                className={cn(
+                  'h-11 min-w-[4.5rem] rounded-sm px-3 text-sm font-semibold tracking-wide transition-colors',
+                  showList
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                List
+              </button>
+              <button
+                role='tab'
+                aria-selected={!showList}
+                onClick={() => setShowList(false)}
+                className={cn(
+                  'h-11 min-w-[4.5rem] rounded-sm px-3 text-sm font-semibold tracking-wide transition-colors',
+                  !showList
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Map
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </>
+
+      {filteredSearchedEvents?.length === 0 && (
+        <div className='flex flex-col items-center gap-1 py-10 text-center'>
+          <p className='text-card-title text-foreground'>
+            No specials match that search
+          </p>
+          <p className='text-note max-w-sm text-muted-foreground'>
+            Try a different day or search term — or if you know a special
+            we&apos;re missing, let us know below.
+          </p>
+        </div>
+      )}
+
+      <div className='pt-4'>
+        <div className={showList ? 'block' : 'hidden'}>
+          <EventsCards
+            events={filteredSearchedEvents || []}
+            user={user}
+            refreshFavourites={refreshFavourites}
+          />
+        </div>
+        <div className='py-4'>
+          <div className={showList ? 'hidden' : 'block pb-6'}>
+            <VenueMap
+              venues={venues}
+              filteredEvents={filteredSearchedEvents}
+              user={user}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

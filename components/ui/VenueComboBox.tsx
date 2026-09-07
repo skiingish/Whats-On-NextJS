@@ -5,6 +5,7 @@ import { Combobox } from './combobox';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { makeNewVenueValue } from '@/lib/venue-selection';
+import { cn } from '@/lib/utils';
 
 interface Venue {
   id: string;
@@ -110,7 +111,14 @@ export function VenueComboBox({
       placeholder='Select a venue...'
       searchPlaceholder='Search venues...'
       emptyMessage='No venues found.'
-      className={className}
+      // Matches the redesigned text inputs (filled surface, hairline border,
+      // small radius) rather than the outline-button look Combobox falls
+      // back to on its own — this is the app's only Combobox usage today,
+      // so it's centralised here rather than in combobox.tsx.
+      className={cn(
+        'w-full justify-between rounded-sm border-input bg-background-secondary font-normal',
+        className
+      )}
       handleAddItem={handleAddVenue}
       addItemLabel={canCreateVenue ? 'Add New Venue:' : 'Suggest New Venue:'}
       loading={loading}
